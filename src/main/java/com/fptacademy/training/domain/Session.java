@@ -7,6 +7,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.List;
 
 @Setter
 @Getter
@@ -28,4 +29,6 @@ public class Session implements Serializable {
     @Size(max = 45)
     @Column(length = 45)
     private String status;
+    @OneToMany(mappedBy = "session")
+    private List<Unit> units;
 }
