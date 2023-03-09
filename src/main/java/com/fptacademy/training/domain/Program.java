@@ -21,7 +21,7 @@ public class Program extends AbstractAuditEntity implements Serializable {
     @Size(max = 50)
     @Column(length = 50, nullable = false, unique = true)
     private String name;
-    private Boolean activated;
+    private Boolean activated = false;
     @ManyToMany
     @JoinTable(
             name = "program_syllabus",
