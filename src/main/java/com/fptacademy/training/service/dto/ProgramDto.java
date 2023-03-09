@@ -15,7 +15,10 @@ public class ProgramDto implements Serializable {
     private String name;
     private Instant createdAt;
     private Creator createdBy;
-    private Integer duration;
+    private Instant lastModifiedAt;
+    private Creator lastModifiedBy;
+    private Integer durationInDays;
+    private Integer durationInHours;
     private Boolean activated;
     @Getter
     @AllArgsConstructor
