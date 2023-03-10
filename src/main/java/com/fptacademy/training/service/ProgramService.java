@@ -49,24 +49,21 @@ public class ProgramService {
         return programMapper.toDto(program);
     }
 
-    //@PostFilter("hasAuthority(\"" + Permissions.PROGRAM_VIEW + "\") and filterObject.activated == true")
     public List<ProgramDto> getPrograms(List<String> keywords, String sort, int page, int size) {
-        // Get training programs based on keyword or get all if there's no keyword
+        // Get training programs based on keywords or get all if there's no keyword
         List<Program> programs;
         if (keywords != null) {
-            List<Program> firstFilteredPrograms = programRepository.findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
-//            programs = new ArrayList<>(programRepository.findAll());
+            List<Program> firstFilteredPrograms = programRepository
+                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
             if (keywords.size() > 1) {
                 keywords.remove(0);
-//                for (int i = 1; i < keywords.size(); ++i) {
-//                    int finalI = i;
                     programs = firstFilteredPrograms
-                            .stream()
+                            .stream() // can use skip??
                             .filter(p -> keywords
                                     .stream()
                                     .allMatch(e -> p.getName().toLowerCase().contains(e.toLowerCase()) || 
-                                            p.getCreatedBy().getFullName().toLowerCase().contains(e.toLowerCase()))).toList();
-//                }
+                                            p.getCreatedBy().getFullName().toLowerCase().contains(e.toLowerCase())))
+                            .toList();
             } else {
                 programs = firstFilteredPrograms;
             }
