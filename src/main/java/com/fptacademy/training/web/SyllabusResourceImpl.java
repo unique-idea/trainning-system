@@ -3,13 +3,17 @@ package com.fptacademy.training.web;
 import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.OutputStandard;
+import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.repository.DeliveryRepository;
 import com.fptacademy.training.repository.LevelRepository;
 import com.fptacademy.training.repository.OutputStandardRepository;
+import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.service.DeliveryService;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
+import com.fptacademy.training.service.SyllabusService;
+import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +22,7 @@ import org.apache.tomcat.util.http.HeaderUtil;
 import org.apache.tomcat.util.http.ResponseUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +47,11 @@ public class SyllabusResourceImpl {
   private final OutputStandardRepository outputStandardRepository;
   private final LevelService levelService;
   private final LevelRepository levelRepository;
-
   private final DeliveryService deliveryService;
   private final DeliveryRepository deliveryRepository;
+
+  private final SyllabusRepository syllabusRepository;
+  private final SyllabusService syllabusService;
 
   // OutputStandards
   @PostMapping("/OutputStandards")
@@ -186,4 +193,15 @@ public class SyllabusResourceImpl {
     deliveryService.delete(id);
     return ResponseEntity.ok("OK");
   }
+
+  @GetMapping("/syllabuses")
+  public ResponseEntity<List<SyllabusListDto>> getAllSyllabuses(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
+    Page<SyllabusListDto> page = syllabusService.findAll(pageable);
+    return ResponseEntity.ok(page.getContent());
+  }
+  // @GetMapping("/syllabuses11")
+  // public ResponseEntity<?> getAllSyllabuses() {
+  //   SyllabusListDto page = syllabusService.findAll();
+  //   return ResponseEntity.ok(page);
+  // }
 }
