@@ -199,9 +199,4 @@ public class SyllabusResourceImpl {
     Page<SyllabusListDto> page = syllabusService.findAll(pageable);
     return ResponseEntity.ok(page.getContent());
   }
-  // @GetMapping("/syllabuses11")
-  // public ResponseEntity<?> getAllSyllabuses() {
-  //   SyllabusListDto page = syllabusService.findAll();
-  //   return ResponseEntity.ok(page);
-  // }
 }
