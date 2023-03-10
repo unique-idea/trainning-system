@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Component
 public class ProgramMapper {
@@ -32,5 +34,9 @@ public class ProgramMapper {
         dto.setDurationInDays(days);
         dto.setDurationInHours(hours);
         return dto;
+    }
+
+    public List<ProgramDto> toDtos(List<Program> programs) {
+        return programs.stream().map(this::toDto).toList();
     }
 }

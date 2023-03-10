@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class ProgramResourceImpl implements ProgramResource {
@@ -18,5 +20,12 @@ public class ProgramResourceImpl implements ProgramResource {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(programService.createProgram(programVM));
+    }
+
+    @Override
+    public ResponseEntity<List<ProgramDto>> getPrograms(List<String> keywords, String sort, int page, int size) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(programService.getPrograms(keywords, sort, page, size));
     }
 }
