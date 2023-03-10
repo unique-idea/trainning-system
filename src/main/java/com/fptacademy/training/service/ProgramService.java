@@ -52,17 +52,26 @@ public class ProgramService {
     //@PostFilter("hasAuthority(\"" + Permissions.PROGRAM_VIEW + "\") and filterObject.activated == true")
     public List<ProgramDto> getPrograms(List<String> keywords, String sort, int page, int size) {
         // Get training programs based on keyword or get all if there's no keyword
-        List<Program> programs = new ArrayList<>();
+        List<Program> programs;
         if (keywords != null) {
-            programs.addAll(programRepository.findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0)));
+            List<Program> firstFilteredPrograms = programRepository.findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
+//            programs = new ArrayList<>(programRepository.findAll());
             if (keywords.size() > 1) {
-                for (int i = 1; i < keywords.size(); ++i) {
-                    int finalI = i;
-                    programs = programs.stream().filter(p -> p.getName().contains(keywords.get(finalI)) && p.getCreatedBy().getFullName().contains(keywords.get(finalI))).toList();
-                }
+                keywords.remove(0);
+//                for (int i = 1; i < keywords.size(); ++i) {
+//                    int finalI = i;
+                    programs = firstFilteredPrograms
+                            .stream()
+                            .filter(p -> keywords
+                                    .stream()
+                                    .allMatch(e -> p.getName().toLowerCase().contains(e.toLowerCase()) || 
+                                            p.getCreatedBy().getFullName().toLowerCase().contains(e.toLowerCase()))).toList();
+//                }
+            } else {
+                programs = firstFilteredPrograms;
             }
         } else {
-            programs.addAll(programRepository.findAll());
+            programs = programRepository.findAll();
         }
         // Convert list of program entities to list of program DTOs
         List<ProgramDto> programDtos = new ArrayList<>(programMapper.toDtos(programs));
