@@ -1,5 +1,6 @@
 package com.fptacademy.training.service;
 
+import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.repository.OutputStandardRepository;
 import java.util.List;
@@ -41,6 +42,9 @@ public class OutputStandardService {
     return outputStandardRepository.findById(id);
   }
 
+  public List<OutputStandard> getOutputStandardByName(String name){
+    return outputStandardRepository.findByNameContains(name);
+  }
   public void delete(Long id) {
     outputStandardRepository.deleteById(id);
   }
