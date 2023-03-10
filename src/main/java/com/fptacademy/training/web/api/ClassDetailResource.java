@@ -1,5 +1,5 @@
 package com.fptacademy.training.web.api;
 
-public class ClassDetailResource {
+public interface ClassDetailResource {
     
 }
