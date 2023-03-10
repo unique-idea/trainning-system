@@ -21,6 +21,9 @@ public class User implements Serializable {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Size(max = 20)
+    @Column(length = 20, unique = true, nullable = false)
+    private String code;
 
     @Size(max = 100)
     @Column(length = 100, nullable = false)
