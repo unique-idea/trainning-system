@@ -25,5 +25,6 @@ public class ProgramDto implements Serializable {
     public static class Creator {
         private Long id;
         private String name;
+        private String code;
     }
 }
