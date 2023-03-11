@@ -7,6 +7,7 @@ import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
+import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.vm.ProgramVM;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,30 +50,40 @@ public class ProgramService {
 
         return programMapper.toDto(program);
     }
-
-    public List<ProgramDto> getPrograms(List<String> keywords, String sort, int page, int size) {
+    /*
+    Return list of program DTOs, only return ones that are activated if logged-in user has View permission,
+    otherwise return all
+     */
+    @PostFilter("(hasAnyAuthority('" + Permissions.PROGRAM_VIEW + "') and filterObject.activated == true) or " +
+            "(hasAnyAuthority('" +
+            Permissions.PROGRAM_CREATE + "', '" +
+            Permissions.PROGRAM_MODIFY + "', '" +
+            Permissions.PROGRAM_FULL_ACCESS + "'))")
+    public List<ProgramDto> getPrograms(List<String> keywords, String sort) {
         // Get training programs based on keywords or get all if there's no keyword
         List<Program> programs;
         if (keywords != null) {
             List<Program> firstFilteredPrograms = programRepository
                     .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
             if (keywords.size() > 1) {
-                keywords.remove(0);
-                    programs = firstFilteredPrograms
-                            .stream() // can use skip??
-                            .filter(p -> keywords
-                                    .stream()
-                                    .allMatch(e -> p.getName().toLowerCase().contains(e.toLowerCase()) || 
-                                            p.getCreatedBy().getFullName().toLowerCase().contains(e.toLowerCase())))
-                            .toList();
+                programs = firstFilteredPrograms
+                        .stream()
+                        .skip(1)
+                        .filter(p -> keywords
+                                .stream()
+                                .allMatch(e -> p.getName().toLowerCase().contains(e.toLowerCase()) ||
+                                        p.getCreatedBy().getFullName().toLowerCase().contains(e.toLowerCase())))
+                        .toList();
             } else {
                 programs = firstFilteredPrograms;
             }
         } else {
             programs = programRepository.findAll();
         }
+
         // Convert list of program entities to list of program DTOs
         List<ProgramDto> programDtos = new ArrayList<>(programMapper.toDtos(programs));
+
         // Sort the list
         String[] a = sort.split(",");
         if (a.length != 2) {
@@ -98,14 +110,7 @@ public class ProgramService {
             case "createdBy" -> programDtos.sort(createdByComparator);
             case "duration" -> programDtos.sort(durationComparator);
         }
-        // Apply pagination
-        int start = page * size;
-        int end = Math.min(start + size, programDtos.size());
-        Page<ProgramDto> pageResult = new PageImpl<>(
-                programDtos.subList(start, end),
-                PageRequest.of(page, size),
-                programDtos.size());
 
-        return pageResult.getContent();
+        return programDtos;
     }
 }

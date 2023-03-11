@@ -45,7 +45,7 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/programs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ProgramDto>> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
