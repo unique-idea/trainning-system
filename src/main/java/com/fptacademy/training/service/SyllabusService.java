@@ -43,6 +43,7 @@ public class SyllabusService {
                     .flatMap(session -> session.getUnits().stream())
                     .flatMap(unit -> unit.getLessons().stream())
                     .map(Lesson::getOutputStandard)
+                    .distinct()
                     .toList()
               )
               .map(Syllabus::getSessions, SyllabusListDto::setOutputStandard)
