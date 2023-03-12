@@ -35,6 +35,7 @@ public class ProgramResourceImpl implements ProgramResource {
                 programDtos.subList(start, end),
                 PageRequest.of(page, size),
                 programDtos.size());
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());

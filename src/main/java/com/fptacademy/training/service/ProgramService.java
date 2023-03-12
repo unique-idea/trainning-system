@@ -12,9 +12,6 @@ import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,10 +84,13 @@ public class ProgramService {
         // Sort the list
         String[] a = sort.split(",");
         if (a.length != 2) {
-            throw new ResourceBadRequestException("Invalid parameters");
+            throw new ResourceBadRequestException("Invalid parameter for sort");
         }
         String property = a[0];
         String direction = a[1];
+        if (!direction.equals("asc") && !direction.equals("desc")) {
+            throw new ResourceBadRequestException("Invalid parameter for sort, cannot find sort direction (asc or desc)");
+        }
         Comparator<ProgramDto> idComparator = Comparator.comparing(ProgramDto::getId);
         Comparator<ProgramDto> nameComparator = Comparator.comparing(ProgramDto::getName);
         Comparator<ProgramDto> createdByComparator = Comparator.comparing(e -> e.getCreatedBy().getName());
@@ -109,6 +109,7 @@ public class ProgramService {
             case "createdAt" -> programDtos.sort(createdAtComparator);
             case "createdBy" -> programDtos.sort(createdByComparator);
             case "duration" -> programDtos.sort(durationComparator);
+            default -> throw new ResourceBadRequestException("Invalid parameter for sort, there's no such property");
         }
 
         return programDtos;
