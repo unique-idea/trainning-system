@@ -1,6 +1,7 @@
 package com.fptacademy.training.service.dto;
 
 import lombok.Data;
+
 @Data
 public class UnitDTO {
     private Long id;

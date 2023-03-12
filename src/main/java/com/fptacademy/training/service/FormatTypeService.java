@@ -16,16 +16,16 @@ public class FormatTypeService {
     @Autowired
     public FormatTypeRepository formatTypeRepository;
 
-    public List<FormatType> getAll(){
+    public List<FormatType> getAll() {
         return formatTypeRepository.findAll();
     }
 
-    public Optional<FormatType> getFormatTypeByID(Long id){
+    public Optional<FormatType> getFormatTypeByID(Long id) {
 
         return formatTypeRepository.findById(id);
     }
 
-    public List<FormatType> getFormatTypeByName(String name){
+    public List<FormatType> getFormatTypeByName(String name) {
 
         return formatTypeRepository.findFormatTypeByNameContains(name);
     }

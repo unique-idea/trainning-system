@@ -10,16 +10,16 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
-public class LessonDTO implements Serializable{
+public class LessonDTO implements Serializable {
 
-        private static final Long serialVersionUID = 1L;
+    private static final Long serialVersionUID = 1L;
 
-        private Long id;
+    private Long id;
 
-        private String name;
+    private String name;
 
-        private String status;
+    private String status;
 
-        private Integer duration;
+    private Integer duration;
 
-    }
+}

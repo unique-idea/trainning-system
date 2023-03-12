@@ -16,11 +16,11 @@ public class AssessmentService {
     @Autowired
     private AssessmentRepository assessmentRepository;
 
-    public List<Assessment> getAll(){
+    public List<Assessment> getAll() {
         return assessmentRepository.findAll();
     }
 
-    public Optional<Assessment> getAssessmentByID(Long id){
+    public Optional<Assessment> getAssessmentByID(Long id) {
 
         return assessmentRepository.findById(id);
     }

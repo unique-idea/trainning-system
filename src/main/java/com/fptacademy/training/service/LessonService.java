@@ -20,26 +20,30 @@ public class LessonService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<LessonDTO> getAll(){
+    public List<LessonDTO> getAll() {
         List<Lesson> list = lessonRepository.findAll();
         List<LessonDTO> listDTO = new ArrayList<>();
-        for(Lesson op : list){
+        for (Lesson op : list) {
             listDTO.add(modelMapper.map(op, LessonDTO.class));
         }
         return listDTO;
     }
 
-    public Optional<LessonDTO> getLessonByID(Long id){
+    public Optional<LessonDTO> getLessonByID(Long id) {
 
-        return lessonRepository.findById(id).map(l->modelMapper.map(l,LessonDTO.class));
+        return lessonRepository.findById(id).map(l -> modelMapper.map(l, LessonDTO.class));
     }
 
-    public List<LessonDTO> getLessonByName(String name){
+    public List<LessonDTO> getLessonByName(String name) {
         List<Lesson> list = lessonRepository.findByNameContains(name);
         List<LessonDTO> listDTO = new ArrayList<>();
-        for(Lesson op : list){
+        for (Lesson op : list) {
             listDTO.add(modelMapper.map(op, LessonDTO.class));
         }
         return listDTO;
+    }
+
+    public Lesson save(Lesson lesson) {
+        return null;
     }
 }

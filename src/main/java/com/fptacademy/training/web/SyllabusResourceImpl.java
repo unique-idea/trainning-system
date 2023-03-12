@@ -3,8 +3,6 @@ package com.fptacademy.training.web;
 import com.fptacademy.training.domain.*;
 import com.fptacademy.training.service.*;
 import com.fptacademy.training.exception.ResourceBadRequestException;
-import com.fptacademy.training.repository.LessonRepository;
-import com.fptacademy.training.repository.LevelRepository;
 import com.fptacademy.training.repository.OutputStandardRepository;
 
 import java.util.ArrayList;
@@ -38,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
@@ -53,6 +52,8 @@ public class SyllabusResourceImpl {
     private final UnitService unitService;
     private final MaterialService materialService;
     private final AssessmentService assessmentService;
+    private final FormatTypeService formatTypeService;
+    private final ModelMapper modelMapper;
     private final FormatTypeService formatTypeService;
     private final DeliveryService deliveryService;
     private final SyllabusService syllabusService;
