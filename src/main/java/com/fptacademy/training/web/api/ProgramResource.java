@@ -28,7 +28,7 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "409", description = "Conflict training program name", content = @Content)
     })
-    @PostMapping(value = "/program", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/programs", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramDto> createProgram(@RequestBody ProgramVM programVM);
 
 
@@ -48,7 +48,7 @@ public interface ProgramResource {
     @GetMapping(value = "/programs", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ProgramDto>> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size);
+            @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size);
 }
