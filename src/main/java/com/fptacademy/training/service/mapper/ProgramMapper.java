@@ -29,8 +29,14 @@ public class ProgramMapper {
                 .flatMap(u -> u.getLessons().stream())
                 .mapToLong(Lesson::getDuration)
                 .sum();
-        dto.setCreatedBy(new ProgramDto.Creator(program.getCreatedBy().getId(), program.getCreatedBy().getFullName()));
-        dto.setLastModifiedBy(new ProgramDto.Creator(program.getLastModifiedBy().getId(), program.getLastModifiedBy().getFullName()));
+        dto.setCreatedBy(new ProgramDto.Creator(
+                program.getCreatedBy().getId(),
+                program.getCreatedBy().getFullName(),
+                program.getCreatedBy().getCode()));
+        dto.setLastModifiedBy(new ProgramDto.Creator(
+                program.getLastModifiedBy().getId(),
+                program.getLastModifiedBy().getFullName(),
+                program.getCreatedBy().getCode()));
         dto.setDurationInDays(days);
         dto.setDurationInHours(hours);
         return dto;
