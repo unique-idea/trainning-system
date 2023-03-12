@@ -52,6 +52,8 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @Enumerated(EnumType.STRING)
   private SyllabusStatus status;
 
+  private Integer duration;
+
   @Column(columnDefinition = "TEXT")
   private String technicalRequirement;
 

@@ -44,8 +44,6 @@ public class SecurityConfiguration {
       .authorizeHttpRequests()
       .mvcMatchers(AUTH_WHITELIST)
       .permitAll()
-      .mvcMatchers("/api/**")
-      .permitAll()
       .anyRequest()
       .authenticated()
       .and()
