@@ -62,10 +62,6 @@ public class LevelService {
         return levelRepository.findAll();
     }
 
-    public Optional<Level> getLevelByID(Long id) {
-        return levelRepository.findById(id);
-    }
-
     public List<Level> getLevelByName(String name) {
         return levelRepository.findByNameContains(name);
     }
