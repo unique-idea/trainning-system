@@ -21,4 +21,7 @@ public interface ClassResource {
     @GetMapping("/all")
     public List<ClassDto> getAllClass();
 
+    @GetMapping("/delete/{id}")
+    public void delClass(@PathVariable Long id);
+
 }

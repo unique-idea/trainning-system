@@ -1,6 +1,7 @@
 package com.fptacademy.training.web;
 
 import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.repository.ClassDetailRepository;
 import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.service.dto.ClassDto;
 import com.fptacademy.training.service.mapper.ClassMapper;
@@ -19,6 +20,7 @@ public class ClassResourceImpl implements ClassResource {
     private final ClassRepository repository;
     private final ClassMapper classMapper;
 
+    private final ClassDetailRepository detailRepository ;
 
 
     @Override
@@ -32,4 +34,13 @@ public class ClassResourceImpl implements ClassResource {
         List<Class> classes = repository.findAll();
         return classes.stream().map(classMapper::toDto).toList();
     }
+
+    @Override
+    public void delClass(@PathVariable Long id){
+        Optional<Class> classes = repository.findById(id);
+        detailRepository.updateStatusById("Inactive",classes.get().getClassDetail().getId());
+
+
+    }
+
 }
