@@ -8,6 +8,7 @@ import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,10 +30,10 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> getUsers() {
+    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getUsers());
+                .body(userService.getUsers(pageNumber, pageSize));
     }
 
     @Override

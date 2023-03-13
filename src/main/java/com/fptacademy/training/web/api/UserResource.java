@@ -49,7 +49,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<UserDto>> getUsers();
+    ResponseEntity<List<UserDto>> getUsers(@RequestParam Integer pageNumber, @RequestParam Integer pageSize);
 
 
     @Operation(

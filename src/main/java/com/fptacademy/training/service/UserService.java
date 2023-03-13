@@ -9,6 +9,9 @@ import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -47,8 +49,9 @@ public class UserService {
         return userMapper.toDto(userRepository.save(user));
     }
 
-    public List<UserDto> getUsers() {
-        return userMapper.toDtos(userRepository.findAll());
+    public List<UserDto> getUsers(int pageNumber, int pageSize) {
+        Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.Direction.DESC, "id");
+        return userMapper.toDtos(userRepository.findAll(pages).getContent());
     }
 
     public Optional<UserDto> findUserByEmail(String email) {
