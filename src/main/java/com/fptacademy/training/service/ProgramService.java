@@ -47,6 +47,7 @@ public class ProgramService {
 
         return programMapper.toDto(program);
     }
+
     /*
     Return list of program DTOs, only return ones that are activated if logged-in user has View permission,
     otherwise return all
@@ -57,6 +58,7 @@ public class ProgramService {
             Permissions.PROGRAM_MODIFY + "', '" +
             Permissions.PROGRAM_FULL_ACCESS + "'))")
     public List<ProgramDto> getPrograms(List<String> keywords, String sort) {
+
         // Get training programs based on keywords or get all if there's no keyword
         List<Program> programs;
         if (keywords != null) {
@@ -113,5 +115,29 @@ public class ProgramService {
         }
 
         return programDtos;
+    }
+
+    public ProgramDto activateProgram(Long id) {
+        Program program = null;
+        //check if program has existed with this id
+        if (programRepository.existsById(id)) {
+            Optional<Program> programOptional = programRepository.findById(id);
+            if (programOptional.isPresent()) {
+                program = programOptional.get();
+            }
+        } else {
+            throw new ResourceNotFoundException("The program is not existed with the " + id);
+        }
+        // Convert program entitie to program DTOs
+        ProgramDto programDto = programMapper.toDto(program);
+
+        //Activate the program
+        programDto.setActivated(true);
+        program.setActivated(true);
+
+        //Save or Update the program: "activated"
+        programRepository.save(program);
+
+        return programDto;
     }
 }

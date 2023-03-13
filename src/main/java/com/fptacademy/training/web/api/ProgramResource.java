@@ -28,8 +28,13 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "409", description = "Conflict training program name", content = @Content)
     })
+
     @PostMapping(value = "/programs", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramDto> createProgram(@RequestBody ProgramVM programVM);
+
+    //Activate the Program by id
+    @PostMapping(value = "/programs/{id}/activate",produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ProgramDto> activateProgram(@PathVariable Long id);
 
 
     @Operation(
