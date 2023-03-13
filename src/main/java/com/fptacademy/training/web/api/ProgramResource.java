@@ -1,6 +1,7 @@
 package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,4 +52,23 @@ public interface ProgramResource {
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size);
+
+    @Operation(
+            summary = "Get list of syllabuses details by program id",
+            description = "Get list of syllabuses details by program id",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found syllabuses"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Program id not found", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/programs/{id}/syllabus", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByProgramId(
+            @PathVariable Long id
+    );
 }

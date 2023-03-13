@@ -9,7 +9,9 @@ import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
+import com.fptacademy.training.service.mapper.SyllabusMapper;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PostFilter;
@@ -25,6 +27,8 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final SyllabusRepository syllabusRepository;
     private final ProgramMapper programMapper;
+
+    private final SyllabusMapper syllabusMapper;
 
     public ProgramDto createProgram(ProgramVM programVM) {
         // Check if program name already existed or not
@@ -113,5 +117,18 @@ public class ProgramService {
         }
 
         return programDtos;
+    }
+
+    public List<SyllabusDto.SyllabusListDto> findSyllabusesByProgramId(Long id){
+        // Check if program id already existed or not
+        if (!programRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Training program with id '" + id + "' not existed");
+        }
+        // Get program by id
+        Optional<Program> program = programRepository.findById(id);
+
+        // Get list syllabus of program
+        List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());
+        return syllabusDtos;
     }
 }

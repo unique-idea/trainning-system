@@ -2,6 +2,7 @@ package com.fptacademy.training.web;
 
 import com.fptacademy.training.service.ProgramService;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.web.api.ProgramResource;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -40,4 +42,14 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());
     }
+
+    @Override
+    public ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByProgramId(Long id) {
+        List<SyllabusDto.SyllabusListDto> syllabusDtos = programService.findSyllabusesByProgramId(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(syllabusDtos);
+    }
+
 }
