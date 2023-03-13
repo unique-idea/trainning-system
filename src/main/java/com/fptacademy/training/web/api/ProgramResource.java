@@ -34,11 +34,18 @@ public interface ProgramResource {
 
     //Activate the Program by id
     @Operation(
-            summary = "Get list of training programs",
-            description = "Get list of training programs with sort and pagination",
+            summary = "Activate program",
+            description = "Activate the program by id ",
             tags = "program",
             security = @SecurityRequirement(name = "token_auth")
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found training programs"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = "/programs/{id}/activate",produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramDto> activateProgram(@PathVariable Long id);
 
