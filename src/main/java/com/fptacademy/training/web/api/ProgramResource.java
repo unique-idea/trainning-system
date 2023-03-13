@@ -34,8 +34,8 @@ public interface ProgramResource {
 
     //Activate the Program by id
     @Operation(
-            summary = "Activate program",
-            description = "Activate the program by id ",
+            summary = "Get list of training programs",
+            description = "Get list of training programs with sort and pagination",
             tags = "program",
             security = @SecurityRequirement(name = "token_auth")
     )
