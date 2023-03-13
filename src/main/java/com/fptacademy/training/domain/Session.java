@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -40,9 +41,10 @@ public class Session implements Serializable {
   private String name;
 
   @Column(length = 45)
+  @JsonIgnore
   private String status;
 
-  @OneToMany(mappedBy = "session")
+  @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
   private List<Unit> units = new ArrayList<>();
 
   @JsonIgnore

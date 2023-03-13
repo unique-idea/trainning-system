@@ -1,9 +1,9 @@
 package com.fptacademy.training.service.dto;
 
+import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
-import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -58,43 +58,13 @@ public class SyllabusDto {
     private Integer attendeeNumber;
     private SyllabusStatus status;
     private Integer duration;
+    private Double totalDurationUnit;
     private String technicalRequirement;
     private String courseObjective;
     private String trainingPrinciple;
     private Level level;
+    private Assessment assessment;
     private List<OutputStandard> outputStandard = new ArrayList<>();
-    private List<SessionDto> sessions = new ArrayList<>();
+    private List<Session> sessions = new ArrayList<>();
   }
-
-  public static class SessionDto {
-
-    private Long id;
-
-    private Integer index;
-
-    private String name;
-
-    private String status;
-
-    private List<UnitDto> units = new ArrayList<>();
-  }
-
-  public static class UnitDto {
-
-    private Long id;
-
-    private String title;
-
-    private String status;
-
-    private String name;
-
-    private Integer index;
-
-    private List<LessonDto> lessons = new ArrayList<>();
-  }
-
-  public static class LessonDto {}
-
-  public static class MaterialDto {}
 }

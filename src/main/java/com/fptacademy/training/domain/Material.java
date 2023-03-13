@@ -30,11 +30,13 @@ public class Material implements Serializable {
   private String fileUrl;
 
   @CreatedBy
+  @JsonIgnore
   @JoinColumn(name = "created_by")
   @ManyToOne
   private User createdBy;
 
   @CreatedDate
+  @JsonIgnore
   private Instant createdAt;
 
   @ManyToOne
