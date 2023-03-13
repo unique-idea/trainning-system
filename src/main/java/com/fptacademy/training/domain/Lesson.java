@@ -1,5 +1,6 @@
 package com.fptacademy.training.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Column;
@@ -31,11 +32,9 @@ public class Lesson implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 100)
   @Column(length = 100)
   private String name;
 
-  @Size(max = 45)
   @Column(length = 45)
   private String status;
 
@@ -54,6 +53,7 @@ public class Lesson implements Serializable {
   private Delivery delivery;
 
   @ManyToOne
+  @JsonIgnore
   @JoinColumn(name = "unit_id")
   private Unit unit;
 

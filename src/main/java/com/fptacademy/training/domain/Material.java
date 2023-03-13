@@ -1,5 +1,6 @@
 package com.fptacademy.training.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.*;
@@ -37,6 +38,7 @@ public class Material implements Serializable {
   private Instant createdAt;
 
   @ManyToOne
+  @JsonIgnore
   @JoinColumn(name = "lesson_id")
   private Lesson lesson;
 }

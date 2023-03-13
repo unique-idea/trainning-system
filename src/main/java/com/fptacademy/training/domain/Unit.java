@@ -1,5 +1,6 @@
 package com.fptacademy.training.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +33,12 @@ public class Unit implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 100)
   @Column(length = 100)
   private String title;
 
-  @Size(max = 45)
   @Column(length = 45)
   private String status;
 
-  @Size(max = 100)
   @Column(length = 100)
   private String name;
 
@@ -50,6 +48,7 @@ public class Unit implements Serializable {
   @OneToMany(mappedBy = "unit")
   private List<Lesson> lessons = new ArrayList<>();
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "session_id")
   private Session session;

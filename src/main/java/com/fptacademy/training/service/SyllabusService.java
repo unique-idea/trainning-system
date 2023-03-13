@@ -7,6 +7,7 @@ import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -49,5 +50,28 @@ public class SyllabusService {
       : modelMapper.getTypeMap(Syllabus.class, SyllabusListDto.class);
 
     return syllabusRepository.findAll(spec, pageable).map(s -> modelMapper.map(s, SyllabusListDto.class));
+  }
+
+  public Syllabus save(Syllabus syllabus) {
+    return syllabusRepository.save(syllabus);
+  }
+
+  public Optional<Syllabus> update(Syllabus syllabus) {
+    return syllabusRepository
+      .findById(syllabus.getId())
+      .map(ops -> {
+        modelMapper.map(syllabus, ops);
+        return ops;
+      })
+      .map(syllabusRepository::save);
+  }
+
+  @Transactional(readOnly = true)
+  public Optional<Syllabus> findOne(Long id) {
+    return syllabusRepository.findById(id);
+  }
+
+  public void delete(Long id) {
+    syllabusRepository.deleteById(id);
   }
 }

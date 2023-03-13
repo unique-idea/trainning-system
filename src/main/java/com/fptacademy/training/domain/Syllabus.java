@@ -37,22 +37,21 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 100)
-  @Column(length = 100, nullable = false)
+  @Column(length = 100)
   private String name;
 
-  @Size(max = 20)
-  @Column(length = 20, unique = true, nullable = false)
+  @Column(length = 20)
   private String code;
 
   private Integer attendeeNumber;
 
-  @Size(max = 20)
   @Column(length = 20)
   @Enumerated(EnumType.STRING)
   private SyllabusStatus status;
 
   private Integer duration;
+
+  private Float version;
 
   @Column(columnDefinition = "TEXT")
   private String technicalRequirement;

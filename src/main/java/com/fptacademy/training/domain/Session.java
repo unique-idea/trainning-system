@@ -36,15 +36,12 @@ public class Session implements Serializable {
   @Column(name = "`index`")
   private Integer index;
 
-  @Size(max = 45)
   @Column(length = 45)
   private String name;
 
-  @Size(max = 45)
   @Column(length = 45)
   private String status;
 
-  @JsonIgnore
   @OneToMany(mappedBy = "session")
   private List<Unit> units = new ArrayList<>();
 
