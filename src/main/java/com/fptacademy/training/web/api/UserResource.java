@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -66,4 +67,9 @@ public interface UserResource {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Optional<UserDto>> getUserByEmail(@PathVariable String email);
+
+
+    @PostMapping("/users/import")
+    ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
+
 }

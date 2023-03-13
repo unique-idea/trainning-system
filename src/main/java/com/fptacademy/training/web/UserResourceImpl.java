@@ -1,5 +1,6 @@
 package com.fptacademy.training.web;
 
+import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.api.UserResource;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -37,5 +40,12 @@ public class UserResourceImpl implements UserResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.findUserByEmail(email));
+    }
+
+    @Override
+    public ResponseEntity<?> uploadUserData(MultipartFile file) {
+        this.userService.saveUsersToDB(file);
+        return ResponseEntity
+                .ok(Map.of("Message", "Users data uploaded and saved database successfully"));
     }
 }
