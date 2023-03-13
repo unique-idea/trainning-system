@@ -39,7 +39,13 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @Enumerated(EnumType.STRING)
   private SyllabusStatus status;
 
+<<<<<<< HEAD
   private Integer duration;
+=======
+    @Size(max = 20)
+    @Column(length = 20)
+    private SyllabusStatus status;
+>>>>>>> parent of c7e9f5f (11.29 13.03.2023)
 
   @Column(columnDefinition = "TEXT")
   private String technicalRequirement;
