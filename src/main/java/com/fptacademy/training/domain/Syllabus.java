@@ -39,4 +39,7 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
     private String trainingPrinciple;
     @OneToMany(mappedBy = "syllabus")
     private List<Session> sessions;
+    @OneToOne
+    @JoinColumn(name = "assessment_id")
+    private Assessment assessment;
 }
