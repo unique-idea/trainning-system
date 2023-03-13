@@ -27,8 +27,8 @@ public class ProgramResourceImpl implements ProgramResource {
 
     //Activate the Program by id
     @Override
-    public ResponseEntity<ProgramDto> activateProgram(Long idCheck) {
-        ProgramDto programDto=programService.activateProgram(idCheck);
+    public ResponseEntity<ProgramDto> activateProgram(Long id) {
+        ProgramDto programDto=programService.activateProgram(id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

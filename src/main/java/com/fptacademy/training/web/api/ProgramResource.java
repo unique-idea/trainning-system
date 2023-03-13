@@ -33,6 +33,12 @@ public interface ProgramResource {
     ResponseEntity<ProgramDto> createProgram(@RequestBody ProgramVM programVM);
 
     //Activate the Program by id
+    @Operation(
+            summary = "Get list of training programs",
+            description = "Get list of training programs with sort and pagination",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
     @PostMapping(value = "/programs/{id}/activate",produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramDto> activateProgram(@PathVariable Long id);
 
