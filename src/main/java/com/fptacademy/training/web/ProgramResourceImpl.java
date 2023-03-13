@@ -5,12 +5,14 @@ import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.web.api.ProgramResource;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -39,5 +41,17 @@ public class ProgramResourceImpl implements ProgramResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadExcelTemplate() {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<List<ProgramDto>> importProgramsFromExcel(MultipartFile file, String[] properties, String handler) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(programService.importProgramFromExcel(file, properties, handler));
     }
 }

@@ -5,6 +5,7 @@ import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.security.Permissions;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -15,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSpecificationExecutor<Syllabus> {
+    Optional<Syllabus> findByCode(String code);
   static Specification<Syllabus> searchByKeywordsOrBycreateDates(String[] keywords, Instant[] createDate, Authentication authentication) {
     return (root, query, builder) -> {
       query.distinct(true);
