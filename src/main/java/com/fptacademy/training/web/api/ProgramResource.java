@@ -71,4 +71,23 @@ public interface ProgramResource {
     ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByProgramId(
             @PathVariable Long id
     );
+     /// tai nguyen test
+     @Operation(
+             summary = "Get specific program by program id",
+             description = "Get specific program by program id",
+             tags = "program",
+             security = @SecurityRequirement(name = "token_auth")
+     )
+     @ApiResponses(value = {
+             @ApiResponse(responseCode = "200", description = "Found program"),
+             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+             @ApiResponse(responseCode = "404", description = "Program id not found", content = @Content),
+     })
+     @GetMapping(value = "/programs/", produces = MediaType.APPLICATION_JSON_VALUE)
+     ResponseEntity<ProgramDto> getProgramById(
+             @RequestParam Long id
+     );
+
+    /// tai nguyen test
 }

@@ -52,4 +52,13 @@ public class ProgramResourceImpl implements ProgramResource {
                 .body(syllabusDtos);
     }
 
+    @Override
+    public ResponseEntity<ProgramDto> getProgramById(Long id) {
+        ProgramDto programDto = programService.findProgramByProgramId(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(programDto);
+    }
+
 }

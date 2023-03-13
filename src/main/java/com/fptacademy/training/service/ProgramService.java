@@ -131,4 +131,20 @@ public class ProgramService {
         List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());
         return syllabusDtos;
     }
+
+    //tai nguyen
+    public ProgramDto findProgramByProgramId(Long id){
+        // Check if program id already existed or not
+        if (!programRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Training program with id '" + id + "' not existed");
+        }
+        // Get program by id
+        Optional<Program> program = programRepository.findById(id);
+        ProgramDto programDto = programMapper.toDto(program.get());
+        // Get list sylla    List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());bus of program
+//
+        return programDto;
+    }
+
+    //tai nguyen
 }
