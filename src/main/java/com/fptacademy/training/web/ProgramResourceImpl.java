@@ -1,7 +1,9 @@
 package com.fptacademy.training.web;
 
 import com.fptacademy.training.service.ProgramService;
+import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.web.api.ProgramResource;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 @RestController
 public class ProgramResourceImpl implements ProgramResource {
     private final ProgramService programService;
+    private final SyllabusService syllabusService;
     @Override
     public ResponseEntity<ProgramDto> createProgram(ProgramVM programVM) {
         return ResponseEntity
@@ -39,5 +42,12 @@ public class ProgramResourceImpl implements ProgramResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());
+    }
+    @Override
+    public ResponseEntity<List<SyllabusDto.SyllabusListDto>>getSyllabusesByName(String name) {
+        List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusService.findSyllabusesByName(name);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(syllabusDtos);
     }
 }

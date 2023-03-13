@@ -5,8 +5,11 @@ import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.repository.SyllabusRepository;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import java.util.List;
+
+import com.fptacademy.training.service.mapper.SyllabusMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -24,7 +27,7 @@ public class SyllabusService {
 
   private final SyllabusRepository syllabusRepository;
   private final ModelMapper modelMapper;
-
+  private final SyllabusMapper syllabusMapper;
   @Transactional(readOnly = true)
   public Page<SyllabusListDto> findAll(Specification<Syllabus> spec, Pageable pageable) {
     TypeMap<Syllabus, SyllabusListDto> typeMap = modelMapper.getTypeMap(Syllabus.class, SyllabusListDto.class) == null
@@ -49,5 +52,10 @@ public class SyllabusService {
       : modelMapper.getTypeMap(Syllabus.class, SyllabusListDto.class);
 
     return syllabusRepository.findAll(spec, pageable).map(s -> modelMapper.map(s, SyllabusListDto.class));
+  }
+  public List<SyllabusDto.SyllabusListDto>findSyllabusesByName(String name){
+      List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCase(name);
+      List<SyllabusDto.SyllabusListDto> syllabusesDto=syllabusMapper.toDtos(syllabuses);
+      return syllabusesDto;
   }
 }

@@ -12,6 +12,7 @@ import com.fptacademy.training.service.DeliveryService;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -304,4 +305,7 @@ public class SyllabusResourceImpl {
       syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
     );
   }
+
+
+
 }
