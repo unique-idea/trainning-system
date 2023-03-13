@@ -32,6 +32,17 @@ public interface ProgramResource {
     @PostMapping(value = "/programs", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramDto> createProgram(@RequestBody ProgramVM programVM);
 
+    //Activate the Program by id
+    @Operation(
+            summary = "Activate program",
+            description = "Activate the program by id ",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @PostMapping(value = "/programs/{id}/activate",produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ProgramDto> activateProgram(@PathVariable Long id);
+
+
     @Operation(
             summary = "Get list of training programs",
             description = "Get list of training programs with sort and pagination",
@@ -51,22 +62,4 @@ public interface ProgramResource {
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size);
-
-
-    //Activate the Program by id
-    @Operation(
-            summary = "Activate program",
-            description = "Activate the program by id ",
-            tags = "program",
-            security = @SecurityRequirement(name = "token_auth")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found training programs"),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-    })
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping(value = "/programs/{id}/activate",produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ProgramDto> activateProgram(@PathVariable Long id);
 }
