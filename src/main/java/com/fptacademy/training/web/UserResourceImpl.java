@@ -38,4 +38,19 @@ public class UserResourceImpl implements UserResource {
                 .status(HttpStatus.OK)
                 .body(userService.findUserByEmail(email));
     }
+
+    @Override
+    public ResponseEntity<List<UserDto>> getUserByName(String name) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.findUserByName(name));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> changeRole(long id, long typeRole) {
+        UserDto userDto = userService.changeRole(id, typeRole);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userDto);
+    }
 }
