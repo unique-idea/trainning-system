@@ -40,4 +40,9 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());
     }
+
+    @Override
+    public void deleteProgram(Long id) {
+        programService.deleteProgram(id);
+    }
 }

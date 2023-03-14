@@ -51,4 +51,20 @@ public interface ProgramResource {
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size);
+
+    @Operation(
+            summary = "Delete training program by id",
+            description = "Delete a training program given its ID. A program can only be deleted if there are no classes associated with it.",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found training programs"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @DeleteMapping("/programs/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteProgram(@PathVariable Long id);
 }

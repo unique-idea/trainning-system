@@ -5,6 +5,7 @@ import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
+import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.security.Permissions;
@@ -25,6 +26,7 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final SyllabusRepository syllabusRepository;
     private final ProgramMapper programMapper;
+    private final ClassRepository classRepository;
 
     public ProgramDto createProgram(ProgramVM programVM) {
         // Check if program name already existed or not
@@ -113,5 +115,12 @@ public class ProgramService {
         }
 
         return programDtos;
+    }
+    public void deleteProgram(Long id) {
+        var classOP = classRepository.findByProgram_Id(id);
+        if (classOP.isPresent()) throw new ResourceBadRequestException("Can not delete program!");
+        var program = programRepository.findById(id);
+        if (program.isEmpty()) throw new ResourceNotFoundException("Can not find program");
+        programRepository.deleteById(id);
     }
 }
