@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ProgramRepository extends JpaRepository<Program, Long> {
     boolean existsByName(String name);
+    List<Program> findByName(String name);
     List<Program> findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(String name, String fullName);
 
 }

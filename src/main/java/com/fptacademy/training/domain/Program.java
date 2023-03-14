@@ -19,7 +19,7 @@ public class Program extends AbstractAuditEntity implements Serializable {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(max = 50)
-    @Column(length = 50, nullable = false, unique = true)
+    @Column(length = 50, nullable = false)
     private String name;
     private Boolean activated = false;
     @ManyToMany

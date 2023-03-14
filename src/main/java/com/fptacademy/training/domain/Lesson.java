@@ -1,7 +1,9 @@
 package com.fptacademy.training.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,12 +32,11 @@ public class Lesson implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 100)
   @Column(length = 100)
   private String name;
 
-  @Size(max = 45)
   @Column(length = 45)
+  @JsonIgnore
   private String status;
 
   private Integer duration;
@@ -54,9 +54,10 @@ public class Lesson implements Serializable {
   private Delivery delivery;
 
   @ManyToOne
+  @JsonIgnore
   @JoinColumn(name = "unit_id")
   private Unit unit;
 
-  @OneToMany(mappedBy = "lesson")
+  @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
   private List<Material> materials;
 }

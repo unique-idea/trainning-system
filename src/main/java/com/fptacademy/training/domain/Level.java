@@ -20,7 +20,6 @@ public class Level implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 50)
-  @Column(length = 50, nullable = false, unique = true)
+  @Column(length = 50)
   private String name;
 }

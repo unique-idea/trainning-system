@@ -20,7 +20,6 @@ public class Delivery implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 50)
-  @Column(length = 50, unique = true, nullable = false)
+  @Column(length = 50)
   private String name;
 }

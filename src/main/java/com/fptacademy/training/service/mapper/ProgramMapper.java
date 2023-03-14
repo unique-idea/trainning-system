@@ -22,7 +22,7 @@ public class ProgramMapper {
                 .stream()
                 .mapToLong(s -> s.getSessions().size())
                 .sum();
-        int hours = (int)program.getSyllabuses()
+        int minutes = (int)program.getSyllabuses()
                 .stream()
                 .flatMap(s -> s.getSessions().stream())
                 .flatMap(s -> s.getUnits().stream())
@@ -36,9 +36,9 @@ public class ProgramMapper {
         dto.setLastModifiedBy(new ProgramDto.Creator(
                 program.getLastModifiedBy().getId(),
                 program.getLastModifiedBy().getFullName(),
-                program.getCreatedBy().getCode()));
+                program.getLastModifiedBy().getCode()));
         dto.setDurationInDays(days);
-        dto.setDurationInHours(hours);
+        dto.setDurationInHours(minutes / 60.f);
         return dto;
     }
 

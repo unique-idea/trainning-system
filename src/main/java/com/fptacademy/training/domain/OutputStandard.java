@@ -20,7 +20,6 @@ public class OutputStandard implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 10)
-  @Column(length = 10, nullable = false, unique = true)
+  @Column(length = 10)
   private String name;
 }

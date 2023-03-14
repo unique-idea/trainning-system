@@ -1,8 +1,15 @@
 package com.fptacademy.training.web;
 
+import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Delivery;
+import com.fptacademy.training.domain.Lesson;
 import com.fptacademy.training.domain.Level;
+import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
+import com.fptacademy.training.domain.Session;
+import com.fptacademy.training.domain.Syllabus;
+import com.fptacademy.training.domain.Unit;
+import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.repository.DeliveryRepository;
 import com.fptacademy.training.repository.LevelRepository;
@@ -12,6 +19,8 @@ import com.fptacademy.training.service.DeliveryService;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
+import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -20,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -303,5 +314,114 @@ public class SyllabusResourceImpl {
     return ResponseEntity.ok(
       syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
     );
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @GetMapping("/syllabuses/{id}")
+  public ResponseEntity<SyllabusDetailDto> getSyllabus(@PathVariable Long id) {
+    Optional<SyllabusDetailDto> result = syllabusService.findOne(id);
+    return result.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @DeleteMapping("/syllabuses/{id}")
+  public ResponseEntity<?> deleteSyllabus(@PathVariable Long id) {
+    Syllabus syl = syllabusRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    syl.setStatus(SyllabusStatus.REJECTED);
+    syllabusService.delete(syl);
+    return ResponseEntity.ok("OK");
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PutMapping("/syllabuses/de-active/{id}")
+  public ResponseEntity<?> deActiveSyllabus(@PathVariable Long id) {
+    Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    syllabus.setStatus(SyllabusStatus.DEACTIVATED);
+    syllabusService.delete(syllabus);
+    return ResponseEntity.ok("OK");
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PutMapping("/syllabuses/active/{id}")
+  public ResponseEntity<?> activeSyllabus(@PathVariable Long id) {
+    Syllabus syl = syllabusRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    syl.setStatus(SyllabusStatus.ACTIVATED);
+    syllabusService.delete(syl);
+    return ResponseEntity.ok("OK");
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  // delivery
+  @PostMapping("/syllabuses")
+  public ResponseEntity<Syllabus> createSyllabus(@RequestBody Syllabus syllabus) {
+    if (syllabus.getId() != null) {
+      throw new ResourceBadRequestException("A new Syllabus cannot already have an ID");
+    }
+    Syllabus result = syllabusService.save(syllabus);
+    return ResponseEntity.ok(result);
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PutMapping("/syllabuses/{id}")
+  public ResponseEntity<Syllabus> updateSyllabus(@PathVariable(value = "id", required = false) final Long id, @RequestBody Syllabus syllabus) {
+    if (syllabus.getId() == null) {
+      throw new ResourceBadRequestException("id null");
+    }
+    if (!Objects.equals(id, syllabus.getId())) {
+      throw new ResourceBadRequestException("id invalid");
+    }
+
+    if (!syllabusRepository.existsById(id)) {
+      throw new ResourceBadRequestException("Entity not found id ");
+    }
+
+    Optional<Syllabus> result = syllabusService.update(syllabus);
+
+    return result.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PostMapping("/syllabuses/duplicate/{id}")
+  public ResponseEntity<?> duplicateSyllabuses(@PathVariable Long id) {
+    ModelMapper map = new ModelMapper();
+    Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
+    modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+    Converter<String, String> emptyToNull = new AbstractConverter<>() {
+      protected String convert(String source) {
+        return (source == null || source.isEmpty()) ? null : source;
+      }
+    };
+
+    map.createTypeMap(Syllabus.class, Syllabus.class).addMappings(mapper -> mapper.skip(Syllabus::setId));
+    map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
+    map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
+    map.createTypeMap(Unit.class, Unit.class).addMappings(mapper -> mapper.skip(Unit::setId));
+    map.createTypeMap(Material.class, Material.class).addMappings(mapper -> mapper.skip(Material::setId));
+    map
+      .createTypeMap(Lesson.class, Lesson.class)
+      .addMappings(mapper -> mapper.skip(Lesson::setId))
+      .addMappings(mapper -> mapper.using(emptyToNull).map(Lesson::getName, Lesson::setName));
+    Syllabus newSyllabus = map.map(syllabus, Syllabus.class);
+
+    return ResponseEntity.ok(syllabusRepository.save(newSyllabus));
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PostMapping("/syllabuses/saveAsDraft")
+  public ResponseEntity<?> saveAsDraftSyllabus() {
+    return ResponseEntity.ok(null);
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @GetMapping("/syllabuses/templateFile")
+  public ResponseEntity<?> templateFileSyllabus() {
+    return ResponseEntity.ok(null);
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PostMapping("/syllabuses/uploadFile")
+  public ResponseEntity<?> uploadFileSyllabus() {
+    return ResponseEntity.ok(null);
   }
 }
