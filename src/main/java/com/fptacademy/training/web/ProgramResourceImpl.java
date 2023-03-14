@@ -51,11 +51,11 @@ public class ProgramResourceImpl implements ProgramResource {
     public ResponseEntity<List<ProgramDto>> getPrograms(List<String> keywords, String sort, int page, int size) {
         List<ProgramDto> programDtos = programService.getPrograms(keywords, sort);
         // Apply pagination
-        int start = page * size;
+        int start = (page - 1) * size;
         int end = Math.min(start + size, programDtos.size());
         Page<ProgramDto> pageResult = new PageImpl<>(
                 programDtos.subList(start, end),
-                PageRequest.of(page, size),
+                PageRequest.of(page - 1, size),
                 programDtos.size());
 
         return ResponseEntity
