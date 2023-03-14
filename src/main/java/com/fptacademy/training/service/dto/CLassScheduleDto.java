@@ -32,40 +32,5 @@ public class CLassScheduleDto implements Serializable{
         private Long id;
         private String name;
     }
-//    public CLassScheduleDto() {
-//    }
-//    public CLassScheduleDto(Long id, Date study_date, Long class_detail_id, Long trainer_id) {
-//        this.id = id;
-//        this.study_date = study_date;
-//        this.class_detail_id = class_detail_id;
-//        this.trainer_id = trainer_id;
-//    }
-//    public static Long getSerialversionuid() {
-//        return serialVersionUID;
-//    }
-//    public Long getId() {
-//        return id;
-//    }
-//    public void setId(Long id) {
-//        this.id = id;
-//    }
-//    public Date getStudy_date() {
-//        return study_date;
-//    }
-//    public void setStudy_date(Date study_date) {
-//        this.study_date = study_date;
-//    }
-//    public Long getClass_detail_id() {
-//        return class_detail_id;
-//    }
-//    public void setClass_detail_id(Long class_detail_id) {
-//        this.class_detail_id = class_detail_id;
-//    }
-//    public Long getTrainer_id() {
-//        return trainer_id;
-//    }
-//    public void setTrainer_id(Long trainer_id) {
-//        this.trainer_id = trainer_id;
-//    }
 
 }

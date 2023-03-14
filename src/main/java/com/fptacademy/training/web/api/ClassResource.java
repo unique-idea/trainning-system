@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.service.dto.ClassDto;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,6 @@ public interface ClassResource {
     @GetMapping("/duplicateById/{id}")
     public ClassDto duplicateClass(@PathVariable Long id);
 
-    @PostMapping("/createClass")
-    public ClassDto createClass(@RequestBody Class classes);
+
 
 }

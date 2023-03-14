@@ -35,16 +35,11 @@ public class ClassResourceImpl implements ClassResource {
     }
 
     @Override
-    public void delClass(@PathVariable Long id){
+    public void delClass(Long id) {
         Optional<Class> classes = repository.findById(id);
         detailRepository.updateStatusById("Inactive",classes.get().getClassDetail().getId());
     }
 
-    @Override
-    public ClassDto createClass(Class classes) {
-        ClassDto classDto = classMapper.toDto(repository.save(classes));
-        return classDto;
-    }
 
     @Override
     public ClassDto duplicateClass(@PathVariable Long id) {
