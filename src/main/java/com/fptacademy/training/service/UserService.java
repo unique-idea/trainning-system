@@ -7,9 +7,13 @@ import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,9 +22,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -37,22 +43,36 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    public UserDto createUser(UserVM userVM){
-        if(userRepository.existsByEmail(userVM.email())){
+    private final ExcelUploadService excelUploadService;
+
+    public UserDto createUser(UserVM userVM) {
+        if (userRepository.existsByEmail(userVM.email())) {
             throw new ResourceAlreadyExistsException("User with email " + userVM.email() + " already existed");
         }
-        User user =userMapper.toEntity(userVM, levelService, roleService);
+        User user = userMapper.toEntity(userVM, levelService, roleService);
         return userMapper.toDto(userRepository.save(user));
     }
 
-    public List<UserDto> getUsers() {
-        return userMapper.toDtos(userRepository.findAll());
+    public List<UserDto> getUsers(int pageNumber, int pageSize) {
+        Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.Direction.DESC, "id");
+        return userMapper.toDtos(userRepository.findAll(pages).getContent());
     }
 
     public Optional<UserDto> findUserByEmail(String email) {
         return Optional.ofNullable(userMapper.toDto(userRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"))));
+    }
+
+    public UserDto deleteUser(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            userRepository.delete(user);
+            return userMapper.toDto(user);
+        } else {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -86,5 +106,16 @@ public class UserService {
                 .getRole()
                 .getPermissions()
                 .stream().map(SimpleGrantedAuthority::new).toList();
+    }
+
+    public void saveUsersToDB(MultipartFile file) {
+        if (ExcelUploadService.isValidExcelFile(file)) {
+            try {
+                List<User> users = excelUploadService.getUserDataFromExcel(file.getInputStream());
+                this.userRepository.saveAll(users);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("The file is not a valid excel file");
+            }
+        }
     }
 }

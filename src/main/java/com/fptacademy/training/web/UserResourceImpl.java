@@ -14,6 +14,15 @@ import com.fptacademy.training.web.vm.UserVM;
 
 import lombok.RequiredArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,10 +38,18 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> getUsers() {
+    public ResponseEntity<UserDto> deleteUser(Long id) {
+        UserDto deletedUser = userService.deleteUser(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getUsers());
+                .body(deletedUser);
+    }
+
+    @Override
+    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.getUsers(pageNumber, pageSize));
     }
 
     @Override
@@ -48,5 +65,11 @@ public class UserResourceImpl implements UserResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.getUsersByFilters(email, fullName, code, levelName, roleName, activated, birthday));
+    }
+
+    public ResponseEntity<?> uploadUserData(MultipartFile file) {
+        this.userService.saveUsersToDB(file);
+        return ResponseEntity
+                .ok(Map.of("Message", "Users data uploaded and saved database successfully"));
     }
 }

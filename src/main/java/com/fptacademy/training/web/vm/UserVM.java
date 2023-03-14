@@ -2,9 +2,7 @@ package com.fptacademy.training.web.vm;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 
 public record UserVM(
 
@@ -14,18 +12,21 @@ public record UserVM(
         String fullName,
 
         @NotBlank(message = "Email must be not empty")
+        @Size(max = 50, message = "Invalid, Email too long")
+        @Email(message = "Invalid email")
         String email,
 
         @NotBlank
         @Schema(example = "2001-04-13")
         String birthday,
 
-        @NotNull
+        @NotBlank(message = "Gender must be not empty")
         @Pattern(regexp = "^(male|female)$", message = "Gender must be 'male' or 'female'")
         @Schema(example = "male")
         String gender,
 
         @NotBlank(message = "Status must be not empty")
+        @Pattern(regexp = "^(true|false)$", message = "Activated must be 'true' or 'false'")
         @Schema(example = "true")
         String activated,
 
@@ -35,12 +36,17 @@ public record UserVM(
         @NotBlank(message = "Role must be not empty")
         String role,
 
-        @NotBlank(message = "AvatarUrl must be not empty")
+        @NotBlank(message = "Avatar Url must be not empty")
         String avatarUrl,
 
         @NotBlank(message = "Password must be not empty")
+        @Size(max = 50, message = "Invalid, password too long")
         String password,
 
         @NotBlank(message = "Code must be not empty")
-        String code
-) {}
+        String code,
+
+        @NotBlank(message = "Status must be not empty")
+        String status
+
+        ) {}

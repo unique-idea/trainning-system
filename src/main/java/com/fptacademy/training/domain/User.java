@@ -62,4 +62,7 @@ public class User implements Serializable {
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 }

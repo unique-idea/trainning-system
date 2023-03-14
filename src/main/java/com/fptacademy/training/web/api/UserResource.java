@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.UserVM;
@@ -57,7 +58,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<UserDto>> getUsers();
+    ResponseEntity<List<UserDto>> getUsers(@RequestParam Integer pageNumber, @RequestParam Integer pageSize);
 
 
     @Operation(
@@ -77,9 +78,12 @@ public interface UserResource {
     ResponseEntity<Optional<UserDto>> getUserByEmail(@PathVariable String email);
 
 
+    @PostMapping("/users/import")
+    ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
+
     @Operation(
-            summary = "Get users by filters",
-            description = "Get users by filters",
+            summary = "Delete user",
+            description = "Delete user by id",
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
@@ -98,5 +102,4 @@ public interface UserResource {
                                                     @RequestParam(required = false) String roleName,
                                                     @RequestParam(required = false) Boolean activated,
                                                     @RequestParam(required = false) String birthday);
-
 }
