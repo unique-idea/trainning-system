@@ -1,5 +1,7 @@
 package com.fptacademy.training.service;
 
+
+import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
@@ -73,6 +75,23 @@ public class UserService {
         } else {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
+    }
+
+    public List<UserDto> findUserByName (String name) {
+        List<UserDto> userDto = userMapper.toDtos(userRepository.findByFullNameContaining(name));
+        if(userDto.isEmpty()) {
+            throw new ResourceNotFoundException("User with name " + name + " not found");
+        }
+        return userDto;
+    }
+
+    public void changeRole (long id, long typeRole) {
+        Role role = roleService.getRoleByID(typeRole);
+        Optional<User> user = userRepository.findById(id);
+        if(user.isEmpty()) {
+            throw new ResourceNotFoundException("User does not exist");
+        }
+        user.get().setRole(role);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
