@@ -2,6 +2,8 @@ package com.fptacademy.training.service.mapper;
 
 import com.fptacademy.training.domain.Lesson;
 import com.fptacademy.training.domain.Syllabus;
+import com.fptacademy.training.domain.*;
+import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -12,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class SyllabusMapper {
-
     private final ModelMapper modelMapper;
 
     public SyllabusDto.SyllabusListDto toDto(Syllabus syllabus){
