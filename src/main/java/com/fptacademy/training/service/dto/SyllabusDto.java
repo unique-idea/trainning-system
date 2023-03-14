@@ -58,9 +58,9 @@ public class SyllabusDto {
     private String code;
     private Float version;
     private Integer attendeeNumber;
-    private SyllabusStatus status;
+    private String status;
     private Integer duration;
-    private Double totalDurationUnit;
+    private Double durationInHours;
     private String technicalRequirement;
     private String courseObjective;
     private String trainingPrinciple;

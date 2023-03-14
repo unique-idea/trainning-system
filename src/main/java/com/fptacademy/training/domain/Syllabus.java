@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -68,7 +69,38 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL)
   private List<Session> sessions = new ArrayList<>();
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "assessment_id")
   private Assessment assessment;
+
+  @PrePersist
+  public void prePersist() {
+    this.sessions.forEach(s -> s.setSyllabus(this));
+    // this.status = SyllabusStatus.DRAFT;
+    // this.assessment.setId(null);
+    // this.duration = this.getSessions().size();
+    // this.sessions.forEach(s -> {
+    //     s.setId(null);
+    //     s.setSyllabus(this);
+    //     s
+    //       .getUnits()
+    //       .forEach(u -> {
+    //         u.setId(null);
+    //         u.setSession(s);
+    //         u.setTotalDurationLesson(u.getLessons().stream().mapToDouble(Lesson::getDuration).sum() / 60);
+    //         u
+    //           .getLessons()
+    //           .forEach(l -> {
+    //             l.setId(null);
+    //             l.setUnit(u);
+    //             l
+    //               .getMaterials()
+    //               .forEach(m -> {
+    //                 m.setId(null);
+    //                 m.setLesson(l);
+    //               });
+    //           });
+    //       });
+    //   });
+  }
 }

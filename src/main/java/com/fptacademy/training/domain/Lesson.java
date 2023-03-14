@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,10 +36,6 @@ public class Lesson implements Serializable {
   @Column(length = 100)
   private String name;
 
-  @Column(length = 45)
-  @JsonIgnore
-  private String status;
-
   private Integer duration;
 
   @ManyToOne
@@ -60,4 +57,9 @@ public class Lesson implements Serializable {
 
   @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
   private List<Material> materials;
+
+  @PrePersist
+  public void prePersist() {
+    this.materials.forEach(m -> m.setLesson(this));
+  }
 }
