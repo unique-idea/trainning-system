@@ -25,6 +25,7 @@ public class ResourceExceptionHandler implements ProblemHandling {
                 .build();
         return create(problem, request);
     }
+
     @ExceptionHandler
     public ResponseEntity<Problem> handleAccessDeniedException(AccessDeniedException e, NativeWebRequest request) {
         ThrowableProblem problem = Problem.builder()
@@ -46,6 +47,7 @@ public class ResourceExceptionHandler implements ProblemHandling {
                 .build();
         return create(problem, request);
     }
+
     @ExceptionHandler
     public ResponseEntity<Problem> handleResourceAlreadyExistsException(ResourceAlreadyExistsException e, NativeWebRequest request) {
         ThrowableProblem problem = Problem.builder()

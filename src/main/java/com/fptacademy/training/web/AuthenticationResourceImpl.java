@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 public class AuthenticationResourceImpl implements AuthenticationResource {
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+
     @Override
     public void login(LoginVM loginVM, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

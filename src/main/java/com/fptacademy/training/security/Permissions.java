@@ -26,5 +26,7 @@ public final class Permissions {
     public static final String USER_MODIFY = "User_Modify";
     public static final String USER_CREATE = "User_Create";
     public static final String USER_FULL_ACCESS = "User_FullAccess";
-    private Permissions() {}
+
+    private Permissions() {
+    }
 }
