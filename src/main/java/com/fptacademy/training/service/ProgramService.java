@@ -249,7 +249,7 @@ public class ProgramService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
         program.setActivated(true);
-        programRepository.save(program);
+        programRepository.saveAndFlush(program);
         return programMapper.toDto(program);
     }
 
@@ -278,13 +278,14 @@ public class ProgramService {
     public ProgramDto updateProgram(ProgramVM programVM, Long id) {
         Program p = programRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
         p.setName(programVM.name());
-        List<Syllabus> syllabuses = programVM.syllabusIds()
+        List<Syllabus> syllabuses = new ArrayList<>(programVM.syllabusIds()
                 .stream()
                 .map(syllabusId -> syllabusRepository
                         .findById(syllabusId)
                         .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
-                .toList();
+                .toList());
         p.setSyllabuses(syllabuses);
+        programRepository.saveAndFlush(p);
         return programMapper.toDto(p);
     }
 
