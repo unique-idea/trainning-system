@@ -20,6 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSpecificationExecutor<Syllabus> {
 
     Optional<Syllabus> findByCode(String code);
+
   static Specification<Syllabus> searchByKeywordsOrBycreateDates(String[] keywords, Instant[] createDate, Authentication authentication) {
     return (root, query, builder) -> {
       query.distinct(true);
@@ -72,31 +73,22 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSp
             }
           : predicates;
 
-      switch (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).filter(r -> r.contains("Syllabus_")).findFirst().get()) {
-        case Permissions.SYLLABUS_MODIFY:
-          predicatesStatus =
-            builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.DRAFT, SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
-          break;
-        case Permissions.SYLLABUS_CREATE:
-          predicatesStatus =
-            builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.DRAFT, SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
-          break;
-        case Permissions.SYLLABUS_VIEW:
-          predicatesStatus = builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.ACTIVATED));
-          break;
-        case Permissions.SYLLABUS_FULL_ACCESS:
-          predicatesStatus =
-            builder
-              .in(root.get("status"))
-              .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED, SyllabusStatus.DRAFT, SyllabusStatus.REJECTED));
-          break;
-        default:
-          predicatesStatus =
-            builder
-              .in(root.get("status"))
-              .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED, SyllabusStatus.DRAFT, SyllabusStatus.REJECTED));
-          break;
-      }
+      predicatesStatus =
+        switch (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).filter(r -> r.contains("Syllabus_")).findFirst().get()) {
+          case Permissions.SYLLABUS_MODIFY -> builder
+            .in(root.get("status"))
+            .value(Arrays.asList(SyllabusStatus.DRAFT, SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
+          case Permissions.SYLLABUS_CREATE -> builder
+            .in(root.get("status"))
+            .value(Arrays.asList(SyllabusStatus.DRAFT, SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
+          case Permissions.SYLLABUS_VIEW -> builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.ACTIVATED));
+          case Permissions.SYLLABUS_FULL_ACCESS -> builder
+            .in(root.get("status"))
+            .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED, SyllabusStatus.DRAFT, SyllabusStatus.REJECTED));
+          default -> builder
+            .in(root.get("status"))
+            .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED, SyllabusStatus.DRAFT, SyllabusStatus.REJECTED));
+        };
 
       return predicates != null ? builder.and(builder.or(predicates), predicatesStatus) : predicatesStatus;
     };
