@@ -28,4 +28,6 @@ public class UserDto {
     private String avatarUrl;
 
     private String code;
+
+    private String status;
 }

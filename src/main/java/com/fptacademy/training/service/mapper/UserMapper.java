@@ -2,6 +2,7 @@ package com.fptacademy.training.service.mapper;
 
 
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.UserStatus;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.RoleService;
 import com.fptacademy.training.service.dto.UserDto;
@@ -40,6 +41,7 @@ public class UserMapper {
             user.setAvatarUrl(userVM.avatarUrl());
             user.setPassword(userVM.password());
             user.setCode(userVM.code());
+            user.setStatus(UserStatus.valueOf(userVM.status()));
         }
         user.setLevel(levelService.getLevelByName(userVM.level()));
         user.setRole(roleService.getRoleByName(userVM.role()));
