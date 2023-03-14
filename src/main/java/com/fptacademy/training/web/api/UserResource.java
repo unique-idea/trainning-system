@@ -72,4 +72,17 @@ public interface UserResource {
     @PostMapping("/users/import")
     ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
 
+    @Operation(
+            summary = "Delete user",
+            description = "Delete user by id",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Delete successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
 }

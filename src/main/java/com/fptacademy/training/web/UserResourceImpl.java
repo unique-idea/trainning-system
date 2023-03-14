@@ -1,6 +1,5 @@
 package com.fptacademy.training.web;
 
-import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.api.UserResource;
@@ -8,7 +7,6 @@ import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +25,14 @@ public class UserResourceImpl implements UserResource {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(userService.createUser(userVM));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> deleteUser(Long id) {
+        UserDto deletedUser = userService.deleteUser(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(deletedUser);
     }
 
     @Override

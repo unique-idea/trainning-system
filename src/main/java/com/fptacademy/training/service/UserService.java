@@ -60,6 +60,17 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"))));
     }
 
+    public UserDto deleteUser(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            userRepository.delete(user);
+            return userMapper.toDto(user);
+        } else {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getCurrentUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
