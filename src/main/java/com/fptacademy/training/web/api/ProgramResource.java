@@ -61,11 +61,11 @@ public interface ProgramResource {
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully"),
+            @ApiResponse(responseCode = "200", description = "Successfully", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
-    @GetMapping(value = "/programs/import/template")
+    @GetMapping(value = "/programs/import/template", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     ResponseEntity<Resource> downloadExcelTemplate();
 
     @Operation(

@@ -6,10 +6,13 @@ import com.fptacademy.training.web.api.ProgramResource;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +23,8 @@ import java.util.List;
 @RestController
 public class ProgramResourceImpl implements ProgramResource {
     private final ProgramService programService;
+    private final ResourceLoader resourceLoader;
+
     @Override
     public ResponseEntity<ProgramDto> createProgram(ProgramVM programVM) {
         return ResponseEntity
@@ -45,7 +50,13 @@ public class ProgramResourceImpl implements ProgramResource {
 
     @Override
     public ResponseEntity<Resource> downloadExcelTemplate() {
-        return null;
+        Resource resource = resourceLoader.getResource("classpath:templates/Program-Template.xlsx");
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Program-Template.xlsx");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
     @Override
