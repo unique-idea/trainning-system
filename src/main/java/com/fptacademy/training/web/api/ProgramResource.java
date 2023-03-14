@@ -50,7 +50,6 @@ public interface ProgramResource {
     @PostMapping(value = "/programs/{id}/activate",produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramDto> activateProgram(@PathVariable Long id);
 
-
     @Operation(
             summary = "Get list of training programs",
             description = "Get list of training programs with sort and pagination",
@@ -70,6 +69,7 @@ public interface ProgramResource {
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size);
+
     @Operation(
             summary = "Get list of syllabuses by name",
             description = "Get list of syllabuses by name",
@@ -81,10 +81,9 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Program id not found", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/syllabuses", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/syllabuses/search", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<SyllabusDto.SyllabusListDto>>getSyllabusesByName(@RequestParam String name);
 
     @Operation(
