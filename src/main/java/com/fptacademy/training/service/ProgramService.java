@@ -239,26 +239,11 @@ public class ProgramService {
     }
 
     public ProgramDto activateProgram(Long id) {
-        Program program = null;
-        //check if program has existed with this id
-        if (programRepository.existsById(id)) {
-            Optional<Program> programOptional = programRepository.findById(id);
-            if (programOptional.isPresent()) {
-                program = programOptional.get();
-            }
-        } else {
-            throw new ResourceNotFoundException("The program is not existed with the " + id);
-        }
-        // Convert program entitie to program DTOs
-        ProgramDto programDto = programMapper.toDto(program);
-
-        //Activate the program
-        programDto.setActivated(true);
+        Program program = programRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
         program.setActivated(true);
-
-        //Save or Update the program: "activated"
         programRepository.save(program);
-
-        return programDto;
+        return programMapper.toDto(program);
     }
 }

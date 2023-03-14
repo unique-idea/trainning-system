@@ -36,7 +36,7 @@ public class ProgramMapper {
         dto.setLastModifiedBy(new ProgramDto.Creator(
                 program.getLastModifiedBy().getId(),
                 program.getLastModifiedBy().getFullName(),
-                program.getCreatedBy().getCode()));
+                program.getLastModifiedBy().getCode()));
         dto.setDurationInDays(days);
         dto.setDurationInHours(hours);
         return dto;
