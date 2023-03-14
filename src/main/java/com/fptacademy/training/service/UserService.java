@@ -1,5 +1,6 @@
 package com.fptacademy.training.service;
 
+import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
