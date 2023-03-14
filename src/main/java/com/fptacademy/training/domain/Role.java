@@ -17,8 +17,7 @@ import java.util.List;
 @Entity
 public class Role implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(max = 50)
     @Column(length = 50, nullable = false, unique = true)

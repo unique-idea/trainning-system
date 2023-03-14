@@ -14,8 +14,7 @@ import java.io.Serializable;
 @Entity
 public class Assessment implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(precision = 3, scale = 2)
     private Float quiz;

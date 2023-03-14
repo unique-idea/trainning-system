@@ -20,7 +20,6 @@ public class ProgramDto implements Serializable {
     private Integer durationInDays;
     private Integer durationInHours;
     private Boolean activated;
-
     @Getter
     @AllArgsConstructor
     public static class Creator {

@@ -15,8 +15,7 @@ import java.io.Serializable;
 @Entity
 public class Attendee implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(max = 50)
     @Column(length = 50, unique = true, nullable = false)

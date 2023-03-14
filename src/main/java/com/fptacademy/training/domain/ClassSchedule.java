@@ -15,8 +15,7 @@ import java.time.LocalDate;
 @Entity
 public class ClassSchedule implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "class_detail_id")
