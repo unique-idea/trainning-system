@@ -74,4 +74,7 @@ public class User implements Serializable {
                 ", avatarUrl='" + avatarUrl + '\'' +
                 '}';
     }
+    
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 }
