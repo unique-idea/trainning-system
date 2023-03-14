@@ -70,14 +70,13 @@ public class UserService {
         return userDto;
     }
 
-    public UserDto changeRole (long id, long typeRole) {
+    public void changeRole (long id, long typeRole) {
         Role role = roleService.getRoleByID(typeRole);
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()) {
             throw new ResourceNotFoundException("User does not exist");
         }
         user.get().setRole(role);
-        return userMapper.toDto(user.get());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
