@@ -86,9 +86,9 @@ public interface ProgramResource {
              @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
              @ApiResponse(responseCode = "404", description = "Program id not found", content = @Content),
      })
-     @GetMapping(value = "/programs/", produces = MediaType.APPLICATION_JSON_VALUE)
+     @GetMapping(value = "/programs/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
      ResponseEntity<ProgramDto> getProgramById(
-             @RequestParam Long id
+             @PathVariable Long id
      );
 
     /// tai nguyen test

@@ -1,5 +1,6 @@
 package com.fptacademy.training.service.mapper;
 
+import com.fptacademy.training.domain.Lesson;
 import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,14 @@ public class SyllabusMapper {
             return null;
         }
         SyllabusDto.SyllabusListDto dto =modelMapper.map(syllabus, SyllabusDto.SyllabusListDto.class);
+        int durationInDays = syllabus.getSessions().size();
+        int durationInHours = (int)syllabus.getSessions().stream()
+                .flatMap(s -> s.getUnits().stream())
+                .flatMap(u -> u.getLessons().stream())
+                .mapToLong(Lesson::getDuration)
+                .sum();
+        dto.setDuration(durationInDays);
+        dto.setDurationInHours(durationInHours);
         return dto;
     }
 
