@@ -1,5 +1,7 @@
 package com.fptacademy.training.service;
 
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.domain.Program;
 import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
@@ -33,6 +35,7 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final SyllabusRepository syllabusRepository;
     private final ProgramMapper programMapper;
+    private final ClassRepository classRepository;
 
     private final SyllabusMapper syllabusMapper;
 
@@ -246,4 +249,29 @@ public class ProgramService {
         programRepository.save(program);
         return programMapper.toDto(program);
     }
+
+    public boolean checkClass(Long id) {
+        if(classRepository.existsByProgram_id(id))
+            return true;
+        return false;
+    }
+
+    public Program deactivateProgram(Long id) {
+        Program program = null;
+        if (programRepository.existsById(id)) {
+            Optional<Program> programOptional = programRepository.findById(id);
+            if (programOptional.isPresent())
+                program = programOptional.get();
+        } else {
+            throw new ResourceNotFoundException("The program is not existed with the " + id);
+        }
+        if(checkClass(id))
+            throw new ResourceAlreadyExistsException("The program have id is" + id + " have class training!!");
+        ProgramDto programDto = programMapper.toDto(program);
+        programDto.setActivated(false);
+        program.setActivated(false);
+        programRepository.save(program);
+        return program;
+    }
+
 }

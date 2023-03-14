@@ -4,6 +4,7 @@ import com.fptacademy.training.service.ProgramService;
 import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
+import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.api.ProgramResource;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class ProgramResourceImpl implements ProgramResource {
     private final SyllabusService syllabusService;
     private final ResourceLoader resourceLoader;
 
+    private final ProgramMapper programMapper;
     @Override
     public ResponseEntity<ProgramDto> createProgram(ProgramVM programVM) {
         return ResponseEntity
@@ -105,4 +107,13 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.CREATED)
                 .body(programService.importProgramFromExcel(file, properties, handler));
     }
+
+    @Override
+    public ResponseEntity<ProgramDto> deactivateProgram(Long id) {
+        ProgramDto programDto = programMapper.toDto(programService.deactivateProgram(id));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(programDto);
+    }
+
 }
