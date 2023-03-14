@@ -20,7 +20,6 @@ public class FormatType implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Size(max = 20)
-  @Column(length = 20, nullable = false, unique = true)
+  @Column(length = 20)
   private String name;
 }
