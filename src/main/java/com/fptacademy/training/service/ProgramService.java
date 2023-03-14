@@ -114,4 +114,18 @@ public class ProgramService {
 
         return programDtos;
     }
+    public ProgramDto updateProgram(ProgramVM programVM, Long id) {
+        Program p = programRepository.findProgramById(id).orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
+        p.setName(programVM.name());
+        List<Syllabus> syllabuses = new ArrayList<>(programVM.syllabusIds()
+                .stream()
+                .map(syllabusId -> syllabusRepository
+                        .findById(syllabusId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
+                .toList());
+        p.setSyllabuses(syllabuses);
+        programRepository.save(p);
+        return programMapper.toDto(p);
+    }
+
 }

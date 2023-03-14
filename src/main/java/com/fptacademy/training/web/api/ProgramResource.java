@@ -1,5 +1,6 @@
 package com.fptacademy.training.web.api;
 
+import com.fptacademy.training.domain.Program;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RequestMapping("/api")
@@ -51,4 +53,19 @@ public interface ProgramResource {
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size);
+
+    @Operation(
+            summary = "Update specific training programs",
+            description = "Update some attributes of a specific training program: name, syllabuses, syllabuses index ",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found training programs"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @PatchMapping(value = "/programs/{id}" ,consumes = "application/merge-patch+json")
+    ResponseEntity<ProgramDto> updateProgram(@NotNull @RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
 }

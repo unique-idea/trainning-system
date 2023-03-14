@@ -40,4 +40,10 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());
     }
+
+    @Override
+    public ResponseEntity<ProgramDto> updateProgram(ProgramVM programVM, Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(programService.updateProgram(programVM, id));
+    }
+
 }
