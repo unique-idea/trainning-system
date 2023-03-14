@@ -15,7 +15,8 @@ import java.util.List;
 @Entity
 public class ClassDetail implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name = "class_id", nullable = false)
@@ -37,7 +38,7 @@ public class ClassDetail implements Serializable {
     private String others;
     @OneToMany(mappedBy = "classDetail")
     private List<ClassSchedule> schedules;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)            /*Add fetch eager here*/
     @JoinTable(
             name = "user_class_detail",
             joinColumns = {@JoinColumn(name = "class_detail_id")},

@@ -1,5 +1,11 @@
 package com.fptacademy.training.repository;
 
+import com.fptacademy.training.domain.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -10,16 +16,33 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.fptacademy.training.domain.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
+    
+    boolean findUserByCodeIgnoreCase(String code);
 
     Optional<User> findByEmail(String email);
-
+    
     List<User> findByFullNameContaining(String keyword);
+    
+    /*Team 3*/
+    @Query(value = "SELECT * FROM users u" +
+            " INNER JOIN user_class_detail ucd " +
+            " ON u.id = ucd.user_id " +
+            " AND ucd.class_detail_id = ?1 " +
+            " AND u.role_id = 2 ", nativeQuery = true)
+    List<User> findAdminsOfClass(Long classDetailId);
 
+   /* @Query(value = "SELECT * FROM users u" +
+            " INNER JOIN user_class_detail ucd " +
+            " ON u.id = ucd.user_id " +
+            " AND ucd.class_detail_id = ?1 " +
+            " AND u.role_id = 4", nativeQuery = true)
+    List<User> findStudentsOfClass(Long classDetailId);*/
+    /*Team 3*/
+    
     @Query("SELECT u FROM User u " +
             "WHERE (:emailParam IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :emailParam, '%'))) " +
             "AND (:fullNameParam IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :fullNameParam, '%'))) " +

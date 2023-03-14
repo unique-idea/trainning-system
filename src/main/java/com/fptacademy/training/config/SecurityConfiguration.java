@@ -1,5 +1,6 @@
 package com.fptacademy.training.config;
 
+import com.fptacademy.training.domain.enumeration.RoleName;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -42,17 +43,29 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(CustomCorsConfiguration::new)
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf()
+                .disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
-                .mvcMatchers(AUTH_WHITELIST).permitAll()
-                .mvcMatchers(HttpMethod.DELETE, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers(HttpMethod.PATCH, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers(HttpMethod.POST, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers("/api/programs/**").hasAnyAuthority(Permissions.PROGRAM_VIEW, Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .anyRequest().authenticated()
-                .and().build();
+                .antMatchers("/api/users/**").hasRole(RoleName.SUPER_ADMIN.toString())
+                .mvcMatchers(AUTH_WHITELIST)
+                .permitAll()
+                .mvcMatchers(HttpMethod.DELETE, "/api/programs")
+                .hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.PATCH, "/api/programs")
+                .hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.POST, "/api/programs")
+                .hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers("/api/programs/**")
+                .hasAnyAuthority(Permissions.PROGRAM_VIEW, Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .anyRequest()
+                .authenticated()
+                .and()
+                .build();
     }
+
+
 }

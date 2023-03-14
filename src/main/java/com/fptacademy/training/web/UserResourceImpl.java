@@ -1,13 +1,11 @@
 package com.fptacademy.training.web;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.UserDto;
@@ -15,6 +13,7 @@ import com.fptacademy.training.web.api.UserResource;
 import com.fptacademy.training.web.vm.UserVM;
 
 import lombok.RequiredArgsConstructor;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -30,18 +29,10 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<UserDto> deleteUser(Long id) {
-        UserDto deletedUser = userService.deleteUser(id);
+    public ResponseEntity<List<UserDto>> getUsers() {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(deletedUser);
-    }
-
-    @Override
-    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.getUsers(pageNumber, pageSize));
+                .body(userService.getUsers());
     }
 
     @Override
@@ -59,25 +50,5 @@ public class UserResourceImpl implements UserResource {
                 .status(HttpStatus.OK)
                 .body(userService.getUsersByFilters(email, fullName, code, levelName,
                         roleName, false, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
-    }
-
-    public ResponseEntity<?> uploadUserData(MultipartFile file) {
-        this.userService.saveUsersToDB(file);
-        return ResponseEntity
-                .ok(Map.of("Message", "Users data uploaded and saved database successfully"));
-    }
-
-    @Override
-    public ResponseEntity<List<UserDto>> getUserByName(String name) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.findUserByName(name));
-    }
-
-    @Override
-    public ResponseEntity<?> changeRole(long id, String typeRole) {
-        this.userService.changeRole(id, typeRole);
-        return ResponseEntity
-                .ok(Map.of("Message", "User's role change successfully"));
     }
 }
