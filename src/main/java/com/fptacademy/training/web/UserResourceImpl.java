@@ -50,5 +50,19 @@ public class UserResourceImpl implements UserResource {
                 .ok(Map.of("Message", "Users data uploaded and saved database successfully"));
     }
 
+    @Override
+    public ResponseEntity<List<UserDto>> getUserByName(String name) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.findUserByName(name));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> changeRole(long id, long typeRole) {
+        UserDto userDto = userService.changeRole(id, typeRole);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userDto);
+    }
 
 }

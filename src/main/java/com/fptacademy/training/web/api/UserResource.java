@@ -72,7 +72,37 @@ public interface UserResource {
     @PostMapping("/users/import")
     ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
 
+    @Operation (
+            summary = "Get user by name",
+            description = "Get user by name",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found users"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/users/name/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<List<UserDto>> getUserByName(@PathVariable String name);
 
+    @Operation (
+            summary = "Change role",
+            description = "Change role",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Update successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> changeRole (@PathVariable long id, long typeRole) ;
 
 
 }
