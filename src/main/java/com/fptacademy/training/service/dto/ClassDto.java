@@ -34,6 +34,7 @@ public class ClassDto implements Serializable{
     }
 
     @Getter
+    @Setter
     @AllArgsConstructor
     public static class AttendeeSimplified {
         private Long id;
@@ -41,6 +42,7 @@ public class ClassDto implements Serializable{
     }
 
     @Getter
+    @Setter
     @AllArgsConstructor
     public static class LocationSimplified {
         private Long id;
