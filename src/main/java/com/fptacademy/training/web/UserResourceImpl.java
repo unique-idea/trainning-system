@@ -58,11 +58,10 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<UserDto> changeRole(long id, long typeRole) {
-        UserDto userDto = userService.changeRole(id, typeRole);
+    public ResponseEntity<?> changeRole(long id, long typeRole) {
+        this.userService.changeRole(id, typeRole);
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userDto);
+                .ok(Map.of("Message", "User role change successfully"));
     }
 
 }

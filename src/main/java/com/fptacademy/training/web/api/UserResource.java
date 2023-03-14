@@ -95,14 +95,14 @@ public interface UserResource {
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Update successfully"),
+            @ApiResponse(responseCode = "200", description = "Change successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UserDto> changeRole (@PathVariable long id, long typeRole) ;
+    ResponseEntity<?> changeRole (@PathVariable long id, long typeRole) ;
 
 
 }
