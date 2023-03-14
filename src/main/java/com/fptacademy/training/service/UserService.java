@@ -1,13 +1,17 @@
 package com.fptacademy.training.service;
 
+import com.fptacademy.training.domain.Level;
+import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
+import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,7 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -65,6 +70,17 @@ public class UserService {
         return userRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
+    }
+
+    public List<UserDto> getUsersByFilters(String email, String fullName, String code, String levelName, String roleName, Boolean activated, String birthday) {
+        LocalDate localBirthday = null;
+        try {
+            localBirthday = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e) {
+            throw new ResourceBadRequestException(birthday + ": Date format is wrong. Please use yyyy-MM-dd format");
+        }
+
+        return userMapper.toDtos(userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, localBirthday));
     }
 
     public Collection<? extends GrantedAuthority> getUserPermissionsByEmail(String email) {
