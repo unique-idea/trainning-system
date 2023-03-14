@@ -81,11 +81,14 @@ public class UserService {
         return userDto;
     }
 
-    public void changeRole (long id, long typeRole) {
-        Role role = roleService.getRoleByID(typeRole);
+    public void changeRole (long id, String typeRole) {
+        Role role = roleService.getRoleByName(typeRole);
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()) {
             throw new ResourceNotFoundException("User does not exist");
+        }
+        else if (user.get().getRole().getId() == 1) {
+            throw new ResourceNotFoundException("This user can't change role");
         }
         user.get().setRole(role);
     }
