@@ -2,6 +2,7 @@ package com.fptacademy.training.web;
 
 import com.fptacademy.training.service.ProgramService;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.api.ProgramResource;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 public class ProgramResourceImpl implements ProgramResource {
     private final ProgramService programService;
+    private final ProgramMapper programMapper;
     @Override
     public ResponseEntity<ProgramDto> createProgram(ProgramVM programVM) {
         return ResponseEntity
@@ -40,4 +42,13 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.OK)
                 .body(pageResult.getContent());
     }
+
+    @Override
+    public ResponseEntity<ProgramDto> deactivateProgram(Long id) {
+        ProgramDto programDto = programMapper.toDto(programService.deactivateProgram(id));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(programDto);
+    }
+
 }
