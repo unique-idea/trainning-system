@@ -36,9 +36,7 @@ public class ProgramService {
     private final SyllabusRepository syllabusRepository;
     private final ProgramMapper programMapper;
     private final ClassRepository classRepository;
-
     private final SyllabusMapper syllabusMapper;
-    private final ClassRepository classRepository;
 
     public ProgramDto createProgram(ProgramVM programVM) {
         // Check if program name already existed or not
@@ -291,10 +289,13 @@ public class ProgramService {
     }
 
     public void deleteProgram(Long id) {
-        var classOP = classRepository.findByProgram_Id(id);
-        if (classOP.isPresent()) throw new ResourceBadRequestException("Can not delete program!");
+        if (classRepository.findByProgram_Id(id).size() != 0) {
+            throw new ResourceBadRequestException("Can not delete program!");
+        }
         var program = programRepository.findById(id);
-        if (program.isEmpty()) throw new ResourceNotFoundException("Can not find program");
+        if (program.isEmpty()) {
+            throw new ResourceNotFoundException("Can not find program");
+        }
         programRepository.deleteById(id);
     }
 }

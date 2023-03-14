@@ -197,10 +197,10 @@ public interface ProgramResource {
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found training programs"),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Deleted training program successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Program not found", content = @Content),
     })
     @DeleteMapping("/programs/{id}")
     @ResponseStatus(HttpStatus.OK)
