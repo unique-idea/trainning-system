@@ -15,7 +15,7 @@ public interface AuthenticationResource {
             description = "Login entry",
             tags = "authentication"
     )
-    @ApiResponses(value = {
+    @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Authenticated successfully"),
             @ApiResponse(responseCode = "401", description = "Incorrect email or password")
     }
@@ -27,7 +27,7 @@ public interface AuthenticationResource {
             description = "Get new access token from refresh token",
             tags = "authentication"
     )
-    @ApiResponses(value = {
+    @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Successfully"),
             @ApiResponse(responseCode = "401", description = "Missing or invalid refresh token")
     }

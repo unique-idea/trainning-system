@@ -12,7 +12,6 @@ import java.util.Optional;
 @Component
 public class AuditAwareImpl implements AuditorAware<User> {
     private final UserService userService;
-
     @Override
     public Optional<User> getCurrentAuditor() {
         return Optional.ofNullable(userService.getCurrentUserLogin());

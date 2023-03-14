@@ -16,8 +16,7 @@ import java.util.List;
 @Entity
 public class Program extends AbstractAuditEntity implements Serializable {
     private static final Long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(max = 50)
     @Column(length = 50, nullable = false, unique = true)
@@ -26,8 +25,8 @@ public class Program extends AbstractAuditEntity implements Serializable {
     @ManyToMany
     @JoinTable(
             name = "program_syllabus",
-            joinColumns = {@JoinColumn(name = "program_id")},
-            inverseJoinColumns = {@JoinColumn(name = "syllabus_id")}
+            joinColumns = { @JoinColumn(name = "program_id") },
+            inverseJoinColumns = { @JoinColumn(name = "syllabus_id") }
     )
     @OrderColumn(name = "syllabus_index")
     private List<Syllabus> syllabuses;

@@ -41,33 +41,7 @@ public class LevelService {
     return levelRepository.findById(id);
   }
 
-<<<<<<< HEAD
   public void delete(Long id) {
     levelRepository.deleteById(id);
   }
-=======
-        return findOne(level.getId()).map(ops -> {
-                    modelMapper.map(level, ops);
-                    return ops;
-                })
-                .map(levelRepository::save);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Level> findOne(Long id) {
-        return levelRepository.findById(id);
-    }
-
-    public List<Level> getAllLevel() {
-        return levelRepository.findAll();
-    }
-
-    public List<Level> getLevelByName(String name) {
-        return levelRepository.findByNameContains(name);
-    }
-
-    public void delete(Long id) {
-        levelRepository.deleteById(id);
-    }
->>>>>>> parent of c7e9f5f (11.29 13.03.2023)
 }

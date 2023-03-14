@@ -19,8 +19,7 @@ import java.time.LocalDate;
 public class User implements Serializable {
     private static final Long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(max = 20)
     @Column(length = 20, unique = true, nullable = false)
