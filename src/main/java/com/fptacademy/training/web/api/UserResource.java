@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,13 +78,27 @@ public interface UserResource {
     @GetMapping(value = "/users/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Optional<UserDto>> getUserByEmail(@PathVariable String email);
 
-
     @PostMapping("/users/import")
     ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
 
     @Operation(
             summary = "Delete user",
             description = "Delete user by id",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Delete successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+        @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
+
+
+    @Operation(
+            summary = "Get users by filters",
+            description = "Get users by filters",
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
