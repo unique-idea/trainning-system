@@ -23,6 +23,7 @@ public class ClassResourceImpl implements ClassResource {
     private final ClassDetailRepository detailRepository ;
 
 
+
     @Override
     public Optional<ClassDto> getClassById(@PathVariable Long class_id){
         Optional<Class> classes = repository.findById(class_id);
@@ -36,11 +37,15 @@ public class ClassResourceImpl implements ClassResource {
     }
 
     @Override
-    public void delClass(@PathVariable Long id){
+    public void delClass(Long id) {
         Optional<Class> classes = repository.findById(id);
         detailRepository.updateStatusById("Inactive",classes.get().getClassDetail().getId());
-
-
     }
+
+    @Override
+    public Class createClass(Class classes) {
+        return null;
+    }
+
 
 }

@@ -3,7 +3,7 @@ package com.fptacademy.training.service.mapper;
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.domain.ClassSchedule;
-import com.fptacademy.training.repository.SyllabusRepository;
+import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -25,10 +25,15 @@ public class ClassDetailMapper {
         }
 
         ClassDetailDto dto = modelMapper.map(details, ClassDetailDto.class);
+        dto.setStart_at(details.getStartAt());
+        dto.setFinish_at(details.getFinishAt());
+
         Class classes = details.getClassField();
+        User createdBy = classes.getCreatedBy();
 
         dto.setClass_id(new ClassDetailDto.ClassSimplified(classes.getId(),
-                classes.getName(), classes.getCode(), classes.getDuration()));
+                classes.getName(), classes.getCode(), classes.getDuration(),
+                new ClassDetailDto.UserSimplified(createdBy.getId(), createdBy.getFullName(), createdBy.getEmail())));
 
         dto.setAttendee(details.getAttendee() == null? null:
                 new ClassDetailDto.AttendeeSimplified(details.getAttendee().getId(),
@@ -40,16 +45,49 @@ public class ClassDetailMapper {
                         details.getLocation().getFsu()));
 
         if(details.getSchedules() != null){
+
             List<ClassSchedule> schedules = details.getSchedules();
-            List<ClassDetailDto.Trainer> trainers = new ArrayList<>();
+            List<ClassDetailDto.ScheduleSimplified> simpleSchedules = new ArrayList<>();
+
             for(ClassSchedule schedule: schedules){
-                ClassDetailDto.Trainer trainer = new ClassDetailDto.Trainer(schedule.getTrainer().getId(),
-                        schedule.getTrainer().getFullName());
-                trainers.add(trainer);
+
+                User trainer = schedule.getTrainer();
+
+                ClassDetailDto.UserSimplified userSimplified = new ClassDetailDto.UserSimplified(
+                        trainer.getId(), trainer.getFullName(), trainer.getEmail());
+
+                ClassDetailDto.ScheduleSimplified simpleSchdedule = new ClassDetailDto.ScheduleSimplified(schedule.getStudyDate(),
+                        userSimplified);
+                simpleSchedules.add(simpleSchdedule);
             }
-            dto.setTrainer(trainers);
+            dto.setSchedules(simpleSchedules);
+        }else{
+            dto.setSchedules(null);
+        }
+
+        if(details.getUsers() != null){
+
+            List<ClassDetailDto.UserSimplified> Trainers = new ArrayList<>();
+            List<ClassDetailDto.UserSimplified> Admins = new ArrayList<>();
+
+            for(User user: details.getUsers()){
+
+                if(user.getRole().getName().equals("Super Admin") || user.getRole().getName().equals("Class Admin")){
+                    Admins.add(new ClassDetailDto.UserSimplified(user.getId(), user.getFullName(), user.getEmail()));
+                }
+
+                else if (user.getRole().getName().equals("Trainer")) {
+                    Trainers.add(new ClassDetailDto.UserSimplified(user.getId(), user.getFullName(), user.getEmail()));
+                }
+
+            }
+
+            dto.setTrainer(Trainers);
+            dto.setAdmin(Admins);
+
         }else{
             dto.setTrainer(null);
+            dto.setAdmin(null);
         }
 
         return dto;

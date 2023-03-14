@@ -2,10 +2,8 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.service.dto.ClassDto;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,5 +21,9 @@ public interface ClassResource {
 
     @GetMapping("/delete/{id}")
     public void delClass(@PathVariable Long id);
+
+    @PostMapping("/create")
+    public Class createClass(@RequestBody Class classes);
+
 
 }
