@@ -16,7 +16,6 @@ import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.service.mapper.SyllabusMapper;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PostFilter;
@@ -161,6 +160,10 @@ public class ProgramService {
     private Program replaceProgram(Program from, Program to) {
         to.setName(from.getName());
         to.setSyllabuses(from.getSyllabuses());
+        if (!isDeactivatable(to.getId())) {
+            throw new ResourceBadRequestException("Cannot deactivate training program with ID '" + to.getId() +
+                    "' because there are on-going classes depend on this program");
+        }
         to.setActivated(from.getActivated());
         return to;
     }
@@ -250,27 +253,25 @@ public class ProgramService {
         return programMapper.toDto(program);
     }
 
-    public boolean checkClass(Long id) {
-        if(classRepository.existsByProgram_id(id))
+    public boolean isDeactivatable(Long id) {
+        List<Class> classes = classRepository.findByProgram_Id(id);
+        if (classes.size() == 0) {
             return true;
-        return false;
+        }
+        for (Class c : classes) {
+            if (!c.getClassDetail().getStatus().equals("CLOSED")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Program deactivateProgram(Long id) {
-        Program program = null;
-        if (programRepository.existsById(id)) {
-            Optional<Program> programOptional = programRepository.findById(id);
-            if (programOptional.isPresent())
-                program = programOptional.get();
-        } else {
-            throw new ResourceNotFoundException("The program is not existed with the " + id);
-        }
-        if(checkClass(id))
-            throw new ResourceAlreadyExistsException("The program have id is" + id + " have class training!!");
-        ProgramDto programDto = programMapper.toDto(program);
-        programDto.setActivated(false);
+        Program program = programRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
+        if(!isDeactivatable(id))
+            throw new ResourceBadRequestException("Cannot deactivate this training program because there are on-going classes depend on this program");
         program.setActivated(false);
-        programRepository.save(program);
         return program;
     }
 
