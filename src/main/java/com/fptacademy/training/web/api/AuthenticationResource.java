@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 
 @RequestMapping("/api/auth")
-public interface AuthenticationResource {
+public interface
+AuthenticationResource {
     @Operation(summary = "Login entry",
             description = "Login entry",
             tags = "authentication"

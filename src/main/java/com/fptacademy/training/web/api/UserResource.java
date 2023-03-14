@@ -105,6 +105,7 @@ public interface UserResource {
     ResponseEntity<?> changeRole (@PathVariable long id, long typeRole) ;
 
 
+
     @Operation(
             summary = "Delete user",
             description = "Delete user by id",
@@ -112,7 +113,7 @@ public interface UserResource {
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Delete successfully"),
+            @ApiResponse(responseCode = "200", description = "Delete successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
