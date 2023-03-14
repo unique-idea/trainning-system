@@ -34,6 +34,16 @@ public class ProgramResourceImpl implements ProgramResource {
                 .body(programService.createProgram(programVM));
     }
 
+    //Activate the Program by id
+    @Override
+    public ResponseEntity<ProgramDto> activateProgram(Long id) {
+        ProgramDto programDto=programService.activateProgram(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(programDto);
+    }
+
     @Override
     public ResponseEntity<List<ProgramDto>> getPrograms(List<String> keywords, String sort, int page, int size) {
         List<ProgramDto> programDtos = programService.getPrograms(keywords, sort);
