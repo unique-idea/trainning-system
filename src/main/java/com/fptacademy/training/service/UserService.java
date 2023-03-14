@@ -109,17 +109,6 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
     }
 
-    public List<UserDto> getUsersByFilters(String email, String fullName, String code, String levelName, String roleName, Boolean activated, String birthday) {
-        LocalDate localBirthday = null;
-        try {
-            localBirthday = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        } catch (Exception e) {
-            throw new ResourceBadRequestException(birthday + ": Date format is wrong. Please use yyyy-MM-dd format");
-        }
-
-        return userMapper.toDtos(userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, localBirthday));
-    }
-
     public Collection<? extends GrantedAuthority> getUserPermissionsByEmail(String email) {
         return getUserByEmail(email)
                 .getRole()
@@ -136,5 +125,16 @@ public class UserService {
                 throw new IllegalArgumentException("The file is not a valid excel file");
             }
         }
+    }
+
+    public List<UserDto> getUsersByFilters(String email, String fullName, String code, String levelName, String roleName, Boolean activated, String birthday) {
+        LocalDate localBirthday = null;
+        try {
+            localBirthday = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e) {
+            throw new ResourceBadRequestException(birthday + ": Date format is wrong. Please use yyyy-MM-dd format");
+        }
+
+        return userMapper.toDtos(userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, localBirthday));
     }
 }
