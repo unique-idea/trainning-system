@@ -9,7 +9,9 @@ import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
+import com.fptacademy.training.service.mapper.SyllabusMapper;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +34,13 @@ public class ProgramService {
     private final SyllabusRepository syllabusRepository;
     private final ProgramMapper programMapper;
 
+    private final SyllabusMapper syllabusMapper;
+
     public ProgramDto createProgram(ProgramVM programVM) {
+        // Check if program name already existed or not
+        if (programRepository.existsByName(programVM.name())) {
+            throw new ResourceAlreadyExistsException("Training program with name '" + programVM.name() + "' already existed");
+        }
         // Create new program
         Program program = new Program();
         program.setName(programVM.name());
@@ -116,6 +124,35 @@ public class ProgramService {
 
         return programDtos;
     }
+
+    public List<SyllabusDto.SyllabusListDto> findSyllabusesByProgramId(Long id){
+        // Check if program id already existed or not
+        if (!programRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Training program with id '" + id + "' not existed");
+        }
+        // Get program by id
+        Optional<Program> program = programRepository.findById(id);
+
+        // Get list syllabus of program
+        List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());
+        return syllabusDtos;
+    }
+
+    //tai nguyen
+    public ProgramDto findProgramByProgramId(Long id){
+        // Check if program id already existed or not
+        if (!programRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Training program with id '" + id + "' not existed");
+        }
+        // Get program by id
+        Optional<Program> program = programRepository.findById(id);
+        ProgramDto programDto = programMapper.toDto(program.get());
+        // Get list sylla    List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());bus of program
+//
+        return programDto;
+    }
+
+    //tai nguyen
 
     private Program replaceProgram(Program from, Program to) {
         to.setName(from.getName());
