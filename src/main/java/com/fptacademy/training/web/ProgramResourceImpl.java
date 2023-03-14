@@ -114,4 +114,14 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.OK)
                 .body(programDto);
     }
+
+    @Override
+    public ResponseEntity<ProgramDto> updateProgram(ProgramVM programVM, Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(programService.updateProgram(programVM, id));
+    }
+
+    @Override
+    public void deleteProgram(Long id) {
+        programService.deleteProgram(id);
+    }
 }
