@@ -7,6 +7,7 @@ import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
+import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.security.Permissions;
@@ -35,7 +36,6 @@ public class ProgramService {
     private final SyllabusRepository syllabusRepository;
     private final ProgramMapper programMapper;
     private final ClassRepository classRepository;
-
     private final SyllabusMapper syllabusMapper;
 
     public ProgramDto createProgram(ProgramVM programVM) {
@@ -275,4 +275,27 @@ public class ProgramService {
         return program;
     }
 
+    public ProgramDto updateProgram(ProgramVM programVM, Long id) {
+        Program p = programRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
+        p.setName(programVM.name());
+        List<Syllabus> syllabuses = programVM.syllabusIds()
+                .stream()
+                .map(syllabusId -> syllabusRepository
+                        .findById(syllabusId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
+                .toList();
+        p.setSyllabuses(syllabuses);
+        return programMapper.toDto(p);
+    }
+
+    public void deleteProgram(Long id) {
+        if (classRepository.findByProgram_Id(id).size() != 0) {
+            throw new ResourceBadRequestException("Can not delete program!");
+        }
+        var program = programRepository.findById(id);
+        if (program.isEmpty()) {
+            throw new ResourceNotFoundException("Can not find program");
+        }
+        programRepository.deleteById(id);
+    }
 }

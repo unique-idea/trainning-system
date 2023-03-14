@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RequestMapping("/api")
@@ -173,4 +174,35 @@ public interface ProgramResource {
             @PathVariable Long id
     );
 
+
+    @Operation(
+            summary = "Update specific training programs",
+            description = "Update some attributes of a specific training program: name, syllabuses, syllabuses index ",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found training programs"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @PatchMapping(value = "/programs/{id}" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ProgramDto> updateProgram(@NotNull @RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
+
+    @Operation(
+            summary = "Delete training program by id",
+            description = "Delete a training program given its ID. A program can only be deleted if there are no classes associated with it.",
+            tags = "program",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Deleted training program successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Program not found", content = @Content),
+    })
+    @DeleteMapping("/programs/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    void deleteProgram(@PathVariable Long id);
 }
