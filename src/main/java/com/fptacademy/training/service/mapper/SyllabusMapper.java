@@ -21,14 +21,14 @@ public class SyllabusMapper {
             return null;
         }
         SyllabusDto.SyllabusListDto dto =modelMapper.map(syllabus, SyllabusDto.SyllabusListDto.class);
-        int durationInDays = syllabus.getSessions().size();
-        int durationInMinutes = (int)syllabus.getSessions().stream()
+        dto.setCreatedBy(syllabus.getCreatedBy().getCode());
+        int days = syllabus.getSessions().size();
+        double hours = syllabus.getSessions().stream()
                 .flatMap(s -> s.getUnits().stream())
-                .flatMap(u -> u.getLessons().stream())
-                .mapToLong(Lesson::getDuration)
+                .mapToDouble(Unit::getTotalDurationLesson)
                 .sum();
-        dto.setDuration(durationInDays);
-        dto.setDurationInHours(durationInMinutes / 60.f);
+        dto.setDuration(days);
+        dto.setDurationInHours(hours);
         return dto;
     }
 

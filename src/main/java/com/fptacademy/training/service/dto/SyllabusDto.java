@@ -2,6 +2,7 @@ package com.fptacademy.training.service.dto;
 
 import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Level;
+import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
@@ -38,7 +39,7 @@ public class SyllabusDto {
     private Instant createdAt;
     private String createdBy;
     private Integer duration;
-    private Float durationInHours;
+    private Double durationInHours;
     private List<OutputStandard> outputStandard = new ArrayList<>();
     private Float version;
   }
@@ -66,7 +67,7 @@ public class SyllabusDto {
     private String trainingPrinciple;
     private Level level;
     private Assessment assessment;
-    private List<OutputStandard> outputStandard = new ArrayList<>();
-    private List<Session> sessions = new ArrayList<>();
+    private List<OutputStandard> outputStandard;
+    private List<Session> sessions;
   }
 }

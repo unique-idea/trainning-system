@@ -66,41 +66,15 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @JoinColumn(name = "level_id")
   private Level level;
 
-  @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Session> sessions = new ArrayList<>();
 
-  @OneToOne(cascade = CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "assessment_id")
   private Assessment assessment;
 
   @PrePersist
   public void prePersist() {
     this.sessions.forEach(s -> s.setSyllabus(this));
-    // this.status = SyllabusStatus.DRAFT;
-    // this.assessment.setId(null);
-    // this.duration = this.getSessions().size();
-    // this.sessions.forEach(s -> {
-    //     s.setId(null);
-    //     s.setSyllabus(this);
-    //     s
-    //       .getUnits()
-    //       .forEach(u -> {
-    //         u.setId(null);
-    //         u.setSession(s);
-    //         u.setTotalDurationLesson(u.getLessons().stream().mapToDouble(Lesson::getDuration).sum() / 60);
-    //         u
-    //           .getLessons()
-    //           .forEach(l -> {
-    //             l.setId(null);
-    //             l.setUnit(u);
-    //             l
-    //               .getMaterials()
-    //               .forEach(m -> {
-    //                 m.setId(null);
-    //                 m.setLesson(l);
-    //               });
-    //           });
-    //       });
-    //   });
   }
 }

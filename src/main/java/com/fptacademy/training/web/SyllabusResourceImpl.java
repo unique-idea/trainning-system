@@ -28,11 +28,17 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -46,7 +52,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
@@ -251,14 +259,14 @@ public class SyllabusResourceImpl {
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
   @GetMapping(value = "/syllabuses")
   @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
-  public ResponseEntity<List<SyllabusListDto>> getAllSyllabuses(
+  public ResponseEntity<Page<SyllabusListDto>> getAllSyllabuses(
     @org.springdoc.api.annotations.ParameterObject Pageable pageable,
     @RequestParam(required = false) String[] keywords,
     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
     Authentication authentication
   ) {
     return ResponseEntity.ok(
-      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
+      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable)
     );
   }
 
@@ -305,22 +313,15 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @PutMapping("/syllabuses/{id}")
-  public ResponseEntity<Syllabus> updateSyllabus(@PathVariable(value = "id", required = false) final Long id, @RequestBody Syllabus syllabus) {
-    if (syllabus.getId() == null) {
-      throw new ResourceBadRequestException("id null");
-    }
-    if (!Objects.equals(id, syllabus.getId())) {
-      throw new ResourceBadRequestException("id invalid");
-    }
-
-    if (!syllabusRepository.existsById(id)) {
+  @PutMapping("/syllabuses")
+  public ResponseEntity<SyllabusDetailDto> updateSyllabus(@RequestBody SyllabusDetailDto syllabus) {
+    if (!syllabusRepository.existsById(syllabus.getId())) {
       throw new ResourceBadRequestException("Entity not found id ");
     }
-
-    Optional<Syllabus> result = syllabusService.update(syllabus);
-
-    return result.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    return syllabusService
+      .update(syllabus)
+      .map(response -> ResponseEntity.ok().body(response))
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
@@ -329,7 +330,12 @@ public class SyllabusResourceImpl {
   public ResponseEntity<Syllabus> duplicateSyllabus(@PathVariable Long id) {
     ModelMapper map = new ModelMapper();
     Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
-    map.createTypeMap(Syllabus.class, Syllabus.class).addMappings(mapper -> mapper.skip(Syllabus::setId));
+    map
+      .createTypeMap(Syllabus.class, Syllabus.class)
+      .addMappings(mapper -> {
+        mapper.skip(Syllabus::setId);
+        mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
+      });
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map.createTypeMap(Unit.class, Unit.class).addMappings(mapper -> mapper.skip(Unit::setId));
@@ -339,14 +345,18 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @GetMapping("/syllabuses/templateFile")
-  public ResponseEntity<?> templateFileSyllabus() {
-    return ResponseEntity.ok(null);
+  @GetMapping(value = "/syllabuses/template", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<Resource> getTemplateSyllabus() {
+    Resource resource = new ClassPathResource("templates/Syllabus-template.xlsx");
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename());
+    headers.add(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
+    return ResponseEntity.ok().headers(headers).body(resource);
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @PostMapping("/syllabuses/uploadFile")
-  public ResponseEntity<?> uploadFileSyllabus() {
-    return ResponseEntity.ok(null);
+  @PostMapping(value = "/syllabuses/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> importSyllabus(@RequestPart(value = "file") MultipartFile file) {
+    return ResponseEntity.status(HttpStatus.OK).body("File '" + file.getOriginalFilename() + "' đã được tải lên thành công!");
   }
 }

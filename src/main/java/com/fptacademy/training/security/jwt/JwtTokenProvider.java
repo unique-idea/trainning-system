@@ -91,7 +91,6 @@ public class JwtTokenProvider {
             accessJwtParser.parseClaimsJws(accessToken);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            System.out.println(e.getClass());
             return false;
         }
     }
@@ -101,7 +100,6 @@ public class JwtTokenProvider {
             refreshJwtParser.parseClaimsJws(refreshToken);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            System.out.println(e.getClass());
             return false;
         }
     }
