@@ -38,7 +38,7 @@ public class SyllabusDto {
     private Instant createdAt;
     private String createdBy;
     private Integer duration;
-    private Float durationInHours;
+    private Double durationInHours;
     private List<OutputStandard> outputStandard = new ArrayList<>();
     private Float version;
   }
