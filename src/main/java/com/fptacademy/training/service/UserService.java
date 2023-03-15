@@ -74,6 +74,11 @@ public class UserService {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+            if (email.equals(user.getEmail())) {
+                throw new RuntimeException("You cannot delete your own account");
+            }
             userRepository.delete(user);
             return userMapper.toDto(user);
         } else {
