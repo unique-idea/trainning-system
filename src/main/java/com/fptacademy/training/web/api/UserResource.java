@@ -146,10 +146,12 @@ public interface UserResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Delete successfully"),
+            @ApiResponse(responseCode = "400", description = "Can't delete your own account"),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Can't delete your account"),
+            @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
     })
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
     @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
 

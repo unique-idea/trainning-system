@@ -86,7 +86,7 @@ public class UserService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String email = authentication.getName();
             if (email.equals(user.getEmail())) {
-                throw new RuntimeException("You cannot delete your own account");
+                throw new ResourceBadRequestException("You cannot delete your own account");
             }
             userRepository.delete(user);
             return userMapper.toDto(user);
