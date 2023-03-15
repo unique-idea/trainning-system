@@ -3,7 +3,6 @@ package com.fptacademy.training.web.vm;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.validation.constraints.*;
-
 public record UserVM(
 
         @NotBlank(message = "Full name must not be empty")
@@ -38,10 +37,6 @@ public record UserVM(
 
         @NotBlank(message = "Avatar Url must be not empty")
         String avatarUrl,
-
-        @NotBlank(message = "Password must be not empty")
-        @Size(max = 50, message = "Invalid, password too long")
-        String password,
 
         @NotBlank(message = "Code must be not empty")
         String code,

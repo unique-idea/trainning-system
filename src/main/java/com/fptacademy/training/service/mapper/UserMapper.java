@@ -39,7 +39,6 @@ public class UserMapper {
             user.setGender(Boolean.valueOf(userVM.gender()));
             user.setActivated(Boolean.valueOf(userVM.activated()));
             user.setAvatarUrl(userVM.avatarUrl());
-            user.setPassword(userVM.password());
             user.setCode(userVM.code());
             user.setStatus(UserStatus.valueOf(userVM.status()));
         }
