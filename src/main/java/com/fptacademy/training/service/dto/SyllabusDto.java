@@ -69,4 +69,31 @@ public class SyllabusDto {
     private List<OutputStandard> outputStandard = new ArrayList<>();
     private List<Session> sessions = new ArrayList<>();
   }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class SyllabusUpdatelDto {
+
+    private Long id;
+    private String name;
+    private String createdBy;
+    private Instant createdAt;
+    private Instant lastModifiedAt;
+    private String lastModifiedBy;
+    private String code;
+    private Float version;
+    private Integer attendeeNumber;
+    private String status;
+    private Integer duration;
+    private Double durationInHours;
+    private String technicalRequirement;
+    private String courseObjective;
+    private String trainingPrinciple;
+    private Level level;
+    private Assessment assessment;
+    private List<OutputStandard> outputStandard = new ArrayList<>();
+    private List<Session> sessions = new ArrayList<>();
+  }
 }

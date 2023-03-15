@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,7 +46,7 @@ public class Unit implements Serializable {
 
   private Double totalDurationLesson;
 
-  @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Lesson> lessons = new ArrayList<>();
 
   @JsonIgnore

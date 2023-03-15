@@ -66,7 +66,7 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @JoinColumn(name = "level_id")
   private Level level;
 
-  @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Session> sessions = new ArrayList<>();
 
   @OneToOne(cascade = CascadeType.ALL)
