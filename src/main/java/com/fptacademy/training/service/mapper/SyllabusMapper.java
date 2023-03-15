@@ -21,6 +21,7 @@ public class SyllabusMapper {
             return null;
         }
         SyllabusDto.SyllabusListDto dto =modelMapper.map(syllabus, SyllabusDto.SyllabusListDto.class);
+        dto.setCreatedBy(syllabus.getCreatedBy().getCode());
         int durationInDays = syllabus.getSessions().size();
         int durationInMinutes = (int)syllabus.getSessions().stream()
                 .flatMap(s -> s.getUnits().stream())
