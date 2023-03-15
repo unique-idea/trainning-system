@@ -4,6 +4,8 @@ import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.repository.LevelRepository;
+import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.RoleService;
 import lombok.AllArgsConstructor;
@@ -26,9 +28,11 @@ import java.util.Objects;
 @Service
 public class ExcelUploadService {
 
-    public RoleService roleService;
+    public final RoleService roleService;
 
-    public LevelService levelService;
+    public final LevelService levelService;
+    private final UserRepository userRepository;
+    private final LevelRepository levelRepository;
 
     public static boolean isValidExcelFile(MultipartFile file) {
         return Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -54,50 +58,80 @@ public class ExcelUploadService {
                     Cell cell = cellIterator.next();
                     switch (cellIndex) {
                         case 0: // full name
-                            user.setFullName(cell.getStringCellValue());
+                            if (cell.getStringCellValue() != null) {
+                                user.setFullName(cell.getStringCellValue());
+                            }
                             break;
 
                         case 1: // email
-                            user.setEmail(cell.getStringCellValue());
+                            if (cell.getStringCellValue() != null) {
+                                user.setEmail(cell.getStringCellValue());
+                            }
                             break;
 
                         case 2: // code
-                            user.setCode(cell.getStringCellValue());
+                            if (cell.getStringCellValue() != null) {
+                                user.setCode(cell.getStringCellValue());
+                            }
                             break;
 
                         case 3: // password
-                            user.setPassword(cell.getStringCellValue());
+                            if (cell.getStringCellValue() != null) {
+                                user.setPassword(cell.getStringCellValue());
+                            }
                             break;
 
-                        case 4: // birthday
-                            user.setBirthday(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                        case 4: // gender
+                            if (cell.getNumericCellValue() == 0 || cell.getNumericCellValue() == 1) {
+                                user.setGender(cell.getNumericCellValue() == 1);
+                            }
                             break;
 
-                        case 5: // gender
-                            user.setGender(cell.getBooleanCellValue());
+                        case 5: // role
+                            if (cell.getStringCellValue() != null) {
+                                Role role = roleService.getRoleByName(cell.getStringCellValue());
+                                user.setRole(role);
+                            }
                             break;
 
-                        case 6: // role
-                            Role role = roleService.getRoleByName(cell.getStringCellValue());
-                            user.setRole(role);
+                        case 6: // Activated
+                            if (cell.getNumericCellValue() == 0 || cell.getNumericCellValue() == 1) {
+                                user.setActivated(cell.getNumericCellValue() == 1);
+                                System.out.println("Activated: " + user.getActivated());
+                            }
                             break;
 
-                        case 7: // Activated
-                            user.setActivated(cell.getBooleanCellValue());
+                        case 7: //level
+                            if (cell.getStringCellValue() != null) {
+                                Level level = null;
+                                boolean checkLevel = levelService.checkLevelIsExist(cell.getStringCellValue());
+                                if (checkLevel) {
+                                    level = new Level(cell.getStringCellValue());
+                                } else {
+                                    level = levelService.getLevelByName(cell.getStringCellValue());
+                                }
+                                levelRepository.save(level);
+                                user.setLevel(level);
+                            }
                             break;
 
-                        case 8: //level
-                            Level level = levelService.getLevelByName(cell.getStringCellValue());
-                            user.setLevel(level);
+                        case 8: //status
+                            if (cell.getStringCellValue() != null) {
+                                UserStatus status = UserStatus.valueOf(cell.getStringCellValue());
+                                user.setStatus(status);
+                            }
                             break;
 
-                        case 9: //status
-                            UserStatus status = UserStatus.valueOf(cell.getStringCellValue());
-                            user.setStatus(status);
+                        case 9:
+                            if (cell.getStringCellValue() != null) {
+                                user.setAvatarUrl(cell.getStringCellValue());
+                            }
                             break;
 
-                        case 10:
-                            user.setAvatarUrl(cell.getStringCellValue());
+                        case 10: // birthday
+                            if (cell.getDateCellValue() != null) {
+                                user.setBirthday(cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                            }
                             break;
 
                         default:
@@ -105,11 +139,14 @@ public class ExcelUploadService {
                     }
                     cellIndex++;
                 }
-                users.add(user);
+                if (user.getActivated() != null) {
+                    users.add(user);
+                }
             }
         } catch (IOException e) {
-            e.getMessage();
+            e.printStackTrace();
         }
+
         return users;
     }
 }

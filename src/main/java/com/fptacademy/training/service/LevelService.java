@@ -53,4 +53,9 @@ public class LevelService {
     public void delete(Long id) {
         levelRepository.deleteById(id);
     }
+
+    public boolean checkLevelIsExist(String name){
+        Optional<Level> level =  levelRepository.findByName(name);
+        return level.isEmpty();
+    }
 }

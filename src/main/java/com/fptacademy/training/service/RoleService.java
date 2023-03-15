@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -23,5 +25,8 @@ public class RoleService {
         return roleRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Type role " + id + " not found"));
+    }
+    public List<Role> getAllPermission(){
+        return roleRepository.findAll();
     }
 }
