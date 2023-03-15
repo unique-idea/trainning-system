@@ -1,6 +1,7 @@
 package com.fptacademy.training.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -13,6 +14,7 @@ import java.io.Serializable;
 @ToString
 @Table(name = "levels")
 @Entity
+@NoArgsConstructor
 public class Level implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +22,8 @@ public class Level implements Serializable {
     @Size(max = 50)
     @Column(length = 50, nullable = false, unique = true)
     private String name;
+
+    public Level(String name) {
+        this.name = name;
+    }
 }

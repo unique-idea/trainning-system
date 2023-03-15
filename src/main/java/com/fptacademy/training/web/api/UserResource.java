@@ -69,7 +69,20 @@ public interface UserResource {
     ResponseEntity<Optional<UserDto>> getUserByEmail(@PathVariable String email);
 
 
-    @PostMapping("/users/import")
+    @Operation(
+            summary = "Import users from excel",
+            description = "Import users from excel",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Import successfully"),
+//            @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+//            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+//    })
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/users/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
 
 }

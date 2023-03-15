@@ -9,6 +9,7 @@ import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -40,6 +42,9 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final ExcelUploadService excelUploadService;
+
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize maxFileSize;
 
     public UserDto createUser(UserVM userVM) {
         if (userRepository.existsByEmail(userVM.email())) {
@@ -83,7 +88,8 @@ public class UserService {
     }
 
     public void saveUsersToDB(MultipartFile file) {
-        if (ExcelUploadService.isValidExcelFile(file)) {
+        System.out.println("Max file size) :" + maxFileSize.toMegabytes());
+        if (ExcelUploadService.isValidExcelFile(file) && file.getSize() <= maxFileSize.toKilobytes()) {
             try {
                 List<User> users = excelUploadService.getUserDataFromExcel(file.getInputStream());
                 this.userRepository.saveAll(users);
