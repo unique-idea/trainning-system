@@ -1,7 +1,10 @@
 package com.fptacademy.training.service;
 
+
+import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
+import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.UserDto;
@@ -9,6 +12,7 @@ import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +28,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -64,6 +70,34 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"))));
     }
 
+    public UserDto deleteUser(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            userRepository.delete(user);
+            return userMapper.toDto(user);
+        } else {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+    }
+
+    public List<UserDto> findUserByName (String name) {
+        List<UserDto> userDto = userMapper.toDtos(userRepository.findByFullNameContaining(name));
+        if(userDto.isEmpty()) {
+            throw new ResourceNotFoundException("User with name " + name + " not found");
+        }
+        return userDto;
+    }
+
+    public void changeRole (long id, long typeRole) {
+        Role role = roleService.getRoleByID(typeRole);
+        Optional<User> user = userRepository.findById(id);
+        if(user.isEmpty()) {
+            throw new ResourceNotFoundException("User does not exist");
+        }
+        user.get().setRole(role);
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getCurrentUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -95,5 +129,16 @@ public class UserService {
                 throw new IllegalArgumentException("The file is not a valid excel file");
             }
         }
+    }
+
+    public List<UserDto> getUsersByFilters(String email, String fullName, String code, String levelName, String roleName, Boolean activated, String birthday) {
+        LocalDate localBirthday = null;
+        try {
+            localBirthday = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e) {
+            throw new ResourceBadRequestException(birthday + ": Date format is wrong. Please use yyyy-MM-dd format");
+        }
+
+        return userMapper.toDtos(userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, localBirthday));
     }
 }

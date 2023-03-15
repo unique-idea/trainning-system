@@ -1,7 +1,11 @@
 package com.fptacademy.training.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -14,6 +18,9 @@ import java.time.LocalDate;
 @Setter
 @Getter
 @ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "users")
 @Entity
 public class User implements Serializable {
@@ -56,6 +63,18 @@ public class User implements Serializable {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", gender=" + gender +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                '}';
+    }
+    
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 }
