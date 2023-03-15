@@ -30,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("code") String code, @Param("levelName") String levelName, 
             @Param("roleName") String roleName, @Param("activated") Boolean activated, 
             @Param("birthday") LocalDate birthday);
+
+    Optional<User> findById(Long id);
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -77,6 +78,16 @@ public class UserResourceImpl implements UserResource {
         this.userService.changeRole(id, typeRole);
         return ResponseEntity
                 .ok(Map.of("Message", "User's role change successfully"));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> getUserById(Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> updateUser(NoNullRequiredUserVM noNullRequiredUserVM, Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUserById(noNullRequiredUserVM, id));
     }
 
 }

@@ -5,7 +5,7 @@ public enum UserStatus {
     IN_CLASS ("In class"),
     OFF_CLASS ("Off class"),
     ACTIVE ("Active"),
-    IN_ACTIVE ("In active"),
+    INACTIVE ("Inactive"),
     ;
 
     private final String text;
