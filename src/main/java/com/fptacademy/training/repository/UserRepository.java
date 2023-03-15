@@ -18,6 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByFullNameContaining (String keyword);
 
+    @Query("SELECT u FROM User u WHERE u.status = :status")
+    List<User> findByStatus(@Param("status") String status);
+
     @Query("SELECT u FROM User u " +
             "WHERE (u.email LIKE %:email% OR :email IS NULL) " +
             "AND (u.fullName LIKE %:fullName% OR :fullName IS NULL) " +

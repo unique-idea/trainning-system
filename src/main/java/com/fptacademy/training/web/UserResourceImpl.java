@@ -73,7 +73,7 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<?> changeRole(long id, long typeRole) {
+    public ResponseEntity<?> changeRole(long id, String typeRole) {
         this.userService.changeRole(id, typeRole);
         return ResponseEntity
                 .ok(Map.of("Message", "User's role change successfully"));

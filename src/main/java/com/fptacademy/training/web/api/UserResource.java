@@ -112,7 +112,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<?> changeRole (@PathVariable long id, long typeRole) ;
+    ResponseEntity<?> changeRole (@PathVariable long id, String typeRole) ;
 
 
     @Operation(
