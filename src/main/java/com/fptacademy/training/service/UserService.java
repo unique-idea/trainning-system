@@ -1,6 +1,5 @@
 package com.fptacademy.training.service;
 
-
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.UserStatus;
@@ -14,6 +13,7 @@ import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +24,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.convert.Jsr310Converters.StringToLocalDateConverter;
 
@@ -52,11 +55,16 @@ public class UserService {
 
     private final ExcelUploadService excelUploadService;
 
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize maxFileSize;
+
     public UserDto createUser(UserVM userVM) {
         if (userRepository.existsByEmail(userVM.email())) {
             throw new ResourceAlreadyExistsException("User with email " + userVM.email() + " already existed");
         }
         User user = userMapper.toEntity(userVM, levelService, roleService);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPassword(passwordEncoder.encode(userVM.code()));
         return userMapper.toDto(userRepository.save(user));
     }
 
