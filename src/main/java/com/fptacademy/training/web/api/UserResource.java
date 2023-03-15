@@ -137,6 +137,7 @@ public interface UserResource {
     ResponseEntity<?> changeRole (@PathVariable long id, String typeRole) ;
 
 
+
     @Operation(
             summary = "Delete user",
             description = "Delete user by id",
@@ -144,9 +145,10 @@ public interface UserResource {
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Delete successfully"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
-        @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Delete successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Can't delete your account"),
     })
     @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
