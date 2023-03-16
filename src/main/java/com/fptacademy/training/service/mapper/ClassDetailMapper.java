@@ -31,41 +31,53 @@ public class ClassDetailMapper {
         Class classes = details.getClassField();
         User createdBy = classes.getCreatedBy();
 
-        dto.setClass_id(new ClassDetailDto.ClassSimplified(classes.getId(),
-                classes.getName(), classes.getCode(), classes.getDuration(),
-                new ClassDetailDto.UserSimplified(createdBy.getId(), createdBy.getFullName(), createdBy.getEmail())));
+        dto.setClass_id(new ClassDetailDto.ClassSimplified(
+                classes.getId(),
+                classes.getName(),
+                classes.getCode(),
+                classes.getDuration(),
+                new ClassDetailDto.UserSimplified(
+                        createdBy.getId(),
+                        createdBy.getFullName(),
+                        createdBy.getEmail(),
+                        createdBy.getCode()),
+                classes.getCreatedAt()
+                ));
 
         dto.setAttendee(details.getAttendee() == null? null:
-                new ClassDetailDto.AttendeeSimplified(details.getAttendee().getId(),
+                new ClassDetailDto.AttendeeSimplified(
+                        details.getAttendee().getId(),
                         details.getAttendee().getType()));
 
         dto.setLocation(details.getLocation() == null? null:
-                new ClassDetailDto.LocationSimplified(details.getLocation().getId(),
+                new ClassDetailDto.LocationSimplified(
+                        details.getLocation().getId(),
                         details.getLocation().getCity(),
                         details.getLocation().getFsu()));
 
-        if(details.getSchedules() != null){
+        if (details.getSchedules() != null) {
 
             List<ClassSchedule> schedules = details.getSchedules();
             List<ClassDetailDto.ScheduleSimplified> simpleSchedules = new ArrayList<>();
 
-            for(ClassSchedule schedule: schedules){
-
-                User trainer = schedule.getTrainer();
-
-                ClassDetailDto.UserSimplified userSimplified = new ClassDetailDto.UserSimplified(
-                        trainer.getId(), trainer.getFullName(), trainer.getEmail());
-
-                ClassDetailDto.ScheduleSimplified simpleSchdedule = new ClassDetailDto.ScheduleSimplified(schedule.getStudyDate(),
-                        userSimplified);
-                simpleSchedules.add(simpleSchdedule);
+            for(ClassSchedule schedule : schedules) {
+                ClassDetailDto.ScheduleSimplified simpleSchedule = new ClassDetailDto.ScheduleSimplified (
+                        schedule.getStudyDate(),
+                        schedule.getSession().getUnits().stream().map(u -> new ClassDetailDto.UnitSimplified(
+                                u.getId(),
+                                u.getIndex(),
+                                u.getName()
+                        )).toList()
+                );
+                simpleSchedules.add(simpleSchedule);
             }
             dto.setSchedules(simpleSchedules);
-        }else{
+        }
+        else {
             dto.setSchedules(null);
         }
 
-        if(details.getUsers() != null){
+        if (details.getUsers() != null) {
 
             List<ClassDetailDto.UserSimplified> Trainers = new ArrayList<>();
             List<ClassDetailDto.UserSimplified> Admins = new ArrayList<>();
@@ -73,19 +85,21 @@ public class ClassDetailMapper {
             for(User user: details.getUsers()){
 
                 if(user.getRole().getName().equals("Super Admin") || user.getRole().getName().equals("Class Admin")){
-                    Admins.add(new ClassDetailDto.UserSimplified(user.getId(), user.getFullName(), user.getEmail()));
+                    Admins.add(new ClassDetailDto.UserSimplified(user.getId(), user.getFullName(), user.getEmail(),
+                            user.getCode()));
                 }
 
                 else if (user.getRole().getName().equals("Trainer")) {
-                    Trainers.add(new ClassDetailDto.UserSimplified(user.getId(), user.getFullName(), user.getEmail()));
+                    Trainers.add(new ClassDetailDto.UserSimplified(user.getId(), user.getFullName(), user.getEmail(),
+                            user.getCode()));
                 }
-
             }
 
             dto.setTrainer(Trainers);
             dto.setAdmin(Admins);
 
-        }else{
+        }
+        else {
             dto.setTrainer(null);
             dto.setAdmin(null);
         }

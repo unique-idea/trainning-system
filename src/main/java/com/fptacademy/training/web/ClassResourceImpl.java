@@ -1,15 +1,27 @@
 package com.fptacademy.training.web;
 
 import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.repository.ClassDetailRepository;
 import com.fptacademy.training.repository.ClassRepository;
+import com.fptacademy.training.service.ClassService;
+import com.fptacademy.training.service.dto.ClassDetailDto;
 import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.mapper.ClassDetailMapper;
 import com.fptacademy.training.service.mapper.ClassMapper;
 import com.fptacademy.training.web.api.ClassResource;
+import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -17,46 +29,83 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RestController
 public class ClassResourceImpl implements ClassResource {
-
-    private final ClassRepository repository;
-    private final ClassMapper classMapper;
-    private final ClassDetailRepository detailRepository ;
+    private final ClassService classService;
 
     @Override
-    public Optional<ClassDto> getClassById(@PathVariable Long class_id){
-        Optional<Class> classes = repository.findById(class_id);
-        return classes.map(classMapper::toDto);
+    public ResponseEntity<ClassDto> getClassById(Long class_id){
+        ClassDto classes = classService.getById(class_id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(classes);
     }
 
     @Override
-    public List<ClassDto> getAllClass(){
-        List<Class> classes = repository.findAll();
-        return classes.stream().map(classMapper::toDto).toList();
+    public ResponseEntity<ClassDetailDto> getDetailsByClassId(Long class_id){
+        ClassDetailDto details = classService.getDetailsByClass_Id(class_id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(details);
     }
 
     @Override
-    public void delClass(Long id) {
-        Optional<Class> classes = repository.findById(id);
-        detailRepository.updateStatusById("Inactive",classes.get().getClassDetail().getId());
+    public ResponseEntity<List<ClassDto>> filterClass(List<String> keywords,
+                                                      LocalDate from,
+                                                      LocalDate to,
+                                                      List<String> cities,
+                                                      List<String> classTimes,
+                                                      List<String> statuses,
+                                                      List<String> attendeeTypes,
+                                                      String fsu,
+                                                      String trainerCode,
+                                                      int page, int size) {
+        List<ClassDto> classDtos = classService.filterClass(
+                keywords, from, to,
+                cities,
+                classTimes,
+                statuses,
+                attendeeTypes,
+                fsu,
+                trainerCode);
+        // Apply pagination
+        int start = page * size;
+        int end = Math.min(start + size, classDtos.size());
+        Page<ClassDto> pageResult = new PageImpl<>(
+                classDtos.subList(start, end),
+                PageRequest.of(page, size),
+                classDtos.size());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(pageResult.getContent());
     }
 
 
     @Override
-    public ClassDto duplicateClass(@PathVariable Long id) {
-        Optional<Class> classesOp = repository.findById(id);
-        Date date = new Date();
-        Class classes = classesOp.get();
+    public ResponseEntity<String> delClass(Long id) {
+        classService.deleteClass(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Delete class successfully");
+    }
 
-        Class duplicateClass = new Class();
-        duplicateClass.setName("Copy of " + classes.getName());
-        duplicateClass.setCreatedAt(classes.getCreatedAt());
-        duplicateClass.setCode(classes.getCode() + " Version: " + date);
-        duplicateClass.setDuration(classes.getDuration());
-        duplicateClass.setCreatedBy(classes.getCreatedBy());
-//        duplicateClass.
+    @Override
+    public ResponseEntity<String> deactivateClass(Long id) {
+        classService.deactivateClass(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Deactivate class successfully");
+    }
 
-        //        repository.save(duplicateClass);
-        return classMapper.toDto(duplicateClass);
+    @Override
+    public ResponseEntity<String> activateClass(Long id) {
+        classService.activateClass(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Activate class successfully");
+    }
+
+    @Override
+    public ResponseEntity<ClassDetailDto> createClass(ClassVM classVM) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(classService.createClass(classVM));
     }
 
 

@@ -37,5 +37,4 @@ public class FaTrainingSystemApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FaTrainingSystemApplication.class, args);
 	}
-
 }

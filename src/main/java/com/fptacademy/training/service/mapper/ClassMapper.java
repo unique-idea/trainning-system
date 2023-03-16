@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Component
 public class ClassMapper {
@@ -46,5 +49,10 @@ public class ClassMapper {
         dto.setCreated_at(classes.getCreatedAt());
         return dto;
     }
+
+    public List<ClassDto> toDtos(List<Class> classes) {
+        return classes.stream().map(this::toDto).toList();
+    }
+
 
 }

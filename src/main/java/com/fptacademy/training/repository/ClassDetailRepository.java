@@ -4,14 +4,16 @@ import com.fptacademy.training.domain.ClassDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 public interface ClassDetailRepository extends JpaRepository<ClassDetail,Long> {
 
-    @Query(value = "Select * from class_details d where d.class_id = ? ", nativeQuery= true)
-    Optional<ClassDetail> findDetailsByClass_Id(String class_id);
+    @Query("select c from ClassDetail c where c.classField.id = :id and c.status <> 'DELETED' and " +
+            "c.status <> 'DRAFT' and c.status <> 'INACTIVE'")
+    Optional<ClassDetail> findDetailsByClass_IdAndStatusNotDeleted(@Param("id") Long class_id);
 
     @Transactional
     @Modifying

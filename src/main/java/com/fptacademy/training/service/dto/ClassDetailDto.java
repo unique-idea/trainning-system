@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -24,14 +25,14 @@ public class ClassDetailDto implements Serializable{
     private Integer planned;
     private LocalTime start_at;
     private String status;
+    private String detailLocation;
+    private String contactPoint;
     private ClassSimplified class_id;
     private AttendeeSimplified attendee;
     private LocationSimplified location;
     private List<UserSimplified> trainer;
     private List<UserSimplified> admin;
     private List<ScheduleSimplified> schedules;
-
-    //list Admin
 
     @Getter
     @AllArgsConstructor
@@ -41,6 +42,16 @@ public class ClassDetailDto implements Serializable{
         private String code;
         private Integer duration;
         private UserSimplified created_by;
+        private Instant createdAt;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class ProgramSimplified {
+        private Long id;
+        private String name;
+        private Integer durationInDays;
+        private Float durationInHours;
     }
 
     @Getter
@@ -55,7 +66,6 @@ public class ClassDetailDto implements Serializable{
     public static class LocationSimplified {
         private Long id;
         private String city;
-
         private String fsu;
     }
 
@@ -65,6 +75,7 @@ public class ClassDetailDto implements Serializable{
         private Long id;
         private String name;
         private String Email;
+        private String code;
     }
 
     @Getter
@@ -72,10 +83,16 @@ public class ClassDetailDto implements Serializable{
     @NoArgsConstructor
     public static class ScheduleSimplified{
         private LocalDate study_date;
-        private UserSimplified trainer;
+        private List<UnitSimplified> units;
     }
 
-//Delivery_type
-    //Program
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UnitSimplified {
+        private Long id;
+        private int index;
+        private String name;
+    }
 
 }
