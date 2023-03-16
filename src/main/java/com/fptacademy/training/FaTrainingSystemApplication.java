@@ -29,7 +29,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 		},
 		tags = {
 				@Tag(name = "authentication", description = "REST API endpoints for authentication"),
-				@Tag(name = "program", description = "REST API endpoints for training program")
+				@Tag(name = "program", description = "REST API endpoints for training program"),
+				@Tag(name = "class", description = "REST API endpoints for training classes")
 		}
 )
 public class FaTrainingSystemApplication {
@@ -37,5 +38,4 @@ public class FaTrainingSystemApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FaTrainingSystemApplication.class, args);
 	}
-
 }

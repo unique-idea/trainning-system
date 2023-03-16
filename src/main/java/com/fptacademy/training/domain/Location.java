@@ -5,8 +5,11 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -23,4 +26,8 @@ public class Location implements Serializable {
     @Size(max = 45)
     @Column(length = 45, nullable = false)
     private String fsu;
+
+    @Size(max = 45)
+    @Column(length = 45, nullable = false)
+    private String code;
 }
