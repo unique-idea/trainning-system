@@ -108,5 +108,11 @@ public class ClassResourceImpl implements ClassResource {
                 .body(classService.createClass(classVM));
     }
 
+    @Override
+    public ResponseEntity<List<ClassDetail>> getAllClassTrainer() {
+        List<ClassDetail> list = classService.getAllClassTrainer();
+        return ResponseEntity.ok().body(list);
+    }
+
 
 }

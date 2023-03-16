@@ -1,6 +1,7 @@
 package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import com.fptacademy.training.service.dto.ClassDto;
 import com.fptacademy.training.web.vm.ClassVM;
@@ -51,8 +52,8 @@ public interface ClassResource {
     @PostMapping
     public ResponseEntity<ClassDetailDto> createClass(@RequestBody ClassVM classVM);
 
-
-
+    @GetMapping("/class_trainer")
+    public ResponseEntity<List<ClassDetail>> getAllClassTrainer();
 
 
 }

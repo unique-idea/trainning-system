@@ -202,4 +202,8 @@ public class ClassService {
                 .orElseThrow(() -> new ResourceNotFoundException("Class ID " + id + " not found"));
         classInfo.getClassDetail().setStatus(ClassStatus.OPENNING.toString());
     }
+
+    public List<ClassDetail> getAllClassTrainer() {
+        return classDetailRepository.findAll();
+    }
 }
