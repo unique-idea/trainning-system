@@ -4,6 +4,7 @@ import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.ClassVM;
 import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -52,8 +53,10 @@ public interface ClassResource {
     @PostMapping
     public ResponseEntity<ClassDetailDto> createClass(@RequestBody ClassVM classVM);
 
-    @GetMapping("/class_trainer")
-    public ResponseEntity<List<ClassDetail>> getAllClassTrainer();
+    @GetMapping("/trainer")
+    public ResponseEntity<List<UserDto>> getAllTrainer();
 
+    @GetMapping("/class_admin")
+    public ResponseEntity<List<UserDto>> getAllClassAdmin();
 
 }

@@ -8,6 +8,7 @@ import com.fptacademy.training.service.ClassService;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import com.fptacademy.training.service.dto.ClassDto;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.ClassDetailMapper;
 import com.fptacademy.training.service.mapper.ClassMapper;
 import com.fptacademy.training.web.api.ClassResource;
@@ -30,6 +31,8 @@ import java.util.Optional;
 @RestController
 public class ClassResourceImpl implements ClassResource {
     private final ClassService classService;
+
+
 
     @Override
     public ResponseEntity<ClassDto> getClassById(Long class_id){
@@ -109,9 +112,17 @@ public class ClassResourceImpl implements ClassResource {
     }
 
     @Override
-    public ResponseEntity<List<ClassDetail>> getAllClassTrainer() {
-        List<ClassDetail> list = classService.getAllClassTrainer();
-        return ResponseEntity.ok().body(list);
+    public ResponseEntity<List<UserDto>> getAllTrainer() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(classService.getAllTrainer());
+    }
+
+    @Override
+    public ResponseEntity<List<UserDto>> getAllClassAdmin() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(classService.getAllClassAdmin());
     }
 
 
