@@ -108,8 +108,8 @@ public class ClassService {
     }
 
     public ClassDetailDto createClass(ClassVM classVM) {
-        if (classRepository.existsByName(classVM.name()))
-            throw new ResourceAlreadyExistsException("Class name already exists");
+//        if (classRepository.existsByName(classVM.name()))
+//            throw new ResourceAlreadyExistsException("Class name already exists");
         Program program = programRepository.findById(classVM.programId())
                 .orElseThrow(() -> new ResourceNotFoundException("Program ID not found"));
         int totalStudyDates = program.getSyllabuses().stream()
