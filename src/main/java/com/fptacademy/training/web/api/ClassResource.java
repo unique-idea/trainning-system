@@ -2,9 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
-import com.fptacademy.training.service.dto.ClassDetailDto;
-import com.fptacademy.training.service.dto.ClassDto;
-import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.web.vm.ClassVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -144,10 +142,59 @@ public interface ClassResource {
     @PostMapping
     public ResponseEntity<ClassDetailDto> createClass(@RequestBody ClassVM classVM);
 
-    @GetMapping("/trainer")
+    @Operation(
+            summary = "Get all trainers available for class",
+            description = "Get all trainers available for class",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find all trainers successfully")
+    })
+    @GetMapping("/trainers")
     public ResponseEntity<List<UserDto>> getAllTrainer();
 
-    @GetMapping("/class_admin")
+    @Operation(
+            summary = "Get all class admins available for class",
+            description = "Get all class admins available for class",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find all class admins successfully")
+    })
+    @GetMapping("/class_admins")
     public ResponseEntity<List<UserDto>> getAllClassAdmin();
+
+    @Operation(
+            summary = "Get all attendees types for class",
+            description = "Get all attendees types for class",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find all attendees successfully")
+    })
+    @GetMapping("/attendees")
+    public ResponseEntity<List<AttendeeDto>> getAllAttendees();
+    @Operation(
+            summary = "Get all locations (cities) for class",
+            description = "Get all locations (cities) for class",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find locations (cities) successfully")
+    })
+    @GetMapping("/locations")
+    public ResponseEntity<List<LocationDto>> getAllLocations();
 
 }

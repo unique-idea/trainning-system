@@ -7,12 +7,8 @@ import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.*;
-import com.fptacademy.training.service.dto.ClassDetailDto;
-import com.fptacademy.training.service.dto.ClassDto;
-import com.fptacademy.training.service.dto.UserDto;
-import com.fptacademy.training.service.mapper.ClassDetailMapper;
-import com.fptacademy.training.service.mapper.ClassMapper;
-import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.service.dto.*;
+import com.fptacademy.training.service.mapper.*;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +35,8 @@ public class ClassService {
     private final ClassDetailMapper classDetailMapper;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final AttendeeMapper attendeeMapper;
+    private final LocationMapper locationMapper;
 
     public List<ClassDto> filterClass(List<String> keywords,
                             LocalDate from,
@@ -207,12 +205,22 @@ public class ClassService {
     }
 
     public List<UserDto> getAllTrainer() {
-        List<User> user = userRepository.getAllTrainers();
+        List<User> user = userRepository.findAllTrainers();
         return user.stream().map(userMapper::toDto).toList();
     }
 
     public List<UserDto> getAllClassAdmin() {
-        List<User> user = userRepository.getAllClassAdmin();
+        List<User> user = userRepository.findAllClassAdmin();
         return user.stream().map(userMapper::toDto).toList();
+    }
+
+    public List<AttendeeDto> getAllAttendees() {
+        List<Attendee> attendees = attendeeRepository.findAll();
+        return attendees.stream().map(attendeeMapper::toDto).toList();
+    }
+
+    public List<LocationDto> getAllLocations() {
+        List<Location> locations = locationRepository.findAll();
+        return locations.stream().map(locationMapper::toDto).toList();
     }
 }

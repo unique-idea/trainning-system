@@ -5,10 +5,7 @@ import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.repository.ClassDetailRepository;
 import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.service.ClassService;
-import com.fptacademy.training.service.dto.ClassDetailDto;
-import com.fptacademy.training.service.dto.ClassDto;
-import com.fptacademy.training.service.dto.ProgramDto;
-import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.service.mapper.ClassDetailMapper;
 import com.fptacademy.training.service.mapper.ClassMapper;
 import com.fptacademy.training.web.api.ClassResource;
@@ -123,6 +120,20 @@ public class ClassResourceImpl implements ClassResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(classService.getAllClassAdmin());
+    }
+
+    @Override
+    public ResponseEntity<List<AttendeeDto>> getAllAttendees() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(classService.getAllAttendees());
+    }
+
+    @Override
+    public ResponseEntity<List<LocationDto>> getAllLocations() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(classService.getAllLocations());
     }
 
 
