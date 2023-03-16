@@ -186,14 +186,26 @@ public class SyllabusService {
               ctx
                 .getSource()
                 .stream()
-                .sorted(Comparator.comparing(Session::getIndex))
-                .map(session -> {
+                .sorted(Comparator.comparing(session -> session.getIndex(), Comparator.nullsLast(Integer::compareTo)))
+                .peek(session ->
                   session.setUnits(
-                    session.getUnits().stream().sorted((u1, u2) -> u1.getIndex().compareTo(u2.getIndex())).collect(Collectors.toList())
-                  );
-                  return session;
-                })
-                .collect(Collectors.toList())
+                    session
+                      .getUnits()
+                      .stream()
+                      .sorted(Comparator.comparing(unit -> unit.getIndex(), Comparator.nullsLast(Integer::compareTo)))
+                      .peek(unit ->
+                        unit.setLessons(
+                          unit
+                            .getLessons()
+                            .stream()
+                            .sorted(Comparator.comparing(lession -> lession.getIndex(), Comparator.nullsLast(Integer::compareTo)))
+                            .toList()
+                        )
+                      )
+                      .toList()
+                  )
+                )
+                .toList()
           )
           .map(Syllabus::getSessions, SyllabusDetailDto::setSessions);
       });

@@ -41,6 +41,9 @@ public class Lesson implements Serializable {
 
   private Integer duration;
 
+  @Column(name = "`index`")
+  private Integer index;
+
   @ManyToOne
   @JoinColumn(name = "output_standard_id")
   private OutputStandard outputStandard;
