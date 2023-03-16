@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,10 +38,6 @@ public class Unit implements Serializable {
   @Column(length = 100)
   private String title;
 
-  @Column(length = 45)
-  @JsonIgnore
-  private String status;
-
   @Column(length = 100)
   private String name;
 
@@ -48,11 +46,16 @@ public class Unit implements Serializable {
 
   private Double totalDurationLesson;
 
-  @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Lesson> lessons = new ArrayList<>();
 
   @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "session_id")
   private Session session;
+
+  @PrePersist
+  public void prePersist() {
+    this.lessons.forEach(l -> l.setUnit(this));
+  }
 }
