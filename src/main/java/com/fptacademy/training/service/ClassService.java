@@ -9,8 +9,10 @@ import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.*;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.ClassDetailMapper;
 import com.fptacademy.training.service.mapper.ClassMapper;
+import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class ClassService {
     private final ClassMapper classMapper;
     private final ClassDetailMapper classDetailMapper;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public List<ClassDto> filterClass(List<String> keywords,
                             LocalDate from,
@@ -201,5 +204,15 @@ public class ClassService {
         Class classInfo = classRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Class ID " + id + " not found"));
         classInfo.getClassDetail().setStatus(ClassStatus.OPENNING.toString());
+    }
+
+    public List<UserDto> getAllTrainer() {
+        List<User> user = userRepository.getAllTrainers();
+        return user.stream().map(userMapper::toDto).toList();
+    }
+
+    public List<UserDto> getAllClassAdmin() {
+        List<User> user = userRepository.getAllClassAdmin();
+        return user.stream().map(userMapper::toDto).toList();
     }
 }

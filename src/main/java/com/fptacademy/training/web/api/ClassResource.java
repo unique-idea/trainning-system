@@ -1,8 +1,10 @@
 package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.ClassVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -142,8 +144,10 @@ public interface ClassResource {
     @PostMapping
     public ResponseEntity<ClassDetailDto> createClass(@RequestBody ClassVM classVM);
 
+    @GetMapping("/trainer")
+    public ResponseEntity<List<UserDto>> getAllTrainer();
 
-
-
+    @GetMapping("/class_admin")
+    public ResponseEntity<List<UserDto>> getAllClassAdmin();
 
 }
