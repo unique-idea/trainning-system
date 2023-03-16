@@ -171,9 +171,12 @@ public class ProgramService {
                 Row row = sheet.getRow(i);
                 // Create a program object with the information from Excel file
                 Program program = new Program();
-                if (row.getCell(0).getCellType() != CellType.BLANK) {
+                if (row.getCell(0) != null && row.getCell(0).getCellType() == CellType.NUMERIC) {
                     Long id = (long)row.getCell(0).getNumericCellValue();
                     program.setId(id);
+                } else if (row.getCell(0) != null && row.getCell(0).getCellType() != CellType.NUMERIC) {
+                    throw new ResourceBadRequestException("Excel file wrong format at Program ID column, make sure to specify right ID format. " +
+                            "If not specify ID, please make sure ID cell is empty");
                 }
                 program.setName(row.getCell(1).getStringCellValue().trim());
                 List<Syllabus> syllabuses = Arrays.stream(row.getCell(2).getStringCellValue().trim().split(","))
