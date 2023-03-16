@@ -2,7 +2,7 @@ package com.fptacademy.training.service;
 
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
@@ -25,13 +25,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.convert.Jsr310Converters.StringToLocalDateConverter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

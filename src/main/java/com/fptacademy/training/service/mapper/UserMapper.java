@@ -2,7 +2,7 @@ package com.fptacademy.training.service.mapper;
 
 
 import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.RoleService;
 import com.fptacademy.training.service.dto.UserDto;

@@ -33,7 +33,8 @@ import java.time.LocalTime;
                 version = "1.0"
         ),
         servers = {
-                @Server(url = "http://localhost:8080", description = "Local server")
+                @Server(url = "http://fademouser-env.eba-rr6m3qyp.ap-southeast-1.elasticbeanstalk.com", description = "Deploy server"),
+                @Server(url = "http://localhost:5000", description = "Local server")
         },
         tags = {
                 @Tag(name = "authentication", description = "REST API endpoints for authentication"),

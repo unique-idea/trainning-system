@@ -60,7 +60,7 @@ public class UserResourceImpl implements UserResource {
                 .body(userService.getUsersByFilters(email, fullName, code, levelName, roleName, activated, birthday));
     }
 
-    public ResponseEntity<?> uploadUserData(MultipartFile file) {
+    public ResponseEntity<?> importUsersFromExcel(MultipartFile file) {
         this.userService.saveUsersToDB(file);
         return ResponseEntity
                 .ok(Map.of("Message", "Users data uploaded and saved database successfully"));

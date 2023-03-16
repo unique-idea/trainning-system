@@ -3,7 +3,7 @@ package com.fptacademy.training.service.util;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.repository.LevelRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.LevelService;

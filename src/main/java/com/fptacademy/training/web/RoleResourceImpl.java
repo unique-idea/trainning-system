@@ -3,12 +3,14 @@ package com.fptacademy.training.web;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.service.RoleService;
 import com.fptacademy.training.web.api.RoleResource;
+import com.fptacademy.training.web.vm.RoleVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,5 +22,12 @@ public class RoleResourceImpl implements RoleResource {
         return  ResponseEntity
                 .status(HttpStatus.OK)
                 .body(roleService.getAllPermission());
+    }
+
+    @Override
+    public ResponseEntity<List<Role>> updatePermission(List<RoleVM> role) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roleService.updatePermission(role));
     }
 }

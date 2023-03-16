@@ -20,17 +20,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
 
 @RequestMapping("/api")
 @EnableMethodSecurity(prePostEnabled = true)
@@ -94,15 +85,16 @@ public interface UserResource {
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Import successfully"),
-//            @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),
-//            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
-//            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-//    })
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Import successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(value = "/users/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<?> uploadUserData(@RequestParam("file") MultipartFile file);
+    @RequestMapping(value = "/user/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<?> importUsersFromExcel(@RequestParam("file") MultipartFile file);
 
     @Operation (
             summary = "Get user by name",
@@ -207,5 +199,4 @@ public interface UserResource {
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> updateUser(@RequestBody @Valid NoNullRequiredUserVM noNullRequiredUserVM, @PathVariable Long id);
-
 }
