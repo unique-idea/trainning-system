@@ -1,7 +1,7 @@
 package com.fptacademy.training.web;
 
-import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.service.RoleService;
+import com.fptacademy.training.service.dto.RoleDto;
 import com.fptacademy.training.web.api.RoleResource;
 import com.fptacademy.training.web.vm.RoleVM;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class RoleResourceImpl implements RoleResource {
     private final RoleService roleService;
 
     @Override
-    public ResponseEntity<List<Role>> getAllPermission() {
+    public ResponseEntity<List<RoleDto>> getAllPermission() {
         return  ResponseEntity
                 .status(HttpStatus.OK)
                 .body(roleService.getAllPermission());

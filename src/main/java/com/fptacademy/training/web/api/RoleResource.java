@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.web.vm.RoleVM;
+import com.fptacademy.training.service.dto.RoleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,7 +33,7 @@ public interface RoleResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users/permission",produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<Role>> getAllPermission();
+    ResponseEntity<List<RoleDto>> getAllPermission();
 
     @Operation(
             summary = "Update permission",
@@ -50,4 +51,5 @@ public interface RoleResource {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = "/users/permission/", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> updatePermission(@RequestBody @Valid List<RoleVM> role);
+
 }

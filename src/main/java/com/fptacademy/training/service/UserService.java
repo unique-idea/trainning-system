@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -71,6 +73,8 @@ public class UserService {
         return userMapper.toDtos(userRepository.findAll(pages).getContent());
     }
 
+
+
     public Optional<UserDto> findUserByEmail(String email) {
         return Optional.ofNullable(userMapper.toDto(userRepository
                 .findByEmail(email)
@@ -79,14 +83,51 @@ public class UserService {
 
     public UserDto deleteUser(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            userRepository.delete(user);
-            return userMapper.toDto(user);
-        } else {
+        if (!optionalUser.isPresent()) {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
+        User user = optionalUser.get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        if (email.equals(user.getEmail())) {
+            throw new ResourceBadRequestException("You cannot delete your own account");
+        }
+        user.setActivated(!user.getActivated());
+
+        User updatedUser = userRepository.save(user);
+        UserDto userDto = userMapper.toDto(updatedUser);
+        return userDto;
     }
+
+
+
+    public UserDto deActive(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (!optionalUser.isPresent()) {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+        User user = optionalUser.get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+         if (email.equals(user.getEmail()))
+            throw new ResourceBadRequestException("You cannot de-active your own account");
+
+         if (user.getStatus() == null)
+            user.setStatus(UserStatus.INACTIVE);
+        else if (user.getStatus() == UserStatus.INACTIVE) {
+            if (user.getRole().equals("Class Admin") || user.getRole().equals("Super Admin"))
+                user.setStatus(UserStatus.ACTIVE);
+            else
+                user.setStatus(UserStatus.ON_BOARDING);
+        }
+        else
+            user.setStatus(UserStatus.INACTIVE);
+
+        User updatedUser = userRepository.save(user);
+        UserDto userDto = userMapper.toDto(updatedUser);
+        return userDto;
+    }
+
 
     public List<UserDto> findUserByName(String name) {
         List<UserDto> userDto = userMapper.toDtos(userRepository.findByFullNameContaining(name));

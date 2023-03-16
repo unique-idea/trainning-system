@@ -5,18 +5,20 @@ import com.fptacademy.training.domain.enumeration.RoleName;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.web.vm.RoleVM;
+import com.fptacademy.training.service.dto.RoleDto;
+import com.fptacademy.training.service.mapper.RoleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
 @Transactional
 public class RoleService {
     private final RoleRepository roleRepository;
+    private final RoleMapper roleMapper;
 
     public Role getRoleByName(String name) {
         return roleRepository
@@ -29,10 +31,11 @@ public class RoleService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Type role " + id + " not found"));
     }
+    public List<RoleDto> getAllPermission(){
+        return roleMapper.toDtos(roleRepository.findAll());
 
-    public List<Role> getAllPermission() {
-        return roleRepository.findAll();
-    }
+
+
 
     public List<Role> updatePermission(List<RoleVM> role) {
         for(int i = 0 ; i < role.size(); i++){
@@ -54,6 +57,5 @@ public class RoleService {
         }
         return getAllPermission();
     }
-
 
 }

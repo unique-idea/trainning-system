@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,6 +43,8 @@ public interface UserResource {
     @PostMapping(value = "/user", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> createUser(@RequestBody @Valid UserVM userVM);
 
+
+    ResponseEntity<UserDto> deActiveUser();
 
     @Operation(
             summary = "Get list of users",
@@ -129,20 +132,40 @@ public interface UserResource {
     ResponseEntity<?> changeRole (@PathVariable long id, String typeRole) ;
 
 
+
     @Operation(
             summary = "Delete user",
-            description = "Delete user by id",
+            description = "Delete user by id (change user's activated)",
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Delete successfully"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
-        @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Delete successfully"),
+            @ApiResponse(responseCode = "400", description = "Can't delete your own account"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
     })
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
     @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
 
+    @Operation(
+            summary = "De-active user",
+            description = "De-active user by id (change user's status)",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "De-active user successfully"),
+            @ApiResponse(responseCode = "400", description = "Can't delete your own account"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
+    })
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
+    @PutMapping(value = "/users/{id}/deActive", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> deActive(@PathVariable("id") Long id);
 
     @Operation(
             summary = "Get users by filters",
