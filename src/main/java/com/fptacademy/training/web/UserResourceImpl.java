@@ -31,11 +31,22 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
+    public ResponseEntity<UserDto> deActiveUser() {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<UserDto> deleteUser(Long id) {
-        UserDto deletedUser = userService.deleteUser(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(deletedUser);
+                .body(userService.deleteUser(id));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> deActive(Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.deActive(id));
     }
 
     @Override

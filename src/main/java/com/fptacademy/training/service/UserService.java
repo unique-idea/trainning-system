@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,13 +26,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.convert.Jsr310Converters.StringToLocalDateConverter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -94,6 +94,26 @@ public class UserService {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
     }
+
+
+    public UserDto deActive(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (!optionalUser.isPresent()) {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+        User user = optionalUser.get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        if (email.equals(user.getEmail())) {
+            throw new ResourceBadRequestException("You cannot de-active your own account");
+        }
+        user.setActivated(!user.getActivated());
+
+        User updatedUser = userRepository.save(user);
+        UserDto userDto = userMapper.toDto(updatedUser);
+        return userDto;
+    }
+
 
     public List<UserDto> findUserByName(String name) {
         List<UserDto> userDto = userMapper.toDtos(userRepository.findByFullNameContaining(name));
