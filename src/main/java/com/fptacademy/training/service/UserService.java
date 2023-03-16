@@ -73,6 +73,8 @@ public class UserService {
         return userMapper.toDtos(userRepository.findAll(pages).getContent());
     }
 
+
+
     public Optional<UserDto> findUserByEmail(String email) {
         return Optional.ofNullable(userMapper.toDto(userRepository
                 .findByEmail(email)
@@ -81,19 +83,22 @@ public class UserService {
 
     public UserDto deleteUser(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
-            if (email.equals(user.getEmail())) {
-                throw new ResourceBadRequestException("You cannot delete your own account");
-            }
-            userRepository.delete(user);
-            return userMapper.toDto(user);
-        } else {
+        if (!optionalUser.isPresent()) {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
+        User user = optionalUser.get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        if (email.equals(user.getEmail())) {
+            throw new ResourceBadRequestException("You cannot delete your own account");
+        }
+        user.setActivated(!user.getActivated());
+
+        User updatedUser = userRepository.save(user);
+        UserDto userDto = userMapper.toDto(updatedUser);
+        return userDto;
     }
+
 
 
     public UserDto deActive(Long id) {
@@ -104,10 +109,19 @@ public class UserService {
         User user = optionalUser.get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        if (email.equals(user.getEmail())) {
+         if (email.equals(user.getEmail()))
             throw new ResourceBadRequestException("You cannot de-active your own account");
+
+         if (user.getStatus() == null)
+            user.setStatus(UserStatus.INACTIVE);
+        else if (user.getStatus() == UserStatus.INACTIVE) {
+            if (user.getRole().equals("Class Admin") || user.getRole().equals("Super Admin"))
+                user.setStatus(UserStatus.ACTIVE);
+            else
+                user.setStatus(UserStatus.ON_BOARDING);
         }
-        user.setActivated(!user.getActivated());
+        else
+            user.setStatus(UserStatus.INACTIVE);
 
         User updatedUser = userRepository.save(user);
         UserDto userDto = userMapper.toDto(updatedUser);

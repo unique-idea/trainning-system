@@ -134,7 +134,7 @@ public interface UserResource {
 
     @Operation(
             summary = "Delete user",
-            description = "Delete user by id",
+            description = "Delete user by id (change user's activated)",
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
@@ -151,7 +151,7 @@ public interface UserResource {
 
     @Operation(
             summary = "De-active user",
-            description = "De-active user by id",
+            description = "De-active user by id (change user's status)",
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
