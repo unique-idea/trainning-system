@@ -21,7 +21,6 @@ import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
-import com.fptacademy.training.service.dto.SyllabusDto.SyllabusUpdatelDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Instant;
@@ -274,19 +273,9 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @PutMapping("/syllabuses/{id}")
-  public ResponseEntity<SyllabusUpdatelDto> updateSyllabus(
-    @PathVariable(value = "id", required = false) final Long id,
-    @RequestBody SyllabusUpdatelDto syllabus
-  ) {
-    if (syllabus.getId() == null) {
-      throw new ResourceBadRequestException("id null");
-    }
-    if (!Objects.equals(id, syllabus.getId())) {
-      throw new ResourceBadRequestException("id invalid");
-    }
-
-    if (!syllabusRepository.existsById(id)) {
+  @PutMapping("/syllabuses")
+  public ResponseEntity<SyllabusDetailDto> updateSyllabus(@RequestBody SyllabusDetailDto syllabus) {
+    if (!syllabusRepository.existsById(syllabus.getId())) {
       throw new ResourceBadRequestException("Entity not found id ");
     }
     return syllabusService

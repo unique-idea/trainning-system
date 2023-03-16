@@ -12,7 +12,6 @@ import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
-import com.fptacademy.training.service.dto.SyllabusDto.SyllabusUpdatelDto;
 import com.fptacademy.training.service.mapper.SyllabusMapper;
 import java.util.Comparator;
 import java.util.List;
@@ -97,109 +96,109 @@ public class SyllabusService {
     return modelMapper.map(syllabusRepository.save(map.map(syllabusDetailDto, Syllabus.class)), SyllabusDetailDto.class);
   }
 
-  public Optional<SyllabusUpdatelDto> update(SyllabusUpdatelDto syllabusDto) {
-    ModelMapper map = new ModelMapper();
-    // map
-    // .createTypeMap(SyllabusDetailDto.class, Syllabus.class)
-    // .addMappings(mapper -> {
-    // mapper.skip(Syllabus::setId);
-    //   mapper.skip(Syllabus::setCreatedAt);
-    //   mapper.<SyllabusStatus>map(src -> SyllabusStatus.DRAFT, Syllabus::setStatus);
-    //   mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
-    // });
-    // map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
-    // map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
-    // map
-    //   .createTypeMap(Unit.class, Unit.class)
-    //   .addMappings(mapper -> {
-    //     mapper.skip(Unit::setId);
-    // mapper
-    //   .using((Converter<List<Lesson>, Double>) ctx -> ctx.getSource().stream().mapToDouble(Lesson::getDuration).sum() / 60)
-    //   .map(Unit::getLessons, Unit::setTotalDurationLesson);
-    // });
-    // map.createTypeMap(Lesson.class, Lesson.class).addMappings(mapper -> mapper.skip(Lesson::setId));
-    // map.createTypeMap(Material.class, Material.class).addMappings(mapper -> mapper.skip(Material::setId));
-
-    Syllabus sula = syllabusRepository.findById(106L).get();
-    List<Session> as = map.map(syllabusDto.getSessions(), new TypeToken<List<Session>>() {}.getType());
-    sula.getSessions().clear();
-    map.map(syllabusDto, sula);
-    sula.getSessions().addAll(as);
-    sula.getSessions().forEach(session -> session.setSyllabus(sula));
-    syllabusRepository.save(sula);
-    System.out.println(sula);
-    return null;
-    // return syllabusRepository
-    //   .findById(syllabusDto.getId())
-    //   .map(syllabus -> {
-    //     modelMapper.map(syllabusDto, syllabus);
-    //     syllabus.getSessions().clear();
-    //     syllabus.getSessions().addAll(modelMapper.map(syllabusDto.getSessions(), new TypeToken<List<Session>>() {}.getType()));
-    //     syllabus.getSessions().forEach(session -> session.setSyllabus(syllabus));
-    //     return syllabus;
-    //   })
-    //   .map(syllabusRepository::save)
-    //   .map(syllabus -> modelMapper.map(syllabus, SyllabusDetailDto.class));
+  public Optional<SyllabusDetailDto> update(SyllabusDetailDto syllabusDto) {
+    TypeMap<SyllabusDetailDto, Syllabus> typeMap = modelMapper.getTypeMap(SyllabusDetailDto.class, Syllabus.class);
+    if (typeMap == null) {
+      typeMap =
+        modelMapper
+          .createTypeMap(SyllabusDetailDto.class, Syllabus.class)
+          .addMappings(mapper -> {
+            mapper.skip(Syllabus::setSessions);
+            mapper.skip(Syllabus::setStatus);
+            mapper.skip(Syllabus::setCreatedBy);
+            mapper.skip(Syllabus::setLastModifiedBy);
+            mapper.skip(Syllabus::setCreatedAt);
+            mapper.skip(Syllabus::setLastModifiedAt);
+            mapper
+              .using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size())
+              .map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
+          });
+    }
+    return syllabusRepository
+      .findById(syllabusDto.getId())
+      .map(syl -> {
+        modelMapper.map(syllabusDto, syl);
+        syl.getSessions().clear();
+        syl.getSessions().addAll(modelMapper.map(syllabusDto.getSessions(), new TypeToken<List<Session>>() {}.getType()));
+        syl
+          .getSessions()
+          .forEach(session -> {
+            session.setSyllabus(syl);
+            session
+              .getUnits()
+              .forEach(unit -> {
+                unit.setSession(session);
+                unit.setTotalDurationLesson(unit.getLessons().stream().mapToDouble(Lesson::getDuration).sum() / 60);
+                unit
+                  .getLessons()
+                  .forEach(lesson -> {
+                    lesson.setUnit(unit);
+                    lesson.getMaterials().forEach(material -> material.setLesson(lesson));
+                  });
+              });
+          });
+        return syl;
+      })
+      .map(syllabusRepository::save)
+      .map(syl -> modelMapper.map(syl, SyllabusDetailDto.class));
   }
 
   @Transactional(readOnly = true)
   public Optional<SyllabusDetailDto> findOne(Long id) {
-    TypeMap<Syllabus, SyllabusDetailDto> typeMap = modelMapper.getTypeMap(Syllabus.class, SyllabusDetailDto.class);
-    if (typeMap == null) {
-      typeMap =
-        modelMapper
-          .createTypeMap(Syllabus.class, SyllabusDetailDto.class)
-          .addMappings(mapper -> {
-            mapper.map(src -> src.getLastModifiedBy().getFullName(), SyllabusDetailDto::setLastModifiedBy);
-            mapper.map(src -> src.getCreatedBy().getFullName(), SyllabusDetailDto::setCreatedBy);
-            mapper
-              .using(
-                (Converter<List<Session>, List<OutputStandard>>) ctx ->
-                  ctx
-                    .getSource()
-                    .stream()
-                    .flatMap(session -> session.getUnits().stream())
-                    .flatMap(unit -> unit.getLessons().stream())
-                    .map(Lesson::getOutputStandard)
-                    .distinct()
-                    .toList()
-              )
-              .map(Syllabus::getSessions, SyllabusDetailDto::setOutputStandard);
-            // mapper
-            //   .using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size())
-            //   .map(Syllabus::getSessions, SyllabusDetailDto::setDuration);
-            mapper
-              .using(
-                (Converter<List<Session>, Double>) ctx ->
-                  ctx
-                    .getSource()
-                    .stream()
-                    .flatMap(session -> session.getUnits().stream())
-                    .flatMap(unit -> unit.getLessons().stream())
-                    .mapToDouble(Lesson::getDuration)
-                    .sum() /
-                  60
-              )
-              .map(Syllabus::getSessions, SyllabusDetailDto::setDurationInHours);
-            mapper
-              .using(
-                (Converter<List<Session>, List<Session>>) ctx ->
-                  ctx
-                    .getSource()
-                    .stream()
-                    .sorted(Comparator.comparing(Session::getIndex))
-                    .map(session -> {
-                      session.setUnits(
-                        session.getUnits().stream().sorted((u1, u2) -> u1.getIndex().compareTo(u2.getIndex())).collect(Collectors.toList())
-                      );
-                      return session;
-                    })
-                    .collect(Collectors.toList())
-              )
-              .map(Syllabus::getSessions, SyllabusDetailDto::setSessions);
-          });
-    }
-    return syllabusRepository.findById(id).map(syl -> modelMapper.map(syl, SyllabusDetailDto.class));
+    ModelMapper map = new ModelMapper();
+    map
+      .createTypeMap(Syllabus.class, SyllabusDetailDto.class)
+      .addMappings(mapper -> {
+        mapper.map(src -> src.getLastModifiedBy().getFullName(), SyllabusDetailDto::setLastModifiedBy);
+        mapper.map(src -> src.getCreatedBy().getFullName(), SyllabusDetailDto::setCreatedBy);
+        mapper
+          .using(
+            (Converter<List<Session>, List<OutputStandard>>) ctx ->
+              ctx
+                .getSource()
+                .stream()
+                .flatMap(session -> session.getUnits().stream())
+                .flatMap(unit -> unit.getLessons().stream())
+                .map(Lesson::getOutputStandard)
+                .distinct()
+                .toList()
+          )
+          .map(Syllabus::getSessions, SyllabusDetailDto::setOutputStandard);
+        // mapper
+        //   .using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size())
+        //   .map(Syllabus::getSessions, SyllabusDetailDto::setDuration);
+        mapper
+          .using(
+            (Converter<List<Session>, Double>) ctx ->
+              ctx
+                .getSource()
+                .stream()
+                .flatMap(session -> session.getUnits().stream())
+                .flatMap(unit -> unit.getLessons().stream())
+                .mapToDouble(Lesson::getDuration)
+                .sum() /
+              60
+          )
+          .map(Syllabus::getSessions, SyllabusDetailDto::setDurationInHours);
+        mapper
+          .using(
+            (Converter<List<Session>, List<Session>>) ctx ->
+              ctx
+                .getSource()
+                .stream()
+                .sorted(Comparator.comparing(Session::getIndex))
+                .map(session -> {
+                  session.setUnits(
+                    session.getUnits().stream().sorted((u1, u2) -> u1.getIndex().compareTo(u2.getIndex())).collect(Collectors.toList())
+                  );
+                  return session;
+                })
+                .collect(Collectors.toList())
+          )
+          .map(Syllabus::getSessions, SyllabusDetailDto::setSessions);
+      });
+
+    return syllabusRepository.findById(id).map(syl -> map.map(syl, SyllabusDetailDto.class));
   }
 
   public void delete(Syllabus syllabus) {
