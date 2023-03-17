@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.web.vm.AccountVM;
 import com.fptacademy.training.web.vm.LoginVM;
+import com.fptacademy.training.web.vm.TokenVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +25,7 @@ public interface AuthenticationResource {
     }
     )
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<AccountVM> login(@RequestBody LoginVM loginVM, HttpServletResponse response);
+    ResponseEntity<AccountVM> login(@RequestBody LoginVM loginVM);
 
     @Operation(summary = "Get access token",
             description = "Get new access token from refresh token",
@@ -32,9 +33,9 @@ public interface AuthenticationResource {
     )
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Successfully"),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid refresh token")
+            @ApiResponse(responseCode = "401", description = "Missing or invalid refresh token", content = @Content)
     }
     )
-    @GetMapping(value = "/refresh")
-    void getAccessTokenFromRefreshToken(@RequestHeader("refresh_token") String refreshToken, HttpServletResponse response);
+    @GetMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<TokenVM> getAccessTokenFromRefreshToken(@RequestHeader("refresh_token") String refreshToken);
 }
