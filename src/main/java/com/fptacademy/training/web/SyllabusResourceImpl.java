@@ -1,5 +1,30 @@
 package com.fptacademy.training.web;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Lesson;
@@ -20,42 +45,11 @@ import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
-import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @RestController
@@ -73,8 +67,14 @@ public class SyllabusResourceImpl {
   private final SyllabusRepository syllabusRepository;
   private final SyllabusService syllabusService;
 
-  @Operation(summary = "", description = "", tags = "outputStandards", security = @SecurityRequirement(name = "token_auth"))
-  @PostMapping("/outputStandards")
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
+  // OutputStandards
+  @PostMapping("/OutputStandards")
   public ResponseEntity<OutputStandard> createOutputStandard(@RequestBody OutputStandard OutputStandardDTO) {
     if (OutputStandardDTO.getId() != null) {
       throw new ResourceBadRequestException("A new OutputStandard cannot already have an ID");
@@ -83,11 +83,16 @@ public class SyllabusResourceImpl {
     return ResponseEntity.ok(result);
   }
 
-  @Operation(summary = "", description = "", tags = "outputStandards", security = @SecurityRequirement(name = "token_auth"))
-  @PutMapping(value = "/outputStandards/{id}")
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
+  @PutMapping(value = "/OutputStandards/{id}")
   public ResponseEntity<OutputStandard> updateOutputStandard(
-    @PathVariable(value = "id", required = false) final Long id,
-    @RequestBody OutputStandard OutputStandardDTO
+          @PathVariable(value = "id", required = false) final Long id,
+          @RequestBody OutputStandard OutputStandardDTO
   ) {
     if (OutputStandardDTO.getId() == null) {
       throw new ResourceBadRequestException("id null");
@@ -106,10 +111,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/OutputStandards")
   public ResponseEntity<List<OutputStandard>> getAllOutputStandards() {
@@ -118,10 +123,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/OutputStandards/{id}")
   public ResponseEntity<OutputStandard> getOutputStandard(@PathVariable Long id) {
@@ -129,14 +134,25 @@ public class SyllabusResourceImpl {
     return outputStandard.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @Operation(deprecated = true, summary = "", description = "", tags = "outputStandards", security = @SecurityRequirement(name = "token_auth"))
-  @DeleteMapping("/outputStandards/{id}")
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
+  @DeleteMapping("/OutputStandards/{id}")
   public ResponseEntity<?> deleteOutputStandard(@PathVariable Long id) {
     outputStandardService.delete(id);
     return ResponseEntity.ok("OK");
   }
 
-  @Operation(summary = "", description = "", tags = "levels", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
+  // level
   @PostMapping("/levels")
   public ResponseEntity<Level> createLevel(@RequestBody Level level) {
     if (level.getId() != null) {
@@ -146,7 +162,12 @@ public class SyllabusResourceImpl {
     return ResponseEntity.ok(result);
   }
 
-  @Operation(summary = "", description = "", tags = "levels", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
   @PutMapping(value = "/levels/{id}")
   public ResponseEntity<Level> updateLevel(@PathVariable(value = "id", required = false) final Long id, @RequestBody Level level) {
     if (level.getId() == null) {
@@ -166,10 +187,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/levels")
   public ResponseEntity<List<Level>> getAllLevels() {
@@ -178,10 +199,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/levels/{id}")
   public ResponseEntity<Level> getLevel(@PathVariable Long id) {
@@ -189,14 +210,25 @@ public class SyllabusResourceImpl {
     return level.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @Operation(deprecated = true, summary = "", description = "", tags = "levels", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
   @DeleteMapping("/levels/{id}")
   public ResponseEntity<?> deleteLevel(@PathVariable Long id) {
     levelService.delete(id);
     return ResponseEntity.ok("OK");
   }
 
-  @Operation(summary = "", description = "", tags = "deliverys", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
+  // delivery
   @PostMapping("/deliverys")
   public ResponseEntity<Delivery> createDelivery(@RequestBody Delivery delivery) {
     if (delivery.getId() != null) {
@@ -206,7 +238,12 @@ public class SyllabusResourceImpl {
     return ResponseEntity.ok(result);
   }
 
-  @Operation(summary = "", description = "", tags = "deliverys", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
   @PutMapping(value = "/deliverys/{id}")
   public ResponseEntity<Delivery> updateDelivery(@PathVariable(value = "id", required = false) final Long id, @RequestBody Delivery delivery) {
     if (delivery.getId() == null) {
@@ -226,10 +263,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/deliverys")
   public ResponseEntity<List<Delivery>> getAllDeliverys() {
@@ -238,10 +275,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/deliverys/{id}")
   public ResponseEntity<Delivery> getDelivery(@PathVariable Long id) {
@@ -249,34 +286,42 @@ public class SyllabusResourceImpl {
     return delivery.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @Operation(deprecated = true, summary = "", description = "", tags = "deliverys", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
   @DeleteMapping("/deliverys/{id}")
   public ResponseEntity<?> deleteDelivery(@PathVariable Long id) {
     deliveryService.delete(id);
     return ResponseEntity.ok("OK");
   }
 
-  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @Operation(
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
+  )
   @GetMapping(value = "/syllabuses")
   @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
-  public ResponseEntity<Page<SyllabusListDto>> getAllSyllabuses(
-    @org.springdoc.api.annotations.ParameterObject Pageable pageable,
-    @RequestParam(required = false) String[] keywords,
-    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
-    Authentication authentication
+  public ResponseEntity<List<SyllabusListDto>> getAllSyllabuses(
+          @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+          @RequestParam(required = false) String[] keywords,
+          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
+          Authentication authentication
   ) {
     return ResponseEntity.ok(
-      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable)
+            syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
     );
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
   @GetMapping("/syllabuses/{id}")
   public ResponseEntity<SyllabusDetailDto> getSyllabus(@PathVariable Long id) {
-    return syllabusService
-      .findOne(id)
-      .map(response -> ResponseEntity.ok().body(response))
-      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Optional<SyllabusDetailDto> result = syllabusService.findOne(id);
+    return result.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
@@ -307,56 +352,77 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  // delivery
   @PostMapping("/syllabuses")
-  public ResponseEntity<SyllabusDetailDto> createSyllabus(@RequestBody SyllabusDetailDto syllabus) {
-    return ResponseEntity.ok(syllabusService.save(syllabus));
+  public ResponseEntity<Syllabus> createSyllabus(@RequestBody Syllabus syllabus) {
+    if (syllabus.getId() != null) {
+      throw new ResourceBadRequestException("A new Syllabus cannot already have an ID");
+    }
+    Syllabus result = syllabusService.save(syllabus);
+    return ResponseEntity.ok(result);
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @PutMapping("/syllabuses")
-  public ResponseEntity<SyllabusDetailDto> updateSyllabus(@RequestBody SyllabusDetailDto syllabus) {
-    if (!syllabusRepository.existsById(syllabus.getId())) {
+  @PutMapping("/syllabuses/{id}")
+  public ResponseEntity<Syllabus> updateSyllabus(@PathVariable(value = "id", required = false) final Long id, @RequestBody Syllabus syllabus) {
+    if (syllabus.getId() == null) {
+      throw new ResourceBadRequestException("id null");
+    }
+    if (!Objects.equals(id, syllabus.getId())) {
+      throw new ResourceBadRequestException("id invalid");
+    }
+
+    if (!syllabusRepository.existsById(id)) {
       throw new ResourceBadRequestException("Entity not found id ");
     }
-    return syllabusService
-      .update(syllabus)
-      .map(response -> ResponseEntity.ok().body(response))
-      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    Optional<Syllabus> result = syllabusService.update(syllabus);
+
+    return result.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
   @PostMapping("/syllabuses/duplicate/{id}")
-  @Transactional
-  public ResponseEntity<Syllabus> duplicateSyllabus(@PathVariable Long id) {
+  public ResponseEntity<?> duplicateSyllabuses(@PathVariable Long id) {
     ModelMapper map = new ModelMapper();
     Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
-    map
-      .createTypeMap(Syllabus.class, Syllabus.class)
-      .addMappings(mapper -> {
-        mapper.skip(Syllabus::setId);
-        mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
-      });
+    modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+    Converter<String, String> emptyToNull = new AbstractConverter<>() {
+      protected String convert(String source) {
+        return (source == null || source.isEmpty()) ? null : source;
+      }
+    };
+
+    map.createTypeMap(Syllabus.class, Syllabus.class).addMappings(mapper -> mapper.skip(Syllabus::setId));
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map.createTypeMap(Unit.class, Unit.class).addMappings(mapper -> mapper.skip(Unit::setId));
-    map.createTypeMap(Lesson.class, Lesson.class).addMappings(mapper -> mapper.skip(Lesson::setId));
     map.createTypeMap(Material.class, Material.class).addMappings(mapper -> mapper.skip(Material::setId));
-    return ResponseEntity.ok(syllabusRepository.save(map.map(syllabus, Syllabus.class)));
+    map
+            .createTypeMap(Lesson.class, Lesson.class)
+            .addMappings(mapper -> mapper.skip(Lesson::setId))
+            .addMappings(mapper -> mapper.using(emptyToNull).map(Lesson::getName, Lesson::setName));
+    Syllabus newSyllabus = map.map(syllabus, Syllabus.class);
+
+    return ResponseEntity.ok(syllabusRepository.save(newSyllabus));
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @GetMapping(value = "/syllabuses/template", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<Resource> getTemplateSyllabus() {
-    Resource resource = new ClassPathResource("templates/Syllabus-template.xlsx");
-    HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename());
-    headers.add(HttpHeaders.CONTENT_TYPE, "application/vnd.ms-excel");
-    return ResponseEntity.ok().headers(headers).body(resource);
+  @PostMapping("/syllabuses/saveAsDraft")
+  public ResponseEntity<?> saveAsDraftSyllabus() {
+    return ResponseEntity.ok(null);
   }
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
-  @PostMapping(value = "/syllabuses/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> importSyllabus(@RequestPart(value = "file") MultipartFile file) {
-    return ResponseEntity.status(HttpStatus.OK).body("File '" + file.getOriginalFilename() + "' đã được tải lên thành công!");
+  @GetMapping("/syllabuses/templateFile")
+  public ResponseEntity<?> templateFileSyllabus() {
+    return ResponseEntity.ok(null);
+  }
+
+  @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
+  @PostMapping("/syllabuses/uploadFile")
+  public ResponseEntity<?> uploadFileSyllabus() {
+    return ResponseEntity.ok(null);
   }
 }
