@@ -12,7 +12,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CLassScheduleDto implements Serializable{
+public class ClassScheduleDto implements Serializable{
     private static final Long serialVersionUID = 1L;
     private Long id;
     private Date study_date;

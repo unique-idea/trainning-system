@@ -1,17 +1,17 @@
 package com.fptacademy.training.service.mapper;
 
-import com.fptacademy.training.domain.*;
 import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.*;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.ClassScheduleService;
-import com.fptacademy.training.service.dto.ClassScheduleDTO;
-import com.fptacademy.training.service.dto.ReturnUserDTO;
-import org.junit.jupiter.api.*;
+import com.fptacademy.training.service.dto.ClassScheduleReturnDto;
+import com.fptacademy.training.service.dto.ReturnUserDto;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -92,7 +92,7 @@ class ClassScheduleMapperTest {
         given(classScheduleService.getCurrentClassDay(anyLong(), anyLong()))
                 .willReturn(4);
         //when
-        ClassScheduleDTO result = classScheduleMapper.toDTO(classScheduleMock);
+        ClassScheduleReturnDto result = classScheduleMapper.toDTO(classScheduleMock);
         //then
 
         assertNotNull(result);
@@ -126,7 +126,7 @@ class ClassScheduleMapperTest {
         given(classScheduleMock.getClassDetail()).willReturn(null);
 
         //when
-        ClassScheduleDTO result = classScheduleMapper.toDTO(classScheduleMock);
+        ClassScheduleReturnDto result = classScheduleMapper.toDTO(classScheduleMock);
 
         //then
         assertNull(result);
@@ -161,7 +161,7 @@ class ClassScheduleMapperTest {
         input.add(classScheduleMock);
         input.add(classScheduleMock);
         input.add(classScheduleMock);
-        List<ClassScheduleDTO> result = classScheduleMapper.toListDTO(input);
+        List<ClassScheduleReturnDto> result = classScheduleMapper.toListDTO(input);
 
         //then
 
@@ -181,7 +181,7 @@ class ClassScheduleMapperTest {
         input.add(classScheduleMock);
         input.add(classScheduleMock);
         input.add(classScheduleMock);
-        List<ClassScheduleDTO> result = classScheduleMapper.toListDTO(input);
+        List<ClassScheduleReturnDto> result = classScheduleMapper.toListDTO(input);
         //then
 
         assertNotNull(result);
@@ -205,7 +205,7 @@ class ClassScheduleMapperTest {
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
 
         //when
-        ReturnUserDTO result = classScheduleMapper.toReturnUserDTO(anyLong());
+        ReturnUserDto result = classScheduleMapper.toReturnUserDTO(anyLong());
 
         //then
         assertEquals(1L, result.getId());
@@ -220,7 +220,7 @@ class ClassScheduleMapperTest {
         given(userRepository.findById(anyLong())).willReturn(Optional.empty());
 
         //when
-        ReturnUserDTO result = classScheduleMapper.toReturnUserDTO(anyLong());
+        ReturnUserDto result = classScheduleMapper.toReturnUserDTO(anyLong());
 
         //then
         assertNull(result);

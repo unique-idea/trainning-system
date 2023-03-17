@@ -13,7 +13,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClassScheduleReturnDTO {
+public class ClassScheduleReturnDto {
 
     private String code;
 
@@ -27,9 +27,9 @@ public class ClassScheduleReturnDTO {
 
     private String type;
 
-    private ReturnUserDTO trainer;
+    private ReturnUserDto trainer;
 
-    private List<ReturnUserDTO> admins = new ArrayList<>();
+    private List<ReturnUserDto> admins = new ArrayList<>();
 
     private LocalDate date;
 
