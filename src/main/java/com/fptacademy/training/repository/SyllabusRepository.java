@@ -1,21 +1,23 @@
 package com.fptacademy.training.repository;
 
-import com.fptacademy.training.domain.Syllabus;
-import com.fptacademy.training.domain.enumeration.SyllabusStatus;
-import com.fptacademy.training.security.Permissions;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
+
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+
+import com.fptacademy.training.domain.Syllabus;
+import com.fptacademy.training.domain.enumeration.SyllabusStatus;
+import com.fptacademy.training.security.Permissions;
 
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSpecificationExecutor<Syllabus> {
 

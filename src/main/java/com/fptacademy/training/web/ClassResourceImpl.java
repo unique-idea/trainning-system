@@ -1,28 +1,25 @@
 package com.fptacademy.training.web;
 
-import com.fptacademy.training.domain.Class;
-import com.fptacademy.training.domain.ClassDetail;
-import com.fptacademy.training.repository.ClassDetailRepository;
-import com.fptacademy.training.repository.ClassRepository;
-import com.fptacademy.training.service.ClassService;
-import com.fptacademy.training.service.dto.*;
-import com.fptacademy.training.service.mapper.ClassDetailMapper;
-import com.fptacademy.training.service.mapper.ClassMapper;
-import com.fptacademy.training.web.api.ClassResource;
-import com.fptacademy.training.web.vm.ClassVM;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import com.fptacademy.training.service.ClassService;
+import com.fptacademy.training.service.dto.AttendeeDto;
+import com.fptacademy.training.service.dto.ClassDetailDto;
+import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.LocationDto;
+import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.web.api.ClassResource;
+import com.fptacademy.training.web.vm.ClassVM;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController

@@ -1,18 +1,14 @@
 package com.fptacademy.training.service.mapper;
 
-import com.fptacademy.training.domain.*;
-import com.fptacademy.training.domain.Class;
-import com.fptacademy.training.repository.UserRepository;
-import com.fptacademy.training.service.ClassScheduleService;
-import com.fptacademy.training.service.dto.ClassScheduleDTO;
-import com.fptacademy.training.service.dto.ReturnUserDTO;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,10 +16,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.fptacademy.training.domain.Attendee;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
+import com.fptacademy.training.domain.ClassSchedule;
+import com.fptacademy.training.domain.Location;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.service.ClassScheduleService;
+import com.fptacademy.training.service.dto.ClassScheduleDTO;
+import com.fptacademy.training.service.dto.ReturnUserDTO;
 
 @ExtendWith(MockitoExtension.class)
 class ClassScheduleMapperTest {

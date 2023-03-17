@@ -1,26 +1,18 @@
 package com.fptacademy.training.service;
 
-import com.fptacademy.training.domain.Level;
-import com.fptacademy.training.domain.Role;
-import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.enumeration.UserStatus;
-import com.fptacademy.training.exception.ResourceAlreadyExistsException;
-import com.fptacademy.training.exception.ResourceBadRequestException;
-import com.fptacademy.training.exception.ResourceNotFoundException;
-import com.fptacademy.training.repository.UserRepository;
-import com.fptacademy.training.service.dto.UserDto;
-import com.fptacademy.training.service.mapper.UserMapper;
-import com.fptacademy.training.service.util.ExcelUploadService;
-import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
-import com.fptacademy.training.web.vm.UserVM;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -34,16 +26,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.exception.ResourceAlreadyExistsException;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.exception.ResourceNotFoundException;
+import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.service.util.ExcelUploadService;
+import com.fptacademy.training.web.vm.UserVM;
 
-import javax.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service

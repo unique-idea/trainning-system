@@ -1,8 +1,14 @@
 package com.fptacademy.training.domain;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import javax.validation.constraints.Size;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

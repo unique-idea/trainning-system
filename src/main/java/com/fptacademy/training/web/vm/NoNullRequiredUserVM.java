@@ -1,11 +1,10 @@
 package com.fptacademy.training.web.vm;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public record NoNullRequiredUserVM (
 
