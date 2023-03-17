@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
-                .antMatchers("/api/users/**").hasRole(RoleName.SUPER_ADMIN.toString())
+                .antMatchers("/api/users/**").hasAuthority("User_FullAccess")
                 .mvcMatchers(AUTH_WHITELIST)
                 .permitAll()
                 .mvcMatchers(HttpMethod.DELETE, "/api/programs")

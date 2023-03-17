@@ -1,5 +1,6 @@
 package com.fptacademy.training.web;
 
+import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.service.RoleService;
 import com.fptacademy.training.service.dto.RoleDto;
 import com.fptacademy.training.web.api.RoleResource;

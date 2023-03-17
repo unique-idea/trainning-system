@@ -62,6 +62,9 @@ public class UserService {
         if (userRepository.existsByEmail(userVM.email())) {
             throw new ResourceAlreadyExistsException("User with email " + userVM.email() + " already existed");
         }
+        if(userRepository.existsByCode(userVM.code())){
+            throw new ResourceAlreadyExistsException("User with code " + userVM.code() + " already existed");
+        }
         User user = userMapper.toEntity(userVM, levelService, roleService);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(userVM.code()));
@@ -70,7 +73,7 @@ public class UserService {
 
     public List<UserDto> getUsers(int pageNumber, int pageSize) {
         Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.Direction.DESC, "id");
-        return userMapper.toDtos(userRepository.findAll(pages).getContent());
+        return userMapper.toDtos(userRepository.findUserByActivatedIsTrue(pages).getContent());
     }
 
 
