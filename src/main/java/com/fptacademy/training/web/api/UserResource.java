@@ -189,7 +189,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UserDto> getUserById(@RequestParam(value = "id") Long id);
+    ResponseEntity<UserDto> getUserById(@PathVariable(value = "id") Long id);
 
     @Operation(
             summary = "Update user by id",

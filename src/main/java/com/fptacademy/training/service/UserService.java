@@ -171,7 +171,8 @@ public class UserService {
                                 existUser.setFullName(noNullRequiredUserVM.fullName());
                             }
                             if (noNullRequiredUserVM.password() != null) {
-                                existUser.setPassword(noNullRequiredUserVM.password());
+                                PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+                                existUser.setPassword(passwordEncoder.encode(noNullRequiredUserVM.password()));
                             }
                             if (noNullRequiredUserVM.activated() != null) {
                                 existUser.setEmail(noNullRequiredUserVM.email());
