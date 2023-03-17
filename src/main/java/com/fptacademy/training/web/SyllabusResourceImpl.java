@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -226,14 +227,14 @@ public class SyllabusResourceImpl {
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
   @GetMapping(value = "/syllabuses")
   @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
-  public ResponseEntity<List<SyllabusListDto>> getAllSyllabuses(
+  public ResponseEntity<Page<SyllabusListDto>> getAllSyllabuses(
     @org.springdoc.api.annotations.ParameterObject Pageable pageable,
     @RequestParam(required = false) String[] keywords,
     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
     Authentication authentication
   ) {
     return ResponseEntity.ok(
-      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
+      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable)
     );
   }
 
