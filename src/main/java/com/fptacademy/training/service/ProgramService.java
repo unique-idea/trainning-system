@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -174,7 +175,9 @@ public class ProgramService {
                 if (row.getCell(0) != null && row.getCell(0).getCellType() == CellType.NUMERIC) {
                     Long id = (long)row.getCell(0).getNumericCellValue();
                     program.setId(id);
-                } else if (row.getCell(0) != null && row.getCell(0).getCellType() != CellType.NUMERIC) {
+                } else if (row.getCell(0) != null &&
+                        row.getCell(0).getCellType() == CellType.STRING &&
+                        StringUtils.hasText(row.getCell(0).getStringCellValue())) {
                     throw new ResourceBadRequestException("Excel file wrong format at Program ID column, make sure to specify right ID format. " +
                             "If not specify ID, please make sure ID cell is empty");
                 }
