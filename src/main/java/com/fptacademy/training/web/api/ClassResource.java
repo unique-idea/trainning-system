@@ -76,7 +76,7 @@ public interface ClassResource {
             @RequestParam(name = "attendee", required = false) List<String> attendeeTypes,
             @RequestParam(name = "fsu", required = false) String fsu,
             @RequestParam(name = "trainer", required = false) String trainerCode,
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     );
 

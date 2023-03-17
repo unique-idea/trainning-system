@@ -31,7 +31,8 @@ public class ClassDetailMapper {
         Class classes = details.getClassField();
         User createdBy = classes.getCreatedBy();
 
-        dto.setClass_id(new ClassDetailDto.ClassSimplified(
+        dto.setClass_id(classes.getId());
+        dto.setClassInfo(new ClassDetailDto.ClassSimplified(
                 classes.getId(),
                 classes.getName(),
                 classes.getCode(),
