@@ -1,9 +1,7 @@
 package com.fptacademy.training.service.mapper;
 
+import com.fptacademy.training.domain.*;
 import com.fptacademy.training.domain.Class;
-import com.fptacademy.training.domain.ClassDetail;
-import com.fptacademy.training.domain.ClassSchedule;
-import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.dto.ClassDetailDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -55,6 +53,25 @@ public class ClassDetailMapper {
                         details.getLocation().getId(),
                         details.getLocation().getCity(),
                         details.getLocation().getFsu()));
+
+        if (classes.getProgram() != null) {
+            int studyDates = classes.getDuration();
+            int studyMinutes = classes.getProgram().getSyllabuses().stream()
+                    .flatMap(s -> s.getSessions().stream())
+                    .flatMap(se -> se.getUnits().stream())
+                    .flatMap(u -> u.getLessons().stream())
+                    .mapToInt(Lesson::getDuration)
+                    .sum();
+            dto.setProgram(new ClassDetailDto.ProgramSimplified(
+                    classes.getProgram().getId(),
+                    classes.getProgram().getName(),
+                    studyDates,
+                    (float) studyMinutes / 60
+            ));
+        }
+        else {
+            dto.setProgram(null);
+        }
 
         if (details.getSchedules() != null) {
 
