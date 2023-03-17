@@ -2,6 +2,7 @@ package com.fptacademy.training.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

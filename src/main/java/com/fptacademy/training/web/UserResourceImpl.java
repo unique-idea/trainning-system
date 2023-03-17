@@ -31,11 +31,22 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
+    public ResponseEntity<UserDto> deActiveUser() {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<UserDto> deleteUser(Long id) {
-        UserDto deletedUser = userService.deleteUser(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(deletedUser);
+                .body(userService.deleteUser(id));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> deActive(Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.deActive(id));
     }
 
     @Override
@@ -60,7 +71,7 @@ public class UserResourceImpl implements UserResource {
                 .body(userService.getUsersByFilters(email, fullName, code, levelName, roleName, activated, birthday));
     }
 
-    public ResponseEntity<?> uploadUserData(MultipartFile file) {
+    public ResponseEntity<?> importUsersFromExcel(MultipartFile file) {
         this.userService.saveUsersToDB(file);
         return ResponseEntity
                 .ok(Map.of("Message", "Users data uploaded and saved database successfully"));

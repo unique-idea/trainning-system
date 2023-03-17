@@ -2,7 +2,7 @@ package com.fptacademy.training.service;
 
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
@@ -25,13 +25,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.convert.Jsr310Converters.StringToLocalDateConverter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -62,6 +60,9 @@ public class UserService {
         if (userRepository.existsByEmail(userVM.email())) {
             throw new ResourceAlreadyExistsException("User with email " + userVM.email() + " already existed");
         }
+        if(userRepository.existsByCode(userVM.code())){
+            throw new ResourceAlreadyExistsException("User with code " + userVM.code() + " already existed");
+        }
         User user = userMapper.toEntity(userVM, levelService, roleService);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(userVM.code()));
@@ -70,8 +71,10 @@ public class UserService {
 
     public List<UserDto> getUsers(int pageNumber, int pageSize) {
         Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.Direction.DESC, "id");
-        return userMapper.toDtos(userRepository.findAll(pages).getContent());
+        return userMapper.toDtos(userRepository.findUserByActivatedIsTrue(pages).getContent());
     }
+
+
 
     public Optional<UserDto> findUserByEmail(String email) {
         return Optional.ofNullable(userMapper.toDto(userRepository
@@ -81,14 +84,49 @@ public class UserService {
 
     public UserDto deleteUser(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            userRepository.delete(user);
-            return userMapper.toDto(user);
-        } else {
+        if (!optionalUser.isPresent()) {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
+        User user = optionalUser.get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        if (email.equals(user.getEmail())) {
+            throw new ResourceBadRequestException("You cannot delete your own account");
+        }
+        user.setActivated(!user.getActivated());
+
+        User updatedUser = userRepository.save(user);
+        UserDto userDto = userMapper.toDto(updatedUser);
+        return userDto;
     }
+
+    public UserDto deActive(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (!optionalUser.isPresent()) {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+        User user = optionalUser.get();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+         if (email.equals(user.getEmail()))
+            throw new ResourceBadRequestException("You cannot de-active your own account");
+
+         if (user.getStatus() == null)
+            user.setStatus(UserStatus.INACTIVE);
+        else if (user.getStatus() == UserStatus.INACTIVE) {
+            if (user.getRole().equals("Class Admin") || user.getRole().equals("Super Admin"))
+                user.setStatus(UserStatus.ACTIVE);
+            else
+                user.setStatus(UserStatus.ON_BOARDING);
+        }
+        else
+            user.setStatus(UserStatus.INACTIVE);
+
+        User updatedUser = userRepository.save(user);
+        UserDto userDto = userMapper.toDto(updatedUser);
+        return userDto;
+    }
+
 
     public List<UserDto> findUserByName(String name) {
         List<UserDto> userDto = userMapper.toDtos(userRepository.findByFullNameContaining(name));
