@@ -33,7 +33,11 @@ public class RoleService {
     }
 
     public List<RoleDto> getAllPermission() {
+    public List<RoleDto> getAllPermission() {
         return roleMapper.toDtos(roleRepository.findAll());
+    }
+
+
     }
 
     public List<Role> updatePermission(List<RoleVM> role) {
@@ -49,6 +53,15 @@ public class RoleService {
                     roleRepository.updatePermission(RoleName.TRAINER.toString(), permission);
                 } else if (role.get(i).name().equalsIgnoreCase(RoleName.TRAINEE.toString())) {
                     roleRepository.updatePermission(RoleName.TRAINEE.toString(), permission);
+                System.out.println(permission);
+                if(role.get(i).name().equalsIgnoreCase(RoleName.SUPER_ADMIN.toString())){
+                    roleRepository.updatePermission(RoleName.SUPER_ADMIN.toString(), role.get(i).permissions());
+                } else if(role.get(i).name().equalsIgnoreCase(RoleName.CLASS_ADMIN.toString())){
+                    roleRepository.updatePermission(RoleName.CLASS_ADMIN.toString(), role.get(i).permissions());
+                } else if(role.get(i).name().equalsIgnoreCase(RoleName.TRAINER.toString())){
+                    roleRepository.updatePermission(RoleName.TRAINER.toString(), role.get(i).permissions());
+                } else if(role.get(i).name().equalsIgnoreCase(RoleName.TRAINEE.toString())){
+                    roleRepository.updatePermission(RoleName.TRAINEE.toString(), role.get(i).permissions());
                 } else {
                     throw new ResourceNotFoundException("Do no have this role: " + role.get(i).name());
                 }
