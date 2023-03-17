@@ -13,8 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,15 +40,16 @@ public class Session implements Serializable {
   @Column(length = 45)
   private String name;
 
-  @Column(length = 45)
-  @JsonIgnore
-  private String status;
-
-  @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Unit> units = new ArrayList<>();
 
   @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "syllabus_id")
   private Syllabus syllabus;
+
+  @PrePersist
+  public void prePersist() {
+    this.units.forEach(u -> u.setSession(this));
+  }
 }

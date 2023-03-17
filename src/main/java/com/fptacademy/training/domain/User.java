@@ -1,7 +1,25 @@
 package com.fptacademy.training.domain;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,15 +27,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.*;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.time.LocalDate;
-
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +37,8 @@ import java.time.LocalDate;
 public class User implements Serializable {
     private static final Long serialVersionUID = 1L;
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(max = 20)
     @Column(length = 20, unique = true, nullable = false)
@@ -63,6 +75,9 @@ public class User implements Serializable {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @Override
     public String toString() {
         return "User{" +
@@ -70,11 +85,12 @@ public class User implements Serializable {
                 ", code='" + code + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", email='" + email + '\'' +
-                ", gender=" + gender +
+                ", gender=" + gender + '\'' +
                 ", avatarUrl='" + avatarUrl + '\'' +
+                ", activated=" + activated + '\'' +
+                ", level=" + level.getName() + '\'' +
+                ", role=" + role.getName() + '\'' +
+                ", status=" + status.name() + '\'' +
                 '}';
     }
-    
-    @Enumerated(EnumType.STRING)
-    private UserStatus status;
 }

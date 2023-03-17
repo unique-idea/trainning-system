@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.List;
@@ -45,4 +46,7 @@ public class ClassDetail implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
     private List<User> users;
+    private String detailLocation;
+    @Email
+    private String contactPoint;
 }

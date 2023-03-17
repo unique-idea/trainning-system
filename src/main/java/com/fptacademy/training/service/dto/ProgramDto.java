@@ -19,7 +19,7 @@ public class ProgramDto implements Serializable {
     private Instant lastModifiedAt;
     private Creator lastModifiedBy;
     private Integer durationInDays;
-    private Float durationInHours;
+    private Double durationInHours;
     private Boolean activated;
     @Getter
     @AllArgsConstructor

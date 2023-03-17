@@ -1,4 +1,4 @@
-package com.fptacademy.training.domain;
+package com.fptacademy.training.domain.enumeration;
 
 public enum UserStatus {
     ON_BOARDING ("On boarding"),

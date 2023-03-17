@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -95,7 +96,7 @@ public class ProgramService {
         List<ProgramDto> programDtos = new ArrayList<>(programMapper.toDtos(programs));
 
         // Sort the list
-        String[] a = sort.split(",");
+        String[] a = sort.split(","); 
         if (a.length != 2) {
             throw new ResourceBadRequestException("Invalid parameter for sort");
         }
@@ -129,30 +130,16 @@ public class ProgramService {
     }
 
     public List<SyllabusDto.SyllabusListDto> findSyllabusesByProgramId(Long id){
-        // Check if program id already existed or not
-        if (!programRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Training program with id '" + id + "' not existed");
-        }
-        // Get program by id
-        Optional<Program> program = programRepository.findById(id);
-
-        // Get list syllabus of program
-        List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());
-        return syllabusDtos;
+        Program program = programRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Training program with id '" + id + "' not existed"));
+        return syllabusMapper.toDtos(program.getSyllabuses());
     }
 
     //tai nguyen
     public ProgramDto findProgramByProgramId(Long id){
-        // Check if program id already existed or not
-        if (!programRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Training program with id '" + id + "' not existed");
-        }
-        // Get program by id
-        Optional<Program> program = programRepository.findById(id);
-        ProgramDto programDto = programMapper.toDto(program.get());
-        // Get list sylla    List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusMapper.toDtos(program.get().getSyllabuses());bus of program
-//
-        return programDto;
+        Program program = programRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Training program with id '" + id + "' not existed"));
+        return programMapper.toDto(program);
     }
 
     //tai nguyen
@@ -185,9 +172,14 @@ public class ProgramService {
                 Row row = sheet.getRow(i);
                 // Create a program object with the information from Excel file
                 Program program = new Program();
-                if (row.getCell(0).getCellType() != CellType.BLANK) {
+                if (row.getCell(0) != null && row.getCell(0).getCellType() == CellType.NUMERIC) {
                     Long id = (long)row.getCell(0).getNumericCellValue();
                     program.setId(id);
+                } else if (row.getCell(0) != null &&
+                        row.getCell(0).getCellType() == CellType.STRING &&
+                        StringUtils.hasText(row.getCell(0).getStringCellValue())) {
+                    throw new ResourceBadRequestException("Excel file wrong format at Program ID column, make sure to specify right ID format. " +
+                            "If not specify ID, please make sure ID cell is empty");
                 }
                 program.setName(row.getCell(1).getStringCellValue().trim());
                 List<Syllabus> syllabuses = Arrays.stream(row.getCell(2).getStringCellValue().trim().split(","))

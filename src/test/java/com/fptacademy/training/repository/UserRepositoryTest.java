@@ -1,307 +1,221 @@
 package com.fptacademy.training.repository;
 
-import com.fptacademy.training.domain.*;
-import com.fptacademy.training.domain.Class;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.fptacademy.training.domain.Level;
+import com.fptacademy.training.domain.Role;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.enumeration.UserStatus;
+import com.fptacademy.training.security.Permissions;
 
 @SpringBootTest
-class UserRepositoryTest {
-
+public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
-
+    
+    @Autowired
+    private LevelRepository levelRepository;
+    
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private Direction direction = Direction.DESC;
+    private String sortBy = "role";
+    private final Pageable pageable = PageRequest.of(0, 2, direction, sortBy);
+    
+    private class UserIdComparator implements Comparator<User> {
+        @Override
+        public int compare(User u1, User u2) {
+            return u1.getId().compareTo(u2.getId());
+        }
+    }
 
-    @Autowired
-    private LevelRepository levelRepository;
-
-    @Autowired
-    private ClassRepository classRepository;
-
-    @Autowired
-    private ClassDetailRepository classDetailRepository;
-
-    @Autowired
-    private LocationRepository locationRepository;
-
-    @Autowired
-    private AttendeeRepository attendeeRepository;
-
-    @Autowired
-    private ClassScheduleRepository classScheduleRepository;
-
-    private User user1, user2, user3, user4, user5;
-    private Class classFields;
-    private ClassDetail classDetail1, classDetail2;
-
-    private ClassSchedule classSchedule1, classSchedule2, classSchedule3, classSchedule4, classSchedule5;
-
+    class UserCustomComparator implements Comparator<User> {
+        @Override
+        public int compare(User u1, User u2) {
+            switch (sortBy) {
+                case "id":
+                    return u1.getId().compareTo(u2.getId());
+                case "code":
+                    return u1.getCode().compareTo(u2.getCode());
+                case "fullName":    
+                    return u1.getFullName().compareTo(u2.getFullName());
+                case "email":
+                    return u1.getEmail().compareTo(u2.getEmail());
+                case "birthday":
+                    return u1.getBirthday().compareTo(u2.getBirthday());
+                case "level":   
+                    return u1.getLevel().getName().compareTo(u2.getLevel().getName());
+                case "role":    
+                    return u1.getRole().getName().compareTo(u2.getRole().getName());
+                case "activated":   
+                    return u1.getActivated().compareTo(u2.getActivated());
+                case "status":  
+                    return u1.getStatus().compareTo(u2.getStatus());
+                default:    
+                    return u1.getId().compareTo(u2.getId());
+            }
+        }
+    }
+    
     @BeforeEach
-    void setUp() {
+    void createFakeData() {
+        Role roleUser = roleRepository.save(
+                Role.builder()
+                        .name("ROLE_USER")
+                        .permissions(List.of(Permissions.USER_FULL_ACCESS))
+                        .build());
+        Role roleAdmin = roleRepository.save(
+                Role.builder()
+                        .name("ROLE_ADMIN")
+                        .permissions(List.of(Permissions.USER_FULL_ACCESS))
+                        .build());
 
-        classScheduleRepository.deleteAll();
-        classDetailRepository.deleteAll();
-        attendeeRepository.deleteAll();
-        classRepository.deleteAll();
+        Level beginner = levelRepository.save(Level.builder().name("Beginner").build());
+        Level intermediate = levelRepository.save(Level.builder().name("Intermediate").build());
+        Level advanced = levelRepository.save(Level.builder().name("Advanced").build());
+
+        User user1 = User.builder()
+                .code("USER001")
+                .fullName("Nguyen Van A")
+                .email("a@gmail.com")
+                .password("123456")
+                .birthday(LocalDate.of(2001, 1, 1))
+                .level(beginner)
+                .role(roleUser)
+                .activated(true)
+                .status(UserStatus.IN_CLASS)
+                .build();
+
+        User user2 = User.builder()
+                .code("USER002")
+                .fullName("Nguyen Van B")
+                .email("b@gmail.com")
+                .password("123456")
+                .birthday(LocalDate.of(1999, 1, 1))
+                .level(intermediate)
+                .role(roleAdmin)
+                .activated(true)
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        User user3 = User.builder()
+                .code("USER003")
+                .fullName("Nguyen Van C")
+                .email("c@gmail.com")
+                .password("123456")
+                .birthday(LocalDate.of(1997, 1, 1))
+                .level(advanced)
+                .role(roleUser)
+                .activated(true)
+                .status(UserStatus.OFF_CLASS)
+                .build();
+
+        userRepository.saveAll(List.of(user1, user2, user3));
+    }
+
+    @AfterEach
+    void deleteFakeData() {
         userRepository.deleteAll();
         levelRepository.deleteAll();
         roleRepository.deleteAll();
-        SecurityContextHolder.clearContext();
+    }
 
-        String password = passwordEncoder.encode("12345");
+    private Boolean isUserMatchFilters(User user, String email, String fullName, String code, String levelName,
+            String roleName, Boolean activated, LocalDate birthdayFrom, LocalDate birthdayTo, String status) {
+        if (email != null && !user.getEmail().toLowerCase().contains(email.toLowerCase()))
+            return false;
+        if (fullName != null && !user.getFullName().toLowerCase().contains(fullName.toLowerCase())) 
+            return false;
+        if (code != null && !user.getCode().toLowerCase().contains(code.toLowerCase()))
+            return false;
+        if (levelName != null && !user.getLevel().getName().toLowerCase().contains(levelName.toLowerCase()))
+            return false;
+        if (roleName != null && !user.getRole().getName().toLowerCase().contains(roleName.toLowerCase()))
+            return false;
+        if (activated != null && !user.getActivated().equals(activated))
+            return false;
+        if (birthdayFrom == null) birthdayFrom = LocalDate.of(0, 1, 1);
+        if (birthdayTo == null) birthdayTo = LocalDate.of(9999, 12, 31);
+        if (user.getBirthday().isBefore(birthdayFrom) || user.getBirthday().isAfter(birthdayTo))
+            return false;
+        if (status != null && !user.getStatus().name().toLowerCase().contains(status.toLowerCase()))
+            return false;
+        return true;
+    }
 
-        List<String> permission = new ArrayList<>();
-        permission.add("Class_FullAccess");
-        permission.add("User_FullAccess");
+    @Test 
+    void shouldReturnAllUsers_whenFindByNoFilters(){
+        Page<User> allUsers = userRepository.findAll(pageable); 
 
-        Role role = new Role();
-        role.setName("Super Admin");
-        role.setPermissions(permission);
-        role = roleRepository.save(role);
+        Page<User> usersNoFilters = userRepository.findByFilters(null, null, null, null, null, null, LocalDate.of(0, 1, 1), LocalDate.of(9999, 12, 31), null, pageable);
+        assertThat(usersNoFilters.getSize()).isEqualTo(pageable.getPageSize());
+        assertThat(usersNoFilters.getContent())
+            .usingElementComparator(new UserIdComparator())
+            .containsExactlyElementsOf(allUsers.getContent());
+    }
 
-        Role role1 = new Role();
-        role1.setName("Class Admin");
-        role1.setPermissions(permission);
-        role1 = roleRepository.save(role1);
+    @Test 
+    void shouldReturnCorrectUsers_whenFindByAllFilters(){
+        final String email = "Gmail", fullName = "NGUYEN", code = "us", levelName = "BEGIN", roleName = "User", status = "_cl";
+        final Boolean activated = true;
+        final LocalDate birthdayFrom = LocalDate.of(2001, 1, 1); 
+        final LocalDate birthdayTo = LocalDate.of(2001, 12, 31); 
 
-        Role role2 = new Role();
-        role2.setName("Attendee");
-        role2.setPermissions(permission);
-        role2 = roleRepository.save(role2);
+        List<User> allUsers = userRepository.findAll();
+        List<User> actualResult = allUsers.stream()
+            .filter(user -> isUserMatchFilters(user, email, fullName, code, levelName, roleName, activated, birthdayFrom, birthdayTo, status))
+            .toList();
+        if (direction.isAscending())
+            actualResult = actualResult.stream().sorted(new UserIdComparator()).toList();
+        else 
+            actualResult = actualResult.stream().sorted(new UserIdComparator().reversed()).toList();
 
-        Level level1 = new Level();
-        level1.setName("Intern");
-        levelRepository.save(level1);
-
-        Level level2 = new Level();
-        level2.setName("Fresher");
-        level2 = levelRepository.save(level2);
-
-        Location location = new Location();
-        location.setCity("Ho Chi Minh");
-        location.setFsu("Ftown1");
-        locationRepository.save(location);
-
-        Location location1 = new Location();
-        location1.setCity("Ho Chi Minh");
-        location1.setFsu("Ftown2");
-        locationRepository.save(location1);
-
-        Location location2 = new Location();
-        location2.setCity("Ha Noi");
-        location2.setFsu("Ftown2");
-        locationRepository.save(location2);
-
-        Attendee attendee1 = new Attendee();
-        attendee1.setType("Intern");
-        attendeeRepository.save(attendee1);
-
-        Attendee attendee2 = new Attendee();
-        attendee2.setType("Fresher");
-        attendeeRepository.save(attendee2);
-
-
-        user1 = new User();
-        user1.setCode("user1");
-        user1.setFullName("User 1");
-        user1.setEmail("user1@test.com");
-        user1.setPassword(password);
-        user1.setBirthday(LocalDate.of(1990, 1, 1));
-        user1.setGender(true);
-        user1.setActivated(true);
-        user1.setRole(role);
-        user1.setLevel(level1);
-        user1.setAvatarUrl("https://avatar.url/user1");
-        user1 = userRepository.save(user1);
-
-
-        user2 = new User();
-        user2.setCode("user2");
-        user2.setFullName("User 2");
-        user2.setEmail("user2@test.com");
-        user2.setPassword(password);
-        user2.setBirthday(LocalDate.of(1990, 2, 2));
-        user2.setGender(false);
-        user2.setActivated(true);
-        user2.setRole(role1);
-        user2.setLevel(level1);
-        user2.setAvatarUrl("https://avatar.url/user2");
-        user2 = userRepository.save(user2);
-
-
-        user3 = new User();
-        user3.setCode("user3");
-        user3.setFullName("User 3");
-        user3.setEmail("user3@test.com");
-        user3.setPassword(password);
-        user3.setBirthday(LocalDate.of(1990, 3, 3));
-        user3.setGender(true);
-        user3.setActivated(false);
-        user3.setRole(role2);
-        user3.setLevel(level1);
-        user3.setAvatarUrl("https://avatar.url/user3");
-        user3 = userRepository.save(user3);
-
-
-        user4 = new User();
-        user4.setCode("user4");
-        user4.setFullName("User 4");
-        user4.setEmail("user4@test.com");
-        user4.setPassword(password);
-        user4.setBirthday(LocalDate.of(1990, 4, 4));
-        user4.setGender(false);
-        user4.setActivated(true);
-        user4.setRole(role2);
-        user4.setLevel(level1);
-        user4.setAvatarUrl("https://avatar.url/user4");
-        user4 = userRepository.save(user4);
-
-
-        user5 = new User();
-        user5.setCode("user5");
-        user5.setFullName("User 5");
-        user5.setEmail("user5@test.com");
-        user5.setPassword(password);
-        user5.setBirthday(LocalDate.of(1990, 5, 5));
-        user5.setGender(true);
-        user5.setActivated(true);
-        user5.setRole(role2);
-        user5.setLevel(level1);
-        user5.setAvatarUrl("https://avatar.url/user5");
-        user5 = userRepository.save(user5);
-
-        //Set login user
-        User currentUser = userRepository.findById(user1.getId()).orElse(null);
-
-        Collection<? extends GrantedAuthority> authorities = Arrays.
-                stream(currentUser.getRole().getPermissions().toString().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                currentUser.getEmail(),
-                null,  //credential
-                authorities// authorities
-        );
-
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authToken);
-        SecurityContextHolder.setContext(context);
-        //set login user
-
-
-        classFields = new Class();
-        classFields.setName("Class 1");
-        classFields.setCode("C1");
-        classFields.setCreatedAt(Instant.now());
-        classFields.setCreatedBy(userRepository.findById(user1.getId()).orElse(null));
-        classFields.setDuration(4);
-        classFields.setLastModifiedAt(Instant.now());
-        classFields.setLastModifiedBy(userRepository.findById(user1.getId()).orElse(null));
-        classFields = classRepository.save(classFields);
-
-
-        classDetail1 = new ClassDetail();
-        classDetail1.setClassField(classFields);
-        classDetail1.setAccepted(20);
-        classDetail1.setPlanned(20);
-        classDetail1.setActual(20);
-        classDetail1.setStartAt(LocalTime.of(8, 0, 0));
-        classDetail1.setFinishAt(LocalTime.of(10, 0, 0));
-        classDetail1.setStatus("ACTIVE");
-        classDetailRepository.save(classDetail1);
-
-
-        classDetail2 = new ClassDetail();
-        classDetail2.setClassField(classFields);
-        classDetail2.setAccepted(20);
-        classDetail2.setPlanned(20);
-        classDetail2.setActual(20);
-        classDetail2.setStartAt(LocalTime.of(8, 0, 0));
-        classDetail2.setFinishAt(LocalTime.of(10, 0, 0));
-        classDetail2.setStatus("INACTIVE");
-        classDetailRepository.save(classDetail2);
-
-        //User class detail
-
-        ClassDetail classDetail = classDetailRepository.findById(classDetail1.getId()).orElse(null);
-        List<User> users = userRepository.findAll();
-        for (int i = 0; i < 4; i++) {
-            User tmp = users.get(i);
-            classDetail.getUsers().add(tmp);
-        }
-        classDetail1 = classDetailRepository.save(classDetail);
-
-        classSchedule1 = new ClassSchedule();
-        classSchedule1.setClassDetail(classDetailRepository.findById(classDetail1.getId()).orElse(null));
-        classSchedule1.setTrainer(user2);
-        classSchedule1.setStudyDate(LocalDate.of(2023, 3, 14));
-        classScheduleRepository.save(classSchedule1);
-
-        classSchedule2 = new ClassSchedule();
-        classSchedule2.setClassDetail(classDetailRepository.findById(classDetail1.getId()).orElse(null));
-        classSchedule2.setTrainer(user2);
-        classSchedule2.setStudyDate(LocalDate.of(2023, 3, 17));
-        classScheduleRepository.save(classSchedule2);
-
-        classSchedule3 = new ClassSchedule();
-        classSchedule3.setClassDetail(classDetailRepository.findById(classDetail1.getId()).orElse(null));
-        classSchedule3.setTrainer(user2);
-        classSchedule3.setStudyDate(LocalDate.of(2023, 3, 21));
-        classScheduleRepository.save(classSchedule3);
-
-        classSchedule4 = new ClassSchedule();
-        classSchedule4.setClassDetail(classDetailRepository.findById(classDetail1.getId()).orElse(null));
-        classSchedule4.setTrainer(user2);
-        classSchedule4.setStudyDate(LocalDate.of(2023, 3, 24));
-        classScheduleRepository.save(classSchedule4);
-
-        classSchedule5 = new ClassSchedule();
-        classSchedule5.setClassDetail(classDetailRepository.findById(classDetail2.getId()).orElse(null));
-        classSchedule5.setTrainer(user2);
-        classSchedule5.setStudyDate(LocalDate.of(2023, 3, 18));
-        classScheduleRepository.save(classSchedule5);
+        actualResult = actualResult.stream().skip(pageable.getOffset()).limit(pageable.getPageSize()).toList();
+    
+        Page<User> usersFullFilters = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, birthdayFrom, birthdayTo, status, pageable);
+        assertThat(usersFullFilters)
+            .usingElementComparator(new UserIdComparator())
+            .containsExactlyInAnyOrderElementsOf(actualResult);
     }
 
     @Test
-    @DisplayName("Test findAdminsOfClass case 1")
-    void findAdminsOfClassShouldReturnAListOfClassAdmin() {
-        List<User> admins = userRepository.findAdminsOfClass(classDetail1.getId());
-        assertNotNull(admins);
-        assertEquals(1, admins.size());
-        assertEquals("Class Admin", admins.get(0).getRole().getName());
-    }
+    void shouldReturnCorrectUsers_whenFindByPartialFilters(){
+        final String email = "Gmail", fullName = null, code = null, levelName = null, roleName = "User", status = null;
+        final Boolean activated = true;
+        final LocalDate birthdayFrom = null, birthdayTo = null; 
 
-    @Test
-    @DisplayName("Test findAdminsOfClass case 2")
-    void findAdminsOfClassShouldReturnAnEmptyList() {
-        List<User> admins = userRepository.findAdminsOfClass(classDetail2.getId());
-        assertNotNull(admins);
-        assertEquals(0, admins.size());
+        List<User> allUsers = userRepository.findAll();
+        List<User> actualResult = allUsers.stream()
+            .filter(user -> isUserMatchFilters(user, email, fullName, code, levelName, roleName, activated, birthdayFrom, birthdayTo, status))
+            .toList();
+        if (direction.isAscending())
+            actualResult = actualResult.stream().sorted(new UserIdComparator()).toList();
+        else 
+            actualResult = actualResult.stream().sorted(new UserIdComparator().reversed()).toList();
+            
+        actualResult = actualResult.stream().skip(pageable.getOffset()).limit(pageable.getPageSize()).toList();
+    
+        Page<User> usersFullFilters = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, birthdayFrom, birthdayTo, status, pageable);
+        assertThat(usersFullFilters)
+            .usingElementComparator(new UserIdComparator())
+            .containsExactlyInAnyOrderElementsOf(actualResult);
     }
 }
