@@ -29,7 +29,6 @@ import lombok.ToString;
 
 @Setter
 @Getter
-@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

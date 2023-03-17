@@ -9,6 +9,7 @@ import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -136,13 +139,6 @@ public class UserService {
         return userMapper.toDtos(page.getContent());
     }
 
-    public Collection<? extends GrantedAuthority> getUserPermissionsByEmail(String email) {
-        return getUserByEmail(email)
-                .getRole()
-                .getPermissions()
-                .stream().map(SimpleGrantedAuthority::new).toList();
-    }
-
     public void saveUsersToDB(MultipartFile file) {
         if (ExcelUploadService.isValidExcelFile(file)) {
             try {
@@ -152,58 +148,6 @@ public class UserService {
                 throw new IllegalArgumentException("The file is not a valid excel file");
             }
         }
-    }
-
-    private Boolean isPropertyValid(String property) {
-        for (String userProperty : userProperties) {
-            if (userProperty.equals(property)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private LocalDate parseDate(String date) {
-        LocalDate localDate = null;
-        if (date != null)
-            try {
-                localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            } catch (Exception e) {
-                throw new ResourceBadRequestException(
-                        date + ": Date format is wrong. Please use yyyy-MM-dd format");
-            }
-        return localDate;
-    }
-
-    public List<UserDto> getUsersByFilters(String email, String fullName, String code,
-            String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo,
-            String status, String sort, Integer pageNumber, Integer pageSize) {
-        LocalDate birthdayFromDate = parseDate(birthdayFrom);
-        if (birthdayFromDate == null) birthdayFromDate = LocalDate.of(0, 1, 1);
-        LocalDate birthdayToDate = parseDate(birthdayTo);
-        if (birthdayToDate == null) birthdayToDate = LocalDate.of(9999, 12, 31);
-        
-        String sortProperty, sortDirection;
-        if (sort == null) sort = "id,ASC";
-        if (pageNumber == null) pageNumber = 0;
-        if (pageSize == null) pageSize = 10;
-
-        sortProperty = sort.split(",")[0];
-        sortDirection = sort.split(",")[1].toUpperCase();
-
-        if (!sortDirection.equals("ASC") && !sortDirection.equals("DESC"))
-            throw new ResourceBadRequestException(sortDirection + ": Sort direction must be ASC or DESC");
-        if (!isPropertyValid(sortProperty))
-            throw new ResourceBadRequestException(sortProperty + ": Sort property is not valid");
-        
-
-        Direction direction = Direction.valueOf(sortDirection);
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, direction, sortProperty);
-        if (status != null)
-            status.replace(" ", "_");
-        
-        Page<User> page = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, birthdayFromDate, birthdayToDate, status, pageable);
-        return userMapper.toDtos(page.getContent());
     }
 
     public Collection<? extends GrantedAuthority> getUserPermissionsByEmail(String email) {

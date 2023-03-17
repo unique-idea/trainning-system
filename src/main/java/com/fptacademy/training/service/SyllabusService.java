@@ -168,18 +168,11 @@ public class SyllabusService {
 
     public void delete(Syllabus syllabus) {
         syllabusRepository.save(syllabus);
-    }<<<<<<<HEAD
+    }
 
   public List<SyllabusDto.SyllabusListDto>findSyllabusesByName(String name){
       List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCase(name);
       List<SyllabusDto.SyllabusListDto> syllabusesDto=syllabusMapper.toDtos(syllabuses);
       return syllabusesDto;
-=======
-
-  public List<SyllabusDto.SyllabusListDto> findSyllabusesByName(String name) {
-    List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCase(name);
-    List<SyllabusDto.SyllabusListDto> syllabusesDto = syllabusMapper.toDtos(syllabuses);
-    return syllabusesDto;
->>>>>>> origin
   }
 }
