@@ -16,7 +16,7 @@ import com.fptacademy.training.service.mapper.SyllabusMapper;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class SyllabusService {
 
   private final SyllabusRepository syllabusRepository;
@@ -78,6 +79,8 @@ public class SyllabusService {
       .createTypeMap(SyllabusDetailDto.class, Syllabus.class)
       .addMappings(mapper -> {
         mapper.skip(Syllabus::setId);
+        mapper.map(src -> 1.0, Syllabus::setVersion);
+        mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
         mapper.<SyllabusStatus>map(src -> SyllabusStatus.DRAFT, Syllabus::setStatus);
         mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
       });
@@ -105,10 +108,10 @@ public class SyllabusService {
           .addMappings(mapper -> {
             mapper.skip(Syllabus::setSessions);
             mapper.skip(Syllabus::setStatus);
-            mapper.skip(Syllabus::setCreatedBy);
-            mapper.skip(Syllabus::setLastModifiedBy);
             mapper.skip(Syllabus::setCreatedAt);
             mapper.skip(Syllabus::setLastModifiedAt);
+            mapper.skip(Syllabus::setCode);
+            mapper.skip(Syllabus::setVersion);
             mapper
               .using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size())
               .map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
@@ -118,6 +121,7 @@ public class SyllabusService {
       .findById(syllabusDto.getId())
       .map(syl -> {
         modelMapper.map(syllabusDto, syl);
+        syl.setVersion(syl.getVersion() + 0.1F);
         syl.getSessions().clear();
         syl.getSessions().addAll(modelMapper.map(syllabusDto.getSessions(), new TypeToken<List<Session>>() {}.getType()));
         syl
