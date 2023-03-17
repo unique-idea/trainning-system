@@ -4,7 +4,7 @@ import com.fptacademy.training.domain.*;
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.ClassScheduleService;
-import com.fptacademy.training.service.dto.ClassScheduleDTO;
+import com.fptacademy.training.service.dto.ClassScheduleReturnDTO;
 import com.fptacademy.training.service.dto.ReturnUserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +22,8 @@ public class ClassScheduleMapper {
 
     private final ClassScheduleService classScheduleService;
 
-    public ClassScheduleDTO toDTO(ClassSchedule classSchedule) {
-        ClassScheduleDTO result = new ClassScheduleDTO();
+    public ClassScheduleReturnDTO toDTO(ClassSchedule classSchedule) {
+        ClassScheduleReturnDTO result = new ClassScheduleReturnDTO();
         try {
             ClassDetail classDetail = classSchedule.getClassDetail();
             Class classField = classDetail.getClassField();
@@ -61,15 +61,15 @@ public class ClassScheduleMapper {
         return result;
     }
 
-    public List<ClassScheduleDTO> toListDTO(List<ClassSchedule> classSchedules) {
+    public List<ClassScheduleReturnDTO> toListDTO(List<ClassSchedule> classSchedules) {
         if(classSchedules == null) {
             return null;
         }
-        List<ClassScheduleDTO> result = new ArrayList<>();
+        List<ClassScheduleReturnDTO> result = new ArrayList<>();
         classSchedules.forEach(
                 classScheduleTmp -> {
                     log.debug("Converting ClassSchedule to ClassScheduleDTO.......");
-                    ClassScheduleDTO tmp = toDTO(classScheduleTmp);
+                    ClassScheduleReturnDTO tmp = toDTO(classScheduleTmp);
                     if (tmp != null) {
                         log.debug("Adding ClassScheduleDTO to result list.......");
                         result.add(tmp);
