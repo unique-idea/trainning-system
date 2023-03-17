@@ -3,6 +3,7 @@ package com.fptacademy.training.service;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
@@ -10,8 +11,10 @@ import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelUploadService;
+import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,16 +26,21 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.validation.constraints.NotNull;
@@ -51,18 +59,25 @@ public class UserService {
 
     private final ExcelUploadService excelUploadService;
 
-    private final String[] userProperties = {"id", "fullName", "email", "phone", "address", "birthday", "level", "role", "status"};
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize maxFileSize;
 
     public UserDto createUser(UserVM userVM) {
         if (userRepository.existsByEmail(userVM.email())) {
             throw new ResourceAlreadyExistsException("User with email " + userVM.email() + " already existed");
         }
-        User user =userMapper.toEntity(userVM, levelService, roleService);
+        if(userRepository.existsByCode(userVM.code())){
+            throw new ResourceAlreadyExistsException("User with code " + userVM.code() + " already existed");
+        }
+        User user = userMapper.toEntity(userVM, levelService, roleService);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPassword(passwordEncoder.encode(userVM.code()));
         return userMapper.toDto(userRepository.save(user));
     }
 
-    public List<UserDto> getUsers() {
-        return userMapper.toDtos(userRepository.findAll());
+    public List<UserDto> getUsers(int pageNumber, int pageSize) {
+        Pageable pages = PageRequest.of(pageNumber, pageSize, Sort.Direction.DESC, "id");
+        return userMapper.toDtos(userRepository.findUserByActivatedIsTrue(pages).getContent());
     }
 
     public Optional<UserDto> findUserByEmail(String email) {
@@ -77,8 +92,7 @@ public class UserService {
         String email = authentication.getName();
         return userRepository
                 .findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "Something went wrong, can not get current logged in user"));
+                .orElseThrow(() -> new UsernameNotFoundException("Something went wrong, can not get current logged in user"));
     }
 
     public User getUserByEmail(String email) {
@@ -115,7 +129,7 @@ public class UserService {
         if (birthdayFromDate == null) birthdayFromDate = LocalDate.of(0, 1, 1);
         LocalDate birthdayToDate = parseDate(birthdayTo);
         if (birthdayToDate == null) birthdayToDate = LocalDate.of(9999, 12, 31);
-        
+
         String sortProperty, sortDirection;
         if (sort == null) sort = "id,ASC";
         if (pageNumber == null) pageNumber = 0;
@@ -128,13 +142,13 @@ public class UserService {
             throw new ResourceBadRequestException(sortDirection + ": Sort direction must be ASC or DESC");
         if (!isPropertyValid(sortProperty))
             throw new ResourceBadRequestException(sortProperty + ": Sort property is not valid");
-        
+
 
         Direction direction = Direction.valueOf(sortDirection);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, direction, sortProperty);
         if (status != null)
             status.replace(" ", "_");
-        
+
         Page<User> page = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated, birthdayFromDate, birthdayToDate, status, pageable);
         return userMapper.toDtos(page.getContent());
     }

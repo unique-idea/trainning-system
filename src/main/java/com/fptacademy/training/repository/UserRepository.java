@@ -1,6 +1,8 @@
 package com.fptacademy.training.repository;
 
 import com.fptacademy.training.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -22,6 +24,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     
     boolean findUserByCodeIgnoreCase(String code);
+
+    boolean existsByCode(String code);
+
+    Page<User> findUserByActivatedIsTrue(Pageable pageable);
 
     Optional<User> findByEmail(String email);
     

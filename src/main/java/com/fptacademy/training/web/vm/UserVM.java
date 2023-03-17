@@ -32,6 +32,7 @@ public record UserVM(
         @NotBlank(message = "Level must be not empty")
         String level,
 
+        @Schema(defaultValue = "TRAINEE")
         @NotBlank(message = "Role must be not empty")
         String role,
 
@@ -41,6 +42,7 @@ public record UserVM(
         @NotBlank(message = "Code must be not empty")
         String code,
 
+        @Schema(defaultValue = "ACTIVE")
         @NotBlank(message = "Status must be not empty")
         String status
 
