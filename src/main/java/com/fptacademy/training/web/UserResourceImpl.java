@@ -53,10 +53,12 @@ public class UserResourceImpl implements UserResource {
 
     @Override
     public ResponseEntity<List<UserDto>> getUsersByFilters(String email, String fullName, String code,
-            String levelName, String roleName, Boolean activated, String birthday) {
+            String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo, 
+            String status, String sort, Integer pageNumber, Integer pageSize) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getUsersByFilters(email, fullName, code, levelName, roleName, activated, birthday));
+                .body(userService.getUsersByFilters(email, fullName, code, levelName,
+                        roleName, false, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
     }
 
     public ResponseEntity<?> uploadUserData(MultipartFile file) {
@@ -78,5 +80,4 @@ public class UserResourceImpl implements UserResource {
         return ResponseEntity
                 .ok(Map.of("Message", "User's role change successfully"));
     }
-
 }

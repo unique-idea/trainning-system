@@ -95,7 +95,7 @@ public class ProgramService {
         List<ProgramDto> programDtos = new ArrayList<>(programMapper.toDtos(programs));
 
         // Sort the list
-        String[] a = sort.split(",");
+        String[] a = sort.split(","); 
         if (a.length != 2) {
             throw new ResourceBadRequestException("Invalid parameter for sort");
         }
