@@ -28,12 +28,12 @@ public class UserResourceImpl implements UserResource {
                 .body(userService.createUser(userVM));
     }
 
-    @Override
-    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.getUsers(pageNumber, pageSize));
-    }
+//    @Override
+//    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(userService.getUsers(pageNumber, pageSize));
+//    }
 
     @Override
     public ResponseEntity<Optional<UserDto>> getUserByEmail(String email) {
@@ -43,12 +43,12 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> getUsersByFilters(String email, String fullName, String code,
-            String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo, 
+    public ResponseEntity<List<UserDto>> getUsers(String email, String fullName, String code,
+            String levelName, String roleName, String birthdayFrom, String birthdayTo,
             String status, String sort, Integer pageNumber, Integer pageSize) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.getUsersByFilters(email, fullName, code, levelName,
-                        roleName, false, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
+                        roleName, true, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
     }
 }
