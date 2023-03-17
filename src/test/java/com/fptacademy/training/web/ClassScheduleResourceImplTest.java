@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.ClassScheduleService;
 import com.fptacademy.training.service.UserService;
-import com.fptacademy.training.service.dto.ClassScheduleReturnDto;
+import com.fptacademy.training.service.dto.ReturnClassScheduleDtoOld;
 import com.fptacademy.training.service.mapper.ClassScheduleMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,22 +47,22 @@ class ClassScheduleResourceImplTest {
     //    @Autowired
 //    private Jackson2ObjectMapperBuilder mapperBuilder;
     private static final String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJhdXRoIjoiQ2xhc3NfRnVsbEFjY2VzcyxNYXRlcmlhbF9GdWxsQWNjZXNzLFByb2dyYW1fRnVsbEFjY2VzcyxTeWxsYWJ1c19GdWxsQWNjZXNzLFVzZXJfRnVsbEFjY2VzcyIsImV4cCI6MTY3ODk1OTcyNn0.SaWGkjSJW0iPbhJrsMqgu162GN3Y7cVfEMRkBQBiCfw";
-    private List<ClassScheduleReturnDto> classScheduleDTOList;
-    private ClassScheduleReturnDto classScheduleDTO1;
-    private ClassScheduleReturnDto classScheduleDTO2;
+    private List<ReturnClassScheduleDtoOld> classScheduleDTOList;
+    private ReturnClassScheduleDtoOld classScheduleDTO1;
+    private ReturnClassScheduleDtoOld classScheduleDTO2;
     private User user1;
 
 
     @BeforeEach
     void setUp() {
-        classScheduleDTO1 = new ClassScheduleReturnDto();
+        classScheduleDTO1 = new ReturnClassScheduleDtoOld();
         classScheduleDTO1.setCode("Java01");
         classScheduleDTO1.setName("Java intern 01");
         classScheduleDTO1.setDate(LocalDate.now());
         classScheduleDTO1.setType("Intern");
         classScheduleDTO1.setLocation("HCM.Ftown1");
 
-        classScheduleDTO2 = new ClassScheduleReturnDto();
+        classScheduleDTO2 = new ReturnClassScheduleDtoOld();
         classScheduleDTO2.setCode("React01");
         classScheduleDTO2.setName("React intern 01");
         classScheduleDTO2.setDate(LocalDate.now());

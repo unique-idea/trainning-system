@@ -1,4 +1,3 @@
-
 package com.fptacademy.training.service.dto;
 
 import lombok.*;
@@ -13,21 +12,25 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClassScheduleReturnDto {
+public class ReturnClassScheduleDto {
 
-    private String code;
+    private Long classId;
 
-    private String name;
+    private String classCode;
+
+    private String className;
 
     private int duration;
 
     private int currentClassDay;
 
-    private String location;
+    private String city;
+
+    private String Fsu;
 
     private String type;
 
-    private ReturnUserDto trainer;
+    private List<ReturnUserDto> trainers;
 
     private List<ReturnUserDto> admins = new ArrayList<>();
 
@@ -36,4 +39,7 @@ public class ClassScheduleReturnDto {
     private LocalTime startAt;
 
     private LocalTime finishAt;
+
+    private List<ReturnUnitDto> units;
+
 }
