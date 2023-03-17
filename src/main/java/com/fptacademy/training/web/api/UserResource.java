@@ -46,7 +46,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<UserDto>> getUsers();
+    ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize);
 
     @Operation(summary = "Get user by email", description = "Get user by email", tags = "user", security = @SecurityRequirement(name = "token_auth"))
     @ApiResponses(value = {

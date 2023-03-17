@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.mapper.UserMapper;

@@ -29,10 +29,10 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> getUsers() {
+    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getUsers());
+                .body(userService.getUsers(pageNumber, pageSize));
     }
 
     @Override

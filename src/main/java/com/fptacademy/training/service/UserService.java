@@ -62,6 +62,8 @@ public class UserService {
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize maxFileSize;
 
+    private String[] userProperties = {"id", "email", "fullName", "code", "level", "role", "activated", "birthday", "status"}; 
+
     public UserDto createUser(UserVM userVM) {
         if (userRepository.existsByEmail(userVM.email())) {
             throw new ResourceAlreadyExistsException("User with email " + userVM.email() + " already existed");

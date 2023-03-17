@@ -22,7 +22,7 @@ import org.springframework.data.domain.Sort.Direction;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.UserStatus;
+import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.security.Permissions;
 
 @SpringBootTest
