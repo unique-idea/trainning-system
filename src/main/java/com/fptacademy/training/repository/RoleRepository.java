@@ -14,5 +14,5 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
     @Modifying
     @Query("UPDATE Role r SET r.permissions = :permission WHERE r.name = :role")
-    void updatePermission(@Param("role") String role,@Param("permission") String permission);
+    void updatePermission(@Param("role") String role,@Param("permission") List<String> permission);
 }

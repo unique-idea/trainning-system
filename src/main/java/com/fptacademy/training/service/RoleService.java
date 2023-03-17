@@ -31,9 +31,9 @@ public class RoleService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Type role " + id + " not found"));
     }
-    public List<RoleDto> getAllPermission(){
+    public List<RoleDto> getAllPermission() {
         return roleMapper.toDtos(roleRepository.findAll());
-
+    }
 
 
 
@@ -41,21 +41,22 @@ public class RoleService {
         for(int i = 0 ; i < role.size(); i++){
             if(role.get(i).permissions().size() == 5){
                 String permission = String.join(",", role.get(i).permissions());
+                System.out.println(permission);
                 if(role.get(i).name().equalsIgnoreCase(RoleName.SUPER_ADMIN.toString())){
-                    roleRepository.updatePermission(RoleName.SUPER_ADMIN.toString(), permission);
+                    roleRepository.updatePermission(RoleName.SUPER_ADMIN.toString(), role.get(i).permissions());
                 } else if(role.get(i).name().equalsIgnoreCase(RoleName.CLASS_ADMIN.toString())){
-                    roleRepository.updatePermission(RoleName.CLASS_ADMIN.toString(), permission);
+                    roleRepository.updatePermission(RoleName.CLASS_ADMIN.toString(), role.get(i).permissions());
                 } else if(role.get(i).name().equalsIgnoreCase(RoleName.TRAINER.toString())){
-                    roleRepository.updatePermission(RoleName.TRAINER.toString(), permission);
+                    roleRepository.updatePermission(RoleName.TRAINER.toString(), role.get(i).permissions());
                 } else if(role.get(i).name().equalsIgnoreCase(RoleName.TRAINEE.toString())){
-                    roleRepository.updatePermission(RoleName.TRAINEE.toString(), permission);
+                    roleRepository.updatePermission(RoleName.TRAINEE.toString(), role.get(i).permissions());
                 } else {
                     throw new ResourceNotFoundException("Do no have this role: " + role.get(i).name());
                 }
             }
 
         }
-        return getAllPermission();
+        return roleRepository.findAll();
     }
 
 }
