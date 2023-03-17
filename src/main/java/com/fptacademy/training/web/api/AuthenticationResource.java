@@ -37,5 +37,5 @@ public interface AuthenticationResource {
     }
     )
     @GetMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<TokenVM> getAccessTokenFromRefreshToken(@RequestHeader("refresh_token") String refreshToken);
+    ResponseEntity<TokenVM> getAccessTokenFromRefreshToken(@RequestHeader("Refresh-Token") String refreshToken);
 }
