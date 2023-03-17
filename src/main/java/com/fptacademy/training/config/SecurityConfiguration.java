@@ -14,6 +14,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,21 +50,32 @@ public class SecurityConfiguration {
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
+                .mvcMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/api/users/**").hasAuthority("User_FullAccess")
-                .mvcMatchers(AUTH_WHITELIST)
-                .permitAll()
-                .mvcMatchers(HttpMethod.DELETE, "/api/programs")
-                .hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers(HttpMethod.PATCH, "/api/programs")
-                .hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers(HttpMethod.POST, "/api/programs")
-                .hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers("/api/programs/**")
-                .hasAnyAuthority(Permissions.PROGRAM_VIEW, Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .anyRequest()
-                .authenticated()
-                .and()
-                .build();
+                .mvcMatchers(HttpMethod.DELETE, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.PATCH, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.POST, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers("/api/programs/**").hasAnyAuthority(Permissions.PROGRAM_VIEW, Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.DELETE, "/api/class/**").hasAnyAuthority(
+                        Permissions.CLASS_MODIFY,
+                        Permissions.CLASS_FULL_ACCESS
+                )
+                .mvcMatchers(HttpMethod.PUT, "/api/class/**").hasAnyAuthority(
+                        Permissions.CLASS_MODIFY,
+                        Permissions.CLASS_FULL_ACCESS
+                )
+                .mvcMatchers(HttpMethod.POST, "/api/class").hasAnyAuthority(
+                        Permissions.CLASS_CREATE,
+                        Permissions.CLASS_MODIFY,
+                        Permissions.CLASS_FULL_ACCESS
+                )
+                .mvcMatchers("/api/class/**").hasAnyAuthority(
+                        Permissions.CLASS_VIEW,
+                        Permissions.CLASS_CREATE,
+                        Permissions.CLASS_MODIFY,
+                        Permissions.CLASS_FULL_ACCESS)
+                .anyRequest().authenticated()
+                .and().build();
     }
 
 

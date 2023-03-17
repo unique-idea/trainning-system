@@ -20,5 +20,4 @@ public class CustomCorsConfiguration {
         };
         c.configurationSource(source);
     }
-
 }

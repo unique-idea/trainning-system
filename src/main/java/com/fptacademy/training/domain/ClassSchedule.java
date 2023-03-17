@@ -24,4 +24,7 @@ public class ClassSchedule implements Serializable {
     @JoinColumn(name = "trainer_id")
     private User trainer;
     private LocalDate studyDate;
+    @ManyToOne
+    @JoinColumn(name = "session_id")
+    private Session session;
 }
