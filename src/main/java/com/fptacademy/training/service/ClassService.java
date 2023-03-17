@@ -7,10 +7,12 @@ import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.*;
+import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.service.mapper.*;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,12 @@ public class ClassService {
     private final AttendeeMapper attendeeMapper;
     private final LocationMapper locationMapper;
 
+    @PostFilter("(hasAnyAuthority('" + Permissions.CLASS_VIEW + "') " +
+            "and filterObject.status != 'DRAFT' and filterObject.status != 'INACTIVE') or " +
+            "(hasAnyAuthority('" +
+            Permissions.CLASS_CREATE + "', '" +
+            Permissions.CLASS_MODIFY + "', '" +
+            Permissions.CLASS_FULL_ACCESS  + "'))")
     public List<ClassDto> filterClass(List<String> keywords,
                             LocalDate from,
                             LocalDate to,
@@ -69,9 +77,7 @@ public class ClassService {
         }
         else classes = classRepository.findAll();
         classes = classes.stream()
-                .filter(c -> !c.getClassDetail().getStatus().equals("DELETED") &&
-                        !c.getClassDetail().getStatus().equals("DRAFT") &&
-                        !c.getClassDetail().getStatus().equals("INACTIVE"))
+                .filter(c -> !c.getClassDetail().getStatus().equals("DELETED"))
                 .filter(c -> {
             LocalDate minStudyDate =
                     Collections.min(c.getClassDetail().getSchedules().stream().map(ClassSchedule::getStudyDate).toList());
@@ -125,12 +131,6 @@ public class ClassService {
                 .orElseThrow(() -> new ResourceNotFoundException("FSU ID not found"));
         Attendee attendee = attendeeRepository.findById(classVM.attendeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attendee ID not found"));
-        int totalStudyMinutes = program.getSyllabuses().stream()
-                        .flatMap(s -> s.getSessions().stream())
-                        .flatMap(se -> se.getUnits().stream())
-                        .flatMap(u -> u.getLessons().stream())
-                        .mapToInt(Lesson::getDuration)
-                        .sum();
         newClass.setDuration(totalStudyDates);
         newClass.setProgram(program);
         newClass.setCode("Generating");

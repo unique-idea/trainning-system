@@ -11,8 +11,7 @@ import java.util.Optional;
 
 public interface ClassDetailRepository extends JpaRepository<ClassDetail,Long> {
 
-    @Query("select c from ClassDetail c where c.classField.id = :id and c.status <> 'DELETED' and " +
-            "c.status <> 'DRAFT' and c.status <> 'INACTIVE'")
+    @Query("select c from ClassDetail c where c.classField.id = :id and c.status <> 'DELETED'")
     Optional<ClassDetail> findDetailsByClass_IdAndStatusNotDeleted(@Param("id") Long class_id);
 
     @Transactional

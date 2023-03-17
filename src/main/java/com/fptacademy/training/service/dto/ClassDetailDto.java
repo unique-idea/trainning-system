@@ -32,6 +32,7 @@ public class ClassDetailDto implements Serializable{
     private LocationSimplified location;
     private List<UserSimplified> trainer;
     private List<UserSimplified> admin;
+    private ProgramSimplified program;
     private List<ScheduleSimplified> schedules;
 
     @Getter
