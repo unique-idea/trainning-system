@@ -2,8 +2,6 @@ package com.fptacademy.training.service.mapper;
 
 import com.fptacademy.training.domain.Lesson;
 import com.fptacademy.training.domain.Syllabus;
-import com.fptacademy.training.domain.*;
-import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -16,19 +14,19 @@ import java.util.List;
 public class SyllabusMapper {
     private final ModelMapper modelMapper;
 
-    public SyllabusDto.SyllabusListDto toDto(Syllabus syllabus){
-        if(syllabus == null){
+    public SyllabusDto.SyllabusListDto toDto(Syllabus syllabus) {
+        if (syllabus == null) {
             return null;
         }
-        SyllabusDto.SyllabusListDto dto =modelMapper.map(syllabus, SyllabusDto.SyllabusListDto.class);
-        dto.setCreatedBy(syllabus.getCreatedBy().getCode());
-        int days = syllabus.getSessions().size();
-        double hours = syllabus.getSessions().stream()
+        SyllabusDto.SyllabusListDto dto = modelMapper.map(syllabus, SyllabusDto.SyllabusListDto.class);
+        int durationInDays = syllabus.getSessions().size();
+        int durationInMinutes = (int) syllabus.getSessions().stream()
                 .flatMap(s -> s.getUnits().stream())
-                .mapToDouble(Unit::getTotalDurationLesson)
+                .flatMap(u -> u.getLessons().stream())
+                .mapToLong(Lesson::getDuration)
                 .sum();
-        dto.setDuration(days);
-        dto.setDurationInHours(hours);
+        dto.setDuration(durationInDays);
+        dto.setDurationInHours(durationInMinutes / 60.f);
         return dto;
     }
 
