@@ -1,12 +1,11 @@
 package com.fptacademy.training.service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.io.Serializable;
 import java.time.Instant;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Setter
 @Getter
@@ -19,7 +18,7 @@ public class ProgramDto implements Serializable {
     private Instant lastModifiedAt;
     private Creator lastModifiedBy;
     private Integer durationInDays;
-    private Float durationInHours;
+    private Double durationInHours;
     private Boolean activated;
     @Getter
     @AllArgsConstructor

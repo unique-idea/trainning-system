@@ -4,8 +4,8 @@ import com.fptacademy.training.domain.*;
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.ClassScheduleService;
-import com.fptacademy.training.service.dto.ClassScheduleDTO;
-import com.fptacademy.training.service.dto.ReturnUserDTO;
+import com.fptacademy.training.service.dto.ReturnClassScheduleDtoOld;
+import com.fptacademy.training.service.dto.ReturnUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,17 +22,17 @@ public class ClassScheduleMapper {
 
     private final ClassScheduleService classScheduleService;
 
-    public ClassScheduleDTO toDTO(ClassSchedule classSchedule) {
-        ClassScheduleDTO result = new ClassScheduleDTO();
+    public ReturnClassScheduleDtoOld toDTO(ClassSchedule classSchedule) {
+        ReturnClassScheduleDtoOld result = new ReturnClassScheduleDtoOld();
         try {
             ClassDetail classDetail = classSchedule.getClassDetail();
             Class classField = classDetail.getClassField();
             Attendee attendee = classDetail.getAttendee();
             List<User> adminsUser = userRepository.findAdminsOfClass(classDetail.getId());
-            List<ReturnUserDTO> admins = new ArrayList<>();
+            List<ReturnUserDto> admins = new ArrayList<>();
             adminsUser.forEach(
                     a -> {
-                        ReturnUserDTO tmp = new ReturnUserDTO(a.getFullName(), a.getId());
+                        ReturnUserDto tmp = new ReturnUserDto(a.getFullName(), a.getId());
                         admins.add(tmp);
                     }
             );
@@ -46,7 +46,7 @@ public class ClassScheduleMapper {
             result.setCurrentClassDay(currentClassDay);
             Location location = classDetail.getLocation();
             result.setLocation(location.getCity() + "." + location.getFsu());
-            ReturnUserDTO trainer = toReturnUserDTO(classSchedule.getTrainer().getId());
+            ReturnUserDto trainer = toReturnUserDTO(classSchedule.getTrainer().getId());
             result.setTrainer(trainer);
             result.setAdmins(admins);
 
@@ -61,15 +61,15 @@ public class ClassScheduleMapper {
         return result;
     }
 
-    public List<ClassScheduleDTO> toListDTO(List<ClassSchedule> classSchedules) {
+    public List<ReturnClassScheduleDtoOld> toListDTO(List<ClassSchedule> classSchedules) {
         if(classSchedules == null) {
             return null;
         }
-        List<ClassScheduleDTO> result = new ArrayList<>();
+        List<ReturnClassScheduleDtoOld> result = new ArrayList<>();
         classSchedules.forEach(
                 classScheduleTmp -> {
                     log.debug("Converting ClassSchedule to ClassScheduleDTO.......");
-                    ClassScheduleDTO tmp = toDTO(classScheduleTmp);
+                    ReturnClassScheduleDtoOld tmp = toDTO(classScheduleTmp);
                     if (tmp != null) {
                         log.debug("Adding ClassScheduleDTO to result list.......");
                         result.add(tmp);
@@ -79,8 +79,8 @@ public class ClassScheduleMapper {
         return result;
     }
 
-    public ReturnUserDTO toReturnUserDTO(Long id) {
-        ReturnUserDTO result = new ReturnUserDTO();
+    public ReturnUserDto toReturnUserDTO(Long id) {
+        ReturnUserDto result = new ReturnUserDto();
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             return null;

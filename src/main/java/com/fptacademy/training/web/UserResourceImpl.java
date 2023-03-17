@@ -17,6 +17,7 @@ import com.fptacademy.training.web.vm.UserVM;
 
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
 @RestController
 public class UserResourceImpl implements UserResource {
@@ -49,12 +50,12 @@ public class UserResourceImpl implements UserResource {
                 .body(userService.deActive(id));
     }
 
-    @Override
-    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.getUsers(pageNumber, pageSize));
-    }
+//    @Override
+//    public ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize) {
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(userService.getUsers(pageNumber, pageSize));
+//    }
 
     @Override
     public ResponseEntity<Optional<UserDto>> getUserByEmail(String email) {
@@ -64,11 +65,13 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> getUsersByFilters(String email, String fullName, String code,
-            String levelName, String roleName, Boolean activated, String birthday) {
+    public ResponseEntity<List<UserDto>> getUsers(String email, String fullName, String code,
+            String levelName, String roleName, String birthdayFrom, String birthdayTo,
+            String status, String sort, Integer pageNumber, Integer pageSize) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.getUsersByFilters(email, fullName, code, levelName, roleName, activated, birthday));
+                .body(userService.getUsersByFilters(email, fullName, code, levelName,
+                        roleName, true, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
     }
 
     public ResponseEntity<?> importUsersFromExcel(MultipartFile file) {
