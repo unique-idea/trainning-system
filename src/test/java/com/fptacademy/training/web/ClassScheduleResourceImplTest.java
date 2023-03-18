@@ -1,11 +1,19 @@
 package com.fptacademy.training.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fptacademy.training.domain.User;
-import com.fptacademy.training.service.ClassScheduleService;
-import com.fptacademy.training.service.UserService;
-import com.fptacademy.training.service.dto.ReturnClassScheduleDtoOld;
-import com.fptacademy.training.service.mapper.ClassScheduleMapper;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,15 +26,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.service.ClassScheduleService;
+import com.fptacademy.training.service.UserService;
+import com.fptacademy.training.service.dto.ReturnClassScheduleDtoOld;
+import com.fptacademy.training.service.mapper.ClassScheduleMapper;
 
 @ExtendWith(MockitoExtension.class)
 class ClassScheduleResourceImplTest {

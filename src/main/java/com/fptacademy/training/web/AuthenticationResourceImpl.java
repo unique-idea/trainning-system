@@ -1,13 +1,5 @@
 package com.fptacademy.training.web;
 
-import com.fptacademy.training.domain.User;
-import com.fptacademy.training.security.jwt.JwtTokenProvider;
-import com.fptacademy.training.service.UserService;
-import com.fptacademy.training.web.api.AuthenticationResource;
-import com.fptacademy.training.web.vm.AccountVM;
-import com.fptacademy.training.web.vm.LoginVM;
-import com.fptacademy.training.web.vm.TokenVM;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,7 +9,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.security.jwt.JwtTokenProvider;
+import com.fptacademy.training.service.UserService;
+import com.fptacademy.training.web.api.AuthenticationResource;
+import com.fptacademy.training.web.vm.AccountVM;
+import com.fptacademy.training.web.vm.LoginVM;
+import com.fptacademy.training.web.vm.TokenVM;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController

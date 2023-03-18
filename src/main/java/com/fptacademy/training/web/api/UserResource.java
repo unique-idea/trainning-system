@@ -8,15 +8,22 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,16 +44,23 @@ public interface UserResource {
     @PostMapping(value = "/user", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> createUser(@RequestBody @Valid UserVM userVM);
 
-    @Operation(summary = "Get list of users", description = "Get list of users with sort and pagination", tags = "user", security = @SecurityRequirement(name = "token_auth"))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found users"),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-    })
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize);
+    ResponseEntity<UserDto> deActiveUser();
+
+    // @Operation(summary = "Get list of users", description = "Get list of users
+    // with sort and pagination", tags = "user", security =
+    // @SecurityRequirement(name = "token_auth"))
+    // @ApiResponses(value = {
+    // @ApiResponse(responseCode = "200", description = "Found users"),
+    // @ApiResponse(responseCode = "400", description = "Invalid parameters",
+    // content = @Content),
+    // @ApiResponse(responseCode = "401", description = "Unauthorized, missing or
+    // invalid JWT", content = @Content),
+    // @ApiResponse(responseCode = "403", description = "Access denied, do not have
+    // permission to access this resource", content = @Content),
+    // })
+    // @ResponseStatus(HttpStatus.OK)
+    // @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    // ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize);
 
     @Operation(summary = "Get user by email", description = "Get user by email", tags = "user", security = @SecurityRequirement(name = "token_auth"))
     @ApiResponses(value = {
@@ -57,15 +71,22 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
     ResponseEntity<Optional<UserDto>> getUserByEmail(@PathVariable String email);
 
+    @Operation(summary = "Import users from excel", description = "Import users from excel", tags = "user", security = @SecurityRequirement(name = "token_auth"))
 
-    @Operation(
-            summary = "Get users by filters",
-            description = "Get users by filters",
-            tags = "user",
-            security = @SecurityRequirement(name = "token_auth")
-    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Import successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<?> importUsersFromExcel(@RequestParam("file") MultipartFile file);
+
+    @Operation(summary = "Get user by name", description = "Get user by name", tags = "user", security = @SecurityRequirement(name = "token_auth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found users"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
@@ -73,14 +94,84 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/users/filters", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<UserDto>> getUsersByFilters(
+    @GetMapping(value = "/users/name/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<List<UserDto>> getUserByName(@PathVariable String name);
+
+    @Operation(summary = "Change role", description = "Change role", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Change successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> changeRole(@PathVariable long id, String typeRole);
+
+    @Operation(summary = "Delete user", description = "Delete user by id (change user's activated)", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Delete successfully"),
+            @ApiResponse(responseCode = "400", description = "Can't delete your own account"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
+    })
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
+    @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
+
+    @Operation(summary = "De-active user", description = "De-active user by id (change user's status)", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "De-active user successfully"),
+            @ApiResponse(responseCode = "400", description = "Can't delete your own account"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
+    })
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
+    @PutMapping(value = "/users/{id}/deActive", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> deActive(@PathVariable("id") Long id);
+
+    @Operation(summary = "Get user by id", description = "Get user with user id", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found users"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error occurred", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/users/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> getUserById(@RequestParam(value = "id") Long id);
+
+    @Operation(summary = "Update user by id", description = "Update user field is changed with user id", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Update success"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error occurred", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> updateUser(@RequestBody @Valid NoNullRequiredUserVM noNullRequiredUserVM,
+            @PathVariable Long id);
+
+    @Operation(summary = "Get users by filters", description = "Get users by filters", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found users"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<List<UserDto>> getUsers(
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "name", required = false) String fullName,
             @RequestParam(name = "code", required = false) String code,
             @RequestParam(name = "level", required = false) String levelName,
             @RequestParam(name = "role", required = false) String roleName,
-            @RequestParam(name = "activated", required = false) Boolean activated,
             @RequestParam(name = "birthdayFrom", required = false) String birthdayFrom,
             @RequestParam(name = "birthdayTo", required = false) String birthdayTo,
             @RequestParam(name = "status", required = false) String status,
