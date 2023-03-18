@@ -36,17 +36,4 @@ public class ReturnClassScheduleDtoOld {
 
     private LocalTime finishAt;
 
-
-    //additional information
-    private String city;
-
-    private String Fsu;
-
-    private Long classId;
-
-    private List<ReturnUserDto> trainers;
-
-    private List<ReturnUnitDto> units;
-
-    //additional information
 }

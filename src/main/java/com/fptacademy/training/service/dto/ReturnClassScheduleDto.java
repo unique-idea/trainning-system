@@ -26,11 +26,11 @@ public class ReturnClassScheduleDto {
 
     private String city;
 
-    private String Fsu;
+    private String fsu;
 
     private String type;
 
-    private List<ReturnUserDto> trainers;
+    private List<ReturnUserDto> trainers = new ArrayList<>();
 
     private List<ReturnUserDto> admins = new ArrayList<>();
 

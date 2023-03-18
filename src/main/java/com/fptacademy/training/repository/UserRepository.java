@@ -41,6 +41,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             " AND u.role_id = 2 ", nativeQuery = true)
     List<User> findAdminsOfClass(Long classDetailId);
 
+    @Query(value = "SELECT * FROM users u" +
+            " INNER JOIN user_class_detail ucd " +
+            " ON u.id = ucd.user_id " +
+            " AND ucd.class_detail_id = ?1 " +
+            " AND u.role_id = 3 ", nativeQuery = true)
+    List<User> findTrainerOfClass(Long classDetailId);
+
    /* @Query(value = "SELECT * FROM users u" +
             " INNER JOIN user_class_detail ucd " +
             " ON u.id = ucd.user_id " +
