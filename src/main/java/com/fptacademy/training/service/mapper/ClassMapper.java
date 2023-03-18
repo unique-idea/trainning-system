@@ -24,6 +24,7 @@ public class ClassMapper {
 
         ClassDto dto = modelMapper.map(classes, ClassDto.class);
 
+        dto.setStatus(classes.getClassDetail().getStatus());
         dto.setCreated_by(classes.getCreatedBy() == null? null :
                 new ClassDto.Creator(classes.getCreatedBy().getId(),
                         classes.getCreatedBy().getFullName()));

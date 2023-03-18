@@ -68,7 +68,7 @@ public interface ProgramResource {
     ResponseEntity<List<ProgramDto>> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size);
 
     @Operation(
