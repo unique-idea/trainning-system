@@ -22,8 +22,12 @@ import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -324,7 +328,11 @@ public class SyllabusResourceImpl {
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
   @PostMapping(value = "/syllabuses/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> importSyllabus(@RequestPart(value = "file") MultipartFile file) {
-    return ResponseEntity.status(HttpStatus.OK).body("File '" + file.getOriginalFilename() + "' đã được tải lên thành công!");
+  public ResponseEntity<?> importSyllabus(
+    @RequestPart(value = "file", required = true) MultipartFile file,
+    @Schema(description = "code or name", type = "array") @RequestParam(required = false) String[] scanning,
+    @Schema(allowableValues = { "allow", "replace", "skip" }) @RequestParam(required = true) String handle
+  ) {
+    return ResponseEntity.ok(syllabusService.importExcel(file, scanning, handle));
   }
 }

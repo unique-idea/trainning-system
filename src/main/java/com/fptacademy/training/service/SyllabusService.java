@@ -2,22 +2,43 @@ package com.fptacademy.training.service;
 
 import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Lesson;
+import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.domain.Unit;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.exception.ResourceNotFoundException;
+import com.fptacademy.training.repository.DeliveryRepository;
+import com.fptacademy.training.repository.FormatTypeRepository;
+import com.fptacademy.training.repository.LessonRepository;
+import com.fptacademy.training.repository.LevelRepository;
+import com.fptacademy.training.repository.MaterialRepository;
+import com.fptacademy.training.repository.OutputStandardRepository;
+import com.fptacademy.training.repository.SessionRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
+import com.fptacademy.training.repository.UnitRepository;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import com.fptacademy.training.service.mapper.SyllabusMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -25,8 +46,10 @@ import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -36,6 +59,14 @@ public class SyllabusService {
   private final SyllabusRepository syllabusRepository;
   private final ModelMapper modelMapper;
   private final SyllabusMapper syllabusMapper;
+  private final LevelRepository levelRepository;
+  private final FormatTypeRepository formatTypeRepository;
+  private final DeliveryRepository deliveryRepository;
+  private final OutputStandardRepository outputStandardRepository;
+  private final SessionRepository sessionRepository;
+  private final UnitRepository unitRepository;
+  private final LessonRepository lessonRepository;
+  private final MaterialRepository materialRepository;
 
   @Transactional(readOnly = true)
   public Page<SyllabusListDto> findAll(Specification<Syllabus> spec, Pageable pageable) {
@@ -219,6 +250,59 @@ public class SyllabusService {
 
   public void delete(Syllabus syllabus) {
     syllabusRepository.save(syllabus);
+  }
+
+  public List<?> importExcel(MultipartFile file, String[] scanning, String handle) {
+    List<Syllabus> syllabuses = new ArrayList<>();
+    try {
+      Workbook workbook = new XSSFWorkbook(file.getInputStream());
+      Sheet syllabusSheet = workbook.getSheet("syllabus");
+      Sheet sessionSheet = workbook.getSheet("session");
+      Sheet assessmentSheet = workbook.getSheet("assessment");
+      Sheet unitSheet = workbook.getSheet("unit");
+      Sheet lessonSheet = workbook.getSheet("lesson");
+      Sheet materialSheet = workbook.getSheet("material");
+      syllabusSheet.removeRow(syllabusSheet.getRow(0));
+      sessionSheet.removeRow(sessionSheet.getRow(0));
+      assessmentSheet.removeRow(assessmentSheet.getRow(0));
+      unitSheet.removeRow(unitSheet.getRow(0));
+      lessonSheet.removeRow(lessonSheet.getRow(0));
+      materialSheet.removeRow(materialSheet.getRow(0));
+
+      syllabusSheet.forEach(row -> {
+        syllabuses.add(
+          Syllabus
+            .builder()
+            .id(row.getCell(0) != null && row.getCell(0).getCellType() == CellType.NUMERIC ? (long) row.getCell(0).getNumericCellValue() : null)
+            .code(row.getCell(1) != null ? row.getCell(1).getStringCellValue() : null)
+            .name(row.getCell(2) != null ? row.getCell(2).getStringCellValue() : null)
+            .attendeeNumber(
+              row.getCell(3) != null && row.getCell(3).getCellType() == CellType.NUMERIC ? (int) row.getCell(3).getNumericCellValue() : null
+            )
+            .status(SyllabusStatus.DRAFT)
+            // .duration(null)
+            .version(1.0F)
+            .courseObjective(row.getCell(4) != null ? row.getCell(4).getStringCellValue() : null)
+            .technicalRequirement(row.getCell(5) != null ? row.getCell(5).getStringCellValue() : null)
+            .trainingPrinciple(row.getCell(6) != null ? row.getCell(6).getStringCellValue() : null)
+            .level(
+              row.getCell(7) != null && row.getCell(7).getCellType() == CellType.NUMERIC
+                ? levelRepository
+                  .findById((long) row.getCell(7).getNumericCellValue())
+                  .orElseThrow(() -> new ResourceNotFoundException("Level" + new CellReference(row.getCell(7)).formatAsString()))
+                : null
+            )
+            // .sessions(null)
+            // .assessment(null)
+            .build()
+        );
+      });
+      workbook.close();
+    } catch (IOException e) {
+      throw new ResourceBadRequestException("dsadasd", e);
+    } finally {}
+
+    return syllabuses;
   }
 
   public List<SyllabusDto.SyllabusListDto> findSyllabusesByName(String name) {
