@@ -5,7 +5,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,11 +21,15 @@ import com.fptacademy.training.web.vm.UserVM;
 
 import lombok.RequiredArgsConstructor;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RequiredArgsConstructor
 @RestController
 public class UserResourceImpl implements UserResource {
 
     private final UserService userService;
+
+    private final ResourceLoader resourceLoader;
 
     @Override
     public ResponseEntity<UserDto> createUser(UserVM userVM) {
@@ -72,7 +80,7 @@ public class UserResourceImpl implements UserResource {
     }
 
     public ResponseEntity<?> importUsersFromExcel(MultipartFile file) {
-        this.userService.saveUsersToDB(file);
+        this.userService.importUsersToDB(file);
         return ResponseEntity
                 .ok(Map.of("Message", "Users data uploaded and saved database successfully"));
     }
@@ -99,6 +107,28 @@ public class UserResourceImpl implements UserResource {
     @Override
     public ResponseEntity<UserDto> updateUser(NoNullRequiredUserVM noNullRequiredUserVM, Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUserById(noNullRequiredUserVM, id));
+    }
+
+    @Override
+    public ResponseEntity<?> exportUsersToExcel(HttpServletResponse response) {
+        response.setContentType("application/json");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment;filename=User_Export.xlsx";
+        response.setHeader(headerKey, headerValue);
+        userService.exportUsersToExcel(response);
+        return ResponseEntity
+                .ok(Map.of("Message", "Export users to excel successfully"));
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadUserExcelTemplate(HttpServletResponse response) {
+        Resource resource = resourceLoader.getResource("classpath:templates/User-Template.xlsx");
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=User-Template.xlsx");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
 }

@@ -9,6 +9,7 @@ import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.service.util.ExcelExportUtils;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.io.IOException;
@@ -166,15 +168,17 @@ public class UserService {
                 .stream().map(SimpleGrantedAuthority::new).toList();
     }
 
-    public void saveUsersToDB(MultipartFile file) {
-        if (ExcelUploadService.isValidExcelFile(file)) {
+    public void importUsersToDB(MultipartFile file) {
+
             try {
-                List<User> users = excelUploadService.getUserDataFromExcel(file.getInputStream());
-                this.userRepository.saveAll(users);
+                if (ExcelUploadService.isValidExcelFile(file)) {
+                    List<User> users = excelUploadService.getUserDataFromExcel(file.getInputStream());
+                    this.userRepository.saveAll(users);
+                }
             } catch (IOException e) {
                 throw new IllegalArgumentException("The file is not a valid excel file");
             }
-        }
+
     }
 
     public List<UserDto> getUsersByFilters(String email, String fullName, String code, String levelName, String roleName, Boolean activated, String birthday) {
@@ -247,4 +251,11 @@ public class UserService {
 
         return userMapper.toDto(checkUser.orElseThrow(() -> new ResourceNotFoundException("Can't update not existed user!")));
     }
+
+    public void exportUsersToExcel(HttpServletResponse response) {
+        List<User> users = userRepository.findAll();
+        ExcelExportUtils excelExport = new ExcelExportUtils(users);
+        excelExport.exportDataToExcel(response);
+    }
+
 }

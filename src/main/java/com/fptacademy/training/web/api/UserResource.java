@@ -3,10 +3,11 @@ package com.fptacademy.training.web.api;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -222,4 +223,38 @@ public interface UserResource {
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> updateUser(@RequestBody @Valid NoNullRequiredUserVM noNullRequiredUserVM, @PathVariable Long id);
+
+    @Operation(
+            summary = "Export users to excel",
+            description = "Export users to excel",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Export successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/export", method = RequestMethod.GET)
+    ResponseEntity<?> exportUsersToExcel(HttpServletResponse response);
+
+    @Operation(
+            summary = "Download Excel Template For Importing Users",
+            description = "Download Excel Template For Importing Users",
+            tags = "user",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Download successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "/user/template/excel", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    ResponseEntity<Resource> downloadUserExcelTemplate(HttpServletResponse response);
+
 }

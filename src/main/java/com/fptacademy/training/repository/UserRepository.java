@@ -36,7 +36,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findStudentsOfClass(Long classDetailId);*/
     /*Team 3*/
 
-    boolean findUserByCodeIgnoreCase(String code);
+    boolean existsByCodeIgnoreCase(String code);
 
     List<User> findByFullNameContaining (String keyword);
 

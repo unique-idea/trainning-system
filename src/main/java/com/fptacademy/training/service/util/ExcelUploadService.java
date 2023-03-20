@@ -82,8 +82,10 @@ public class ExcelUploadService {
                             break;
 
                         case 4: // gender
-                            if (cell.getNumericCellValue() == 0 || cell.getNumericCellValue() == 1) {
-                                user.setGender(cell.getNumericCellValue() == 1);
+                            if (cell.getStringCellValue().equalsIgnoreCase("true")) {
+                                user.setGender(Boolean.TRUE);
+                            } else {
+                                user.setGender(Boolean.FALSE);
                             }
                             break;
 
@@ -95,9 +97,10 @@ public class ExcelUploadService {
                             break;
 
                         case 6: // Activated
-                            if (cell.getNumericCellValue() == 0 || cell.getNumericCellValue() == 1) {
-                                user.setActivated(cell.getNumericCellValue() == 1);
-                                System.out.println("Activated: " + user.getActivated());
+                            if (cell.getStringCellValue().equalsIgnoreCase("true")) {
+                                user.setActivated(Boolean.TRUE);
+                            } else {
+                                user.setActivated(Boolean.FALSE);
                             }
                             break;
 
@@ -139,7 +142,7 @@ public class ExcelUploadService {
                     }
                     cellIndex++;
                 }
-                if (user.getActivated() != null) {
+                if (user.getActivated() != null && !userRepository.existsByCodeIgnoreCase(user.getCode())) {
                     users.add(user);
                 }
             }
