@@ -136,5 +136,11 @@ public class ClassResourceImpl implements ClassResource {
                 .body(classService.getAllLocations());
     }
 
+    @Override
+    public ResponseEntity<ClassDetailDto> updateClass(Long class_id, ClassVM classVM) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(classService.updateClass(class_id, classVM));
+    }
+
 
 }

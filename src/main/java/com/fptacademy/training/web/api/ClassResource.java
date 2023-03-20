@@ -4,6 +4,7 @@ import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.web.vm.ClassVM;
+import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -197,4 +198,8 @@ public interface ClassResource {
     @GetMapping("/locations")
     public ResponseEntity<List<LocationDto>> getAllLocations();
 
+    @PutMapping("/{class_id}")
+    public ResponseEntity<ClassDetailDto> updateClass(
+            @PathVariable Long class_id,
+            @RequestBody ClassVM classVM);
 }
