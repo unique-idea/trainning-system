@@ -1,13 +1,15 @@
 package com.fptacademy.training.service.dto;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

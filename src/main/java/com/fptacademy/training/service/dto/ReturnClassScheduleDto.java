@@ -12,27 +12,34 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClassScheduleDTO {
+public class ReturnClassScheduleDto {
 
-    private String code;
+    private Long classId;
 
-    private String name;
+    private String classCode;
+
+    private String className;
 
     private int duration;
 
     private int currentClassDay;
 
-    private String location;
+    private String city;
+
+    private String fsu;
 
     private String type;
 
-    private ReturnUserDTO trainer;
+    private List<ReturnUserDto> trainers = new ArrayList<>();
 
-    private List<ReturnUserDTO> admins = new ArrayList<>();
+    private List<ReturnUserDto> admins = new ArrayList<>();
 
     private LocalDate date;
 
     private LocalTime startAt;
 
     private LocalTime finishAt;
+
+    private List<ReturnUnitDto> units;
+
 }

@@ -20,14 +20,13 @@ public class ProgramMapper {
         ProgramDto dto = modelMapper.map(program, ProgramDto.class);
         int days = (int)program.getSyllabuses()
                 .stream()
-                .mapToLong(s -> s.getSessions().size())
+                .mapToLong(Syllabus::getDuration)
                 .sum();
-        int minutes = (int)program.getSyllabuses()
+        double hours = program.getSyllabuses()
                 .stream()
                 .flatMap(s -> s.getSessions().stream())
                 .flatMap(s -> s.getUnits().stream())
-                .flatMap(u -> u.getLessons().stream())
-                .mapToLong(Lesson::getDuration)
+                .mapToDouble(Unit::getTotalDurationLesson)
                 .sum();
         dto.setCreatedBy(new ProgramDto.Creator(
                 program.getCreatedBy().getId(),
@@ -38,7 +37,7 @@ public class ProgramMapper {
                 program.getLastModifiedBy().getFullName(),
                 program.getLastModifiedBy().getCode()));
         dto.setDurationInDays(days);
-        dto.setDurationInHours(minutes / 60.f);
+        dto.setDurationInHours(hours);
         return dto;
     }
 

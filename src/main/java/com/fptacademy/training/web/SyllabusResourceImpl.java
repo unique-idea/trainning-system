@@ -1,5 +1,30 @@
 package com.fptacademy.training.web;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Lesson;
@@ -20,35 +45,11 @@ import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
-import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.AbstractConverter;
-import org.modelmapper.Converter;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @RestController
@@ -67,10 +68,10 @@ public class SyllabusResourceImpl {
   private final SyllabusService syllabusService;
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   // OutputStandards
   @PostMapping("/OutputStandards")
@@ -83,15 +84,15 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @PutMapping(value = "/OutputStandards/{id}")
   public ResponseEntity<OutputStandard> updateOutputStandard(
-    @PathVariable(value = "id", required = false) final Long id,
-    @RequestBody OutputStandard OutputStandardDTO
+          @PathVariable(value = "id", required = false) final Long id,
+          @RequestBody OutputStandard OutputStandardDTO
   ) {
     if (OutputStandardDTO.getId() == null) {
       throw new ResourceBadRequestException("id null");
@@ -110,10 +111,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/OutputStandards")
   public ResponseEntity<List<OutputStandard>> getAllOutputStandards() {
@@ -122,10 +123,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/OutputStandards/{id}")
   public ResponseEntity<OutputStandard> getOutputStandard(@PathVariable Long id) {
@@ -134,10 +135,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @DeleteMapping("/OutputStandards/{id}")
   public ResponseEntity<?> deleteOutputStandard(@PathVariable Long id) {
@@ -146,10 +147,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   // level
   @PostMapping("/levels")
@@ -162,10 +163,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @PutMapping(value = "/levels/{id}")
   public ResponseEntity<Level> updateLevel(@PathVariable(value = "id", required = false) final Long id, @RequestBody Level level) {
@@ -186,10 +187,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/levels")
   public ResponseEntity<List<Level>> getAllLevels() {
@@ -198,10 +199,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/levels/{id}")
   public ResponseEntity<Level> getLevel(@PathVariable Long id) {
@@ -210,10 +211,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @DeleteMapping("/levels/{id}")
   public ResponseEntity<?> deleteLevel(@PathVariable Long id) {
@@ -222,10 +223,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   // delivery
   @PostMapping("/deliverys")
@@ -238,10 +239,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @PutMapping(value = "/deliverys/{id}")
   public ResponseEntity<Delivery> updateDelivery(@PathVariable(value = "id", required = false) final Long id, @RequestBody Delivery delivery) {
@@ -262,10 +263,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/deliverys")
   public ResponseEntity<List<Delivery>> getAllDeliverys() {
@@ -274,10 +275,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping("/deliverys/{id}")
   public ResponseEntity<Delivery> getDelivery(@PathVariable Long id) {
@@ -286,10 +287,10 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @DeleteMapping("/deliverys/{id}")
   public ResponseEntity<?> deleteDelivery(@PathVariable Long id) {
@@ -298,21 +299,21 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
-    summary = "createdBy.code,asc",
-    description = "createdBy.code,asc",
-    tags = "syllabuses",
-    security = @SecurityRequirement(name = "token_auth")
+          summary = "createdBy.code,asc",
+          description = "createdBy.code,asc",
+          tags = "syllabuses",
+          security = @SecurityRequirement(name = "token_auth")
   )
   @GetMapping(value = "/syllabuses")
   @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   public ResponseEntity<List<SyllabusListDto>> getAllSyllabuses(
-    @org.springdoc.api.annotations.ParameterObject Pageable pageable,
-    @RequestParam(required = false) String[] keywords,
-    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
-    Authentication authentication
+          @org.springdoc.api.annotations.ParameterObject Pageable pageable,
+          @RequestParam(required = false) String[] keywords,
+          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
+          Authentication authentication
   ) {
     return ResponseEntity.ok(
-      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
+            syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable).getContent()
     );
   }
 
@@ -399,9 +400,9 @@ public class SyllabusResourceImpl {
     map.createTypeMap(Unit.class, Unit.class).addMappings(mapper -> mapper.skip(Unit::setId));
     map.createTypeMap(Material.class, Material.class).addMappings(mapper -> mapper.skip(Material::setId));
     map
-      .createTypeMap(Lesson.class, Lesson.class)
-      .addMappings(mapper -> mapper.skip(Lesson::setId))
-      .addMappings(mapper -> mapper.using(emptyToNull).map(Lesson::getName, Lesson::setName));
+            .createTypeMap(Lesson.class, Lesson.class)
+            .addMappings(mapper -> mapper.skip(Lesson::setId))
+            .addMappings(mapper -> mapper.using(emptyToNull).map(Lesson::getName, Lesson::setName));
     Syllabus newSyllabus = map.map(syllabus, Syllabus.class);
 
     return ResponseEntity.ok(syllabusRepository.save(newSyllabus));

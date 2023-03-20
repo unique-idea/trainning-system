@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -65,10 +66,15 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @JoinColumn(name = "level_id")
   private Level level;
 
-  @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "syllabus", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Session> sessions = new ArrayList<>();
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "assessment_id")
   private Assessment assessment;
+
+  @PrePersist
+  public void prePersist() {
+    this.sessions.forEach(s -> s.setSyllabus(this));
+  }
 }
