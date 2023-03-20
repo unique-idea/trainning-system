@@ -71,15 +71,15 @@ public class UserResourceImpl implements UserResource {
                 .body(userService.findUserByEmail(email));
     }
 
-    @Override
-    public ResponseEntity<List<UserDto>> getUsers(String email, String fullName, String code,
-            String levelName, String roleName, String birthdayFrom, String birthdayTo,
-            String status, String sort, Integer pageNumber, Integer pageSize) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.getUsersByFilters(email, fullName, code, levelName,
-                        roleName, true, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
-    }
+//    @Override
+//    public ResponseEntity<List<UserDto>> getUsers(String email, String fullName, String code,
+//            String levelName, String roleName, String birthdayFrom, String birthdayTo,
+//            String status, String sort, Integer pageNumber, Integer pageSize) {
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(userService.getUsersByFilters(email, fullName, code, levelName,
+//                        roleName, true, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
+//    }
 
     public ResponseEntity<?> importUsersFromExcel(MultipartFile file) {
         this.userService.importUsersToDB(file);

@@ -15,6 +15,13 @@ import com.fptacademy.training.domain.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @Query("Select c from User c where c.role.name = 'Trainer'")
+    List<User> findAllTrainers();
+
+    @Query("Select c from User c where c.role.name = 'Class Admin'")
+    List<User> findAllClassAdmin();
+
+
     boolean existsByEmail(String email);
 
     boolean existsByCodeIgnoreCase(String code);
