@@ -22,17 +22,15 @@ import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -306,6 +304,9 @@ public class SyllabusResourceImpl {
       .createTypeMap(Syllabus.class, Syllabus.class)
       .addMappings(mapper -> {
         mapper.skip(Syllabus::setId);
+        mapper
+          .using((Converter<String, String>) ctx -> ctx.getSource().contains("duplicate") ? ctx.getSource() : ctx.getSource() + " (duplicate)")
+          .map(Syllabus::getName, Syllabus::setName);
         mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
       });
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
