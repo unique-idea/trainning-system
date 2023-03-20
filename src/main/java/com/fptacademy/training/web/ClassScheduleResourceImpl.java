@@ -4,7 +4,7 @@ import com.fptacademy.training.domain.ClassSchedule;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.ClassScheduleService;
 import com.fptacademy.training.service.UserService;
-import com.fptacademy.training.service.dto.ReturnClassScheduleDtoOld;
+import com.fptacademy.training.service.dto.ReturnClassScheduleDto;
 import com.fptacademy.training.service.mapper.ClassScheduleMapper;
 import com.fptacademy.training.web.api.ClassScheduleResource;
 import lombok.RequiredArgsConstructor;
@@ -26,39 +26,39 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
     private final UserService userService;
 
     @Override
-    public ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassSchedule(LocalDate date) {
+    public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassSchedule(LocalDate date) {
 
         List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleByDate(date);
-        List<ReturnClassScheduleDtoOld> result = classScheduleMapper.toListDTO(classSchedules);
+        List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassScheduleByWeek(LocalDate date) {
+    public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(LocalDate date) {
 
         List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleInAWeek(date);
-        List<ReturnClassScheduleDtoOld> result = classScheduleMapper.toListDTO(classSchedules);
+        List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassScheduleOfCurrentUser(LocalDate date) {
+    public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(LocalDate date) {
 
         User currentUser = userService.getCurrentUserLogin();
         List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleOfAUserByDate(date, currentUser.getId());
-        List<ReturnClassScheduleDtoOld> result = classScheduleMapper.toListDTO(classSchedules);
+        List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassScheduleOfCurrentUserByWeek(LocalDate date) {
+    public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(LocalDate date) {
 
         User currentUser = userService.getCurrentUserLogin();
         List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleOfAUserInAWeek(currentUser.getId(), date);
-        List<ReturnClassScheduleDtoOld> result = classScheduleMapper.toListDTO(classSchedules);
+        List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

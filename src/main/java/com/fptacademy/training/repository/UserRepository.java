@@ -35,19 +35,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByFullNameContaining(String keyword);
 
     /*Team 3*/
-    @Query(value = "SELECT * FROM users u" +
+    //no use
+    /*@Query(value = "SELECT u.* FROM users u " +
             " INNER JOIN user_class_detail ucd " +
             " ON u.id = ucd.user_id " +
-            " AND ucd.class_detail_id = ?1 " +
-            " AND u.role_id = 2 ", nativeQuery = true)
-    List<User> findAdminsOfClass(Long classDetailId);
+            " AND u.role_id = 2 " +
+            " AND ucd.class_detail_id = ?1 ", nativeQuery = true)
+    List<User> findAdminsOfClass(Long classDetailId);*/
 
-    @Query(value = "SELECT * FROM users u" +
+    //no use
+    /*@Query(value = "SELECT u.* FROM users u " +
             " INNER JOIN user_class_detail ucd " +
             " ON u.id = ucd.user_id " +
-            " AND ucd.class_detail_id = ?1 " +
-            " AND u.role_id = 3 ", nativeQuery = true)
-    List<User> findTrainerOfClass(Long classDetailId);
+            " AND u.role_id = 3 " +
+            " AND ucd.class_detail_id = ?1 ", nativeQuery = true)
+    List<User> findTrainerOfClass(Long classDetailId);*/
 
    /* @Query(value = "SELECT * FROM users u" +
             " INNER JOIN user_class_detail ucd " +
@@ -56,9 +58,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             " AND u.role_id = 4", nativeQuery = true)
     List<User> findStudentsOfClass(Long classDetailId);*/
     /*Team 3*/
-
-
-
 
     @Query("SELECT u FROM User u " +
             "WHERE (:emailParam IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :emailParam, '%'))) " +
