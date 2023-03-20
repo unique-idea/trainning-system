@@ -1,8 +1,8 @@
 package com.fptacademy.training.service.dto;
 
 import com.fptacademy.training.domain.Assessment;
+import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Level;
-import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
@@ -67,6 +67,7 @@ public class SyllabusDto {
     private String trainingPrinciple;
     private Level level;
     private Assessment assessment;
+    private List<Delivery> timeAllocation;
     private List<OutputStandard> outputStandard;
     private List<Session> sessions;
   }
