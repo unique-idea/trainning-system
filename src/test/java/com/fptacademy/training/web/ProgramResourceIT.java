@@ -9,6 +9,8 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.ProgramVM;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -107,6 +110,28 @@ public class ProgramResourceIT {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(TestUtil.convertObjectToJsonBytes(programVM))
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    public void TestDeleteProgram() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/programs")
+                        .header("Authorization", accessToken)
+                        .header("Content-Type", "application/json")
+                        .content("{\"name\":\"test\", \"syllabusIds\":[]}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String json = result.getResponse().getContentAsString();
+        JsonObject responseObject = JsonParser.parseString(json).getAsJsonObject();
+        Long id = responseObject.get("id").getAsLong();
+        mockMvc.perform(delete("/api/programs/{id}", id)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void TestDeleteProgramNotFound() throws Exception {
+        mockMvc.perform(delete("/api/programs/{id}", 999)
+                        .header("Authorization", accessToken))
                 .andExpect(status().isNotFound());
     }
 }
