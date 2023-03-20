@@ -48,9 +48,9 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
                 .mvcMatchers(AUTH_WHITELIST).permitAll()
-                .mvcMatchers(HttpMethod.DELETE, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers(HttpMethod.PATCH, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
-                .mvcMatchers(HttpMethod.POST, "/api/programs").hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.DELETE, "/api/programs/**").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.PATCH, "/api/programs/**").hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.POST, "/api/programs/**").hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
                 .mvcMatchers("/api/programs/**").hasAnyAuthority(Permissions.PROGRAM_VIEW, Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
                 .mvcMatchers(HttpMethod.DELETE, "/api/class/**").hasAnyAuthority(
                         Permissions.CLASS_MODIFY,

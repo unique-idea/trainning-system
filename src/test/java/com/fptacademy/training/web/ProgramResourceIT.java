@@ -1,69 +1,112 @@
 package com.fptacademy.training.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fptacademy.training.IntegrationTest;
-import com.fptacademy.training.domain.Program;
-import com.fptacademy.training.domain.Syllabus;
-import com.fptacademy.training.repository.ProgramRepository;
-import com.fptacademy.training.repository.SyllabusRepository;
+import com.fptacademy.training.domain.*;
+import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.ProgramVM;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithSecurityContext;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 
 @AutoConfigureMockMvc
 @IntegrationTest
-@Sql(scripts = {"/roles-users-data.sql"})
 public class ProgramResourceIT {
-    private final String username = "admin@gmail.com";
-    private final String password = "12345";
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ProgramRepository programRepository;
-    @Autowired
-    private SyllabusRepository syllabusRepository;
     @Autowired
     private JwtTokenProvider tokenProvider;
     @Autowired
-    private AuthenticationManagerBuilder authenticationManagerBuilder;
+    private MockMvc mockMvc;
+    private final String DEFAULT_PROGRAM_NAME = "Test Program";
+    @Autowired
+    private SyllabusRepository syllabusRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
     private String accessToken;
+    @Autowired
+    private ProgramRepository programRepository;
+
     @BeforeEach
-    public void init() {
-        Authentication authentication = authenticationManagerBuilder.getOrBuild().authenticate(new UsernamePasswordAuthenticationToken(username, password));
+    @Transactional
+    void setup() {
+        Role role = TestUtil.getRole(List.of(Permissions.PROGRAM_FULL_ACCESS));
+        roleRepository.saveAndFlush(role);
+        User user = TestUtil.getUser(role);
+        userRepository.saveAndFlush(user);
+        Authentication authentication = TestUtil.createAuthentication(user);
         accessToken = tokenProvider.generateAccessToken(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Syllabus syllabus = new Syllabus();
+        syllabus.setDuration(1);
+        Session session = new Session();
+        session.setSyllabus(syllabus);
+        Unit unit = new Unit();
+        unit.setSession(session);
+        unit.setTotalDurationLesson(12.5);
+        session.setUnits(List.of(unit));
+        List<Syllabus> syllabuses = List.of(syllabus);
+        syllabusRepository.saveAllAndFlush(syllabuses);
+    }
+    @AfterEach
+    @Transactional
+    void teardown() {
+        programRepository.deleteAll();
+        syllabusRepository.deleteAll();
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
+    }
+    @Test
+    void testCreateProgram() throws Exception {
+        List<Long> syllabusIds = syllabusRepository.findAll().stream().mapToLong(Syllabus::getId).boxed().toList();
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, syllabusIds);
+        mockMvc
+                .perform(post("/api/programs")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isCreated());
     }
 
     @Test
-    void testCreateProgram() throws Exception {
-        List<Syllabus> syllabuses = List.of(new Syllabus(), new Syllabus(), new Syllabus());
-        syllabusRepository.saveAll(syllabuses);
-        ProgramVM programVM = new ProgramVM("Program test", syllabusRepository.findAll().stream().map(Syllabus::getId).toList());
-        //Program program = new Program();
-        mockMvc.perform(post("/api/programs")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+    @Transactional
+    void testCreateProgramWithConflictName() throws Exception {
+        Program program = new Program();
+        program.setName(DEFAULT_PROGRAM_NAME);
+        programRepository.saveAndFlush(program);
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of());
+        mockMvc
+                .perform(post("/api/programs")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(TestUtil.convertObjectToJsonBytes(programVM)))
-                .andExpect(status().isCreated());
-        assertThat(programRepository.existsByName("Program test")).isTrue();
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void testCreateProgramWithNonExistSyllabuses() throws Exception {
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of(99L, 100L, 101L));
+        mockMvc
+                .perform(post("/api/programs")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
     }
 }

@@ -5,20 +5,16 @@ import com.fptacademy.training.domain.User;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
+import com.fptacademy.training.web.TestUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,33 +24,33 @@ class JwtTokenProviderTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private RoleRepository roleRepository;
     @Autowired
     private UserRepository userRepository;
     private final long ONE_MINUTE = 1;
-    final String EMAIL = "test@gmail.com";
-    final String NAME = "Just A Test";
-    final String CODE = "TEST123";
-    final String AVATAR_URL = "https://image.com/test.jpg";
-    final String PASSWORD = "test_password";
+    private User user;
 
     @BeforeEach
+    @Transactional
     void setup() {
         ReflectionTestUtils.setField(tokenProvider, "accessExpireTimeInMinutes", ONE_MINUTE);
         ReflectionTestUtils.setField(tokenProvider, "refreshExpireTimeInMinutes", ONE_MINUTE);
+        Role role = TestUtil.getRole(List.of(Permissions.CLASS_CREATE));
+        roleRepository.saveAndFlush(role);
+        user = TestUtil.getUser(role);
+        userRepository.saveAndFlush(user);
     }
 
-    private Authentication createAuthentication() {
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(Permissions.PROGRAM_VIEW));
-        return new UsernamePasswordAuthenticationToken(EMAIL, PASSWORD, authorities);
+    @AfterEach
+    @Transactional
+    void teardown() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
     }
 
     @Test
     void testAccessTokenReturnTrueWhenValid() {
-        Authentication authentication = createAuthentication();
+        Authentication authentication = TestUtil.createAuthentication(user);
         String token = tokenProvider.generateAccessToken(authentication);
 
         boolean isTokenValid = tokenProvider.validateAccessToken(token);
@@ -73,7 +69,7 @@ class JwtTokenProviderTest {
     void testAccessTokenReturnFalseWhenJWTisExpired() {
         ReflectionTestUtils.setField(tokenProvider, "accessExpireTimeInMinutes", -ONE_MINUTE);
 
-        Authentication authentication = createAuthentication();
+        Authentication authentication = TestUtil.createAuthentication(user);
         String token = tokenProvider.generateAccessToken(authentication);
 
         boolean isTokenValid = tokenProvider.validateAccessToken(token);
@@ -82,26 +78,8 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @Transactional
     void testRefreshTokenReturnTrueWhenValid() {
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
-        Role role = new Role();
-        role.setName("Test");
-        role.setPermissions(List.of(Permissions.CLASS_CREATE));
-        roleRepository.saveAndFlush(role);
-
-        User user = new User();
-        user.setEmail(EMAIL);
-        user.setFullName(NAME);
-        user.setCode(CODE);
-        user.setAvatarUrl(AVATAR_URL);
-        user.setPassword(passwordEncoder.encode(PASSWORD));
-        user.setActivated(true);
-        user.setRole(role);
-        userRepository.saveAndFlush(user);
-
-        String token = tokenProvider.generateRefreshToken(EMAIL);
+        String token = tokenProvider.generateRefreshToken(user.getEmail());
 
         boolean isTokenValid = tokenProvider.validateRefreshToken(token);
 
@@ -116,28 +94,10 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @Transactional
     void testRefreshTokenReturnFalseWhenJWTisExpired() {
         ReflectionTestUtils.setField(tokenProvider, "refreshExpireTimeInMinutes", -ONE_MINUTE);
 
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
-        Role role = new Role();
-        role.setName("Test");
-        role.setPermissions(List.of(Permissions.CLASS_CREATE));
-        roleRepository.saveAndFlush(role);
-
-        User user = new User();
-        user.setEmail(EMAIL);
-        user.setFullName(NAME);
-        user.setCode(CODE);
-        user.setAvatarUrl(AVATAR_URL);
-        user.setPassword(passwordEncoder.encode(PASSWORD));
-        user.setActivated(true);
-        user.setRole(role);
-        userRepository.saveAndFlush(user);
-
-        String token = tokenProvider.generateRefreshToken(EMAIL);
+        String token = tokenProvider.generateRefreshToken(user.getEmail());
 
         boolean isTokenValid = tokenProvider.validateRefreshToken(token);
 
@@ -146,7 +106,7 @@ class JwtTokenProviderTest {
 
     @Test
     void testGetAuthenticationFromAccessToken() {
-        Authentication auth1 = createAuthentication();
+        Authentication auth1 = TestUtil.createAuthentication(user);
         String token = tokenProvider.generateAccessToken(auth1);
         Authentication auth2 = tokenProvider.getAuthentication(token);
         assertThat(auth1.getName()).isEqualTo(auth2.getName());
@@ -154,25 +114,8 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @Transactional
     void testGenerateAccessTokenFromRefreshToken() {
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
-        Role role = new Role();
-        role.setName("Test");
-        role.setPermissions(List.of(Permissions.CLASS_CREATE));
-        roleRepository.saveAndFlush(role);
-
-        User user = new User();
-        user.setEmail(EMAIL);
-        user.setFullName(NAME);
-        user.setCode(CODE);
-        user.setAvatarUrl(AVATAR_URL);
-        user.setPassword(passwordEncoder.encode(PASSWORD));
-        user.setActivated(true);
-        user.setRole(role);
-        userRepository.saveAndFlush(user);
-        String refreshToken = tokenProvider.generateRefreshToken(EMAIL);
+        String refreshToken = tokenProvider.generateRefreshToken(user.getEmail());
         String accessToken = tokenProvider.generateAccessToken(refreshToken);
         boolean isValidToken = tokenProvider.validateAccessToken(accessToken);
         assertThat(isValidToken).isTrue();

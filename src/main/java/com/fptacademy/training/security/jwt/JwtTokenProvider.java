@@ -1,6 +1,7 @@
 package com.fptacademy.training.security.jwt;
 
 import com.fptacademy.training.config.ApplicationProperties;
+import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -85,7 +86,8 @@ public class JwtTokenProvider {
                 stream(claims.get("auth").toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        return new UsernamePasswordAuthenticationToken(email, accessToken, authorities);
+        User user = userService.getUserByEmail(email);
+        return new UsernamePasswordAuthenticationToken(user, accessToken, authorities);
     }
 
     public boolean validateAccessToken(String accessToken) {

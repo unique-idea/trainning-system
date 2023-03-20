@@ -8,13 +8,12 @@ import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.LoginVM;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,51 +28,42 @@ public class AuthenticationResourceIT {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private JwtTokenProvider tokenProvider;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private RoleRepository roleRepository;
-    final String EMAIL = "test@gmail.com";
-    final String NAME = "Just A Test";
-    final String CODE = "TEST123";
-    final String AVATAR_URL = "https://image.com/test.jpg";
-    final String PASSWORD = "test_password";
+    private User user;
 
     @BeforeEach
+    @Transactional
     void setup() {
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
-        Role role = new Role();
-        role.setName("Test");
-        role.setPermissions(List.of(Permissions.CLASS_CREATE));
+        Role role = TestUtil.getRole(List.of(Permissions.CLASS_CREATE));
         roleRepository.saveAndFlush(role);
 
-        User user = new User();
-        user.setEmail(EMAIL);
-        user.setFullName(NAME);
-        user.setCode(CODE);
-        user.setAvatarUrl(AVATAR_URL);
-        user.setPassword(passwordEncoder.encode(PASSWORD));
-        user.setActivated(true);
-        user.setRole(role);
+        user = TestUtil.getUser(role);
         userRepository.saveAndFlush(user);
+    }
+
+    @AfterEach
+    @Transactional
+    void teardown() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
     }
 
     @Test
     @Transactional
     void testLogin() throws Exception {
-        LoginVM loginVM = new LoginVM(EMAIL, PASSWORD);
+        LoginVM loginVM = new LoginVM(TestUtil.EMAIL, TestUtil.PASSWORD);
 
         mockMvc
                 .perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(TestUtil.convertObjectToJsonBytes(loginVM)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fullName").value(NAME))
-                .andExpect(jsonPath("$.avatarUrl").value(AVATAR_URL))
+                .andExpect(jsonPath("$.fullName").value(user.getFullName()))
+                .andExpect(jsonPath("$.avatarUrl").value(user.getAvatarUrl()))
                 .andExpect(jsonPath("$.tokens.accessToken").isString())
                 .andExpect(jsonPath("$.tokens.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.tokens.refreshToken").isString())
