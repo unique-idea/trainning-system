@@ -128,17 +128,17 @@ public interface ClassResource {
 
     @Operation(
             summary = "Create a new class",
-            description = "Create a new class (can be saved as draft) by set the status field to 'DRAFT'",
+            description = "Create a new class (can be saved as draft by set the status field to 'DRAFT')",
             tags = "class",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-            @ApiResponse(responseCode = "201", description = "Create a new class by ID successfully"),
+            @ApiResponse(responseCode = "201", description = "Create a new class successfully"),
             @ApiResponse(responseCode = "404", description = "ID not found", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
-            @ApiResponse(responseCode = "409", description = "Conflict training program", content = @Content)
+            @ApiResponse(responseCode = "409", description = "Conflict class", content = @Content)
     })
     @PostMapping
     public ResponseEntity<ClassDetailDto> createClass(@RequestBody ClassVM classVM);
@@ -198,6 +198,20 @@ public interface ClassResource {
     @GetMapping("/locations")
     public ResponseEntity<List<LocationDto>> getAllLocations();
 
+    @Operation(
+            summary = "Update an existing class",
+            description = "Update an existing class",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Update class by ID successfully"),
+            @ApiResponse(responseCode = "404", description = "ID not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Conflict class", content = @Content)
+    })
     @PutMapping("/{class_id}")
     public ResponseEntity<ClassDetailDto> updateClass(
             @PathVariable Long class_id,
