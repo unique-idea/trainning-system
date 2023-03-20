@@ -8,16 +8,39 @@ import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.domain.Unit;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.repository.DeliveryRepository;
+import com.fptacademy.training.repository.FormatTypeRepository;
+import com.fptacademy.training.repository.LessonRepository;
+import com.fptacademy.training.repository.LevelRepository;
+import com.fptacademy.training.repository.MaterialRepository;
+import com.fptacademy.training.repository.OutputStandardRepository;
+import com.fptacademy.training.repository.SessionRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
+import com.fptacademy.training.repository.UnitRepository;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import com.fptacademy.training.service.mapper.SyllabusMapper;
+import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -27,6 +50,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -36,6 +60,14 @@ public class SyllabusService {
   private final SyllabusRepository syllabusRepository;
   private final ModelMapper modelMapper;
   private final SyllabusMapper syllabusMapper;
+  private final LevelRepository levelRepository;
+  private final FormatTypeRepository formatTypeRepository;
+  private final DeliveryRepository deliveryRepository;
+  private final OutputStandardRepository outputStandardRepository;
+  private final SessionRepository sessionRepository;
+  private final UnitRepository unitRepository;
+  private final LessonRepository lessonRepository;
+  private final MaterialRepository materialRepository;
 
   @Transactional(readOnly = true)
   public Page<SyllabusListDto> findAll(Specification<Syllabus> spec, Pageable pageable) {
@@ -219,6 +251,245 @@ public class SyllabusService {
 
   public void delete(Syllabus syllabus) {
     syllabusRepository.save(syllabus);
+  }
+
+  private <T> T getCellValue(Cell cell, CellType expectedType, T defaultValue, Class<T> clazz) {
+    return Optional
+      .ofNullable(cell)
+      .filter(c -> c.getCellType() == expectedType)
+      .map(c ->
+        expectedType == CellType.NUMERIC && Number.class.isAssignableFrom(clazz)
+          ? clazz.cast(
+            new HashMap<Class<?>, Function<Double, ?>>() {
+              {
+                put(Integer.class, (Double d) -> d.intValue());
+                put(Double.class, (Double d) -> d);
+                put(Float.class, (Double d) -> d.floatValue());
+                put(Long.class, (Double d) -> d.longValue());
+              }
+            }
+              .getOrDefault(
+                clazz,
+                (Double d) -> {
+                  throw new IllegalArgumentException("Unexpected class type: " + clazz.getName());
+                }
+              )
+              .apply(c.getNumericCellValue())
+          )
+          : expectedType == CellType.BOOLEAN && clazz == Boolean.class ? clazz.cast(c.getBooleanCellValue()) : clazz.cast(c.getStringCellValue())
+      )
+      .orElse(defaultValue);
+  }
+
+  public List<?> importExcel(MultipartFile file, String[] scanning, String handle) {
+    ModelMapper map = new ModelMapper();
+    map
+      .createTypeMap(Syllabus.class, Syllabus.class)
+      .addMappings(mapper -> {
+        mapper.skip(Syllabus::setId);
+        mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(Syllabus::getSessions, Syllabus::setDuration);
+      });
+    map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
+    map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
+    map
+      .createTypeMap(Unit.class, Unit.class)
+      .addMappings(mapper -> {
+        mapper.skip(Unit::setId);
+        mapper
+          .using((Converter<List<Lesson>, Double>) ctx -> ctx.getSource().stream().mapToDouble(Lesson::getDuration).sum() / 60)
+          .map(Unit::getLessons, Unit::setTotalDurationLesson);
+      });
+    map.createTypeMap(Lesson.class, Lesson.class).addMappings(mapper -> mapper.skip(Lesson::setId));
+    map.createTypeMap(Material.class, Material.class).addMappings(mapper -> mapper.skip(Material::setId));
+    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+      Set<String> codeSet = new HashSet<>();
+      Stream<Row> syllabusSheet = StreamSupport
+        .stream(workbook.getSheet("syllabus").spliterator(), false)
+        .skip(1)
+        .filter(row -> {
+          String code = getCellValue(row.getCell(1), CellType.STRING, null, String.class);
+          if (codeSet.contains(code) && handle.equals("skip")) {
+            return false;
+          } else if (codeSet.contains(code) && handle.equals("replace")) {
+            return true;
+          } else if (codeSet.contains(code) && handle.equals("allow")) {
+            row.createCell(1).setCellValue(Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase());
+            return true;
+          } else {
+            codeSet.add(code);
+            return true;
+          }
+        })
+        .collect(
+          Collectors.toMap(row -> getCellValue(row.getCell(1), CellType.STRING, null, String.class), Function.identity(), (row1, row2) -> row2)
+        )
+        .values()
+        .stream();
+      Supplier<Stream<Row>> assessmentSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("assessment").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(0), CellType.NUMERIC, null, Long.class) != null);
+      Supplier<Stream<Row>> sessionSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("session").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(3), CellType.NUMERIC, null, Long.class) != null);
+      Supplier<Stream<Row>> unitSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("unit").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(4), CellType.NUMERIC, null, Long.class) != null);
+      Supplier<Stream<Row>> lessonSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("lesson").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(7), CellType.NUMERIC, null, Long.class) != null);
+      Supplier<Stream<Row>> materialSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("material").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(3), CellType.NUMERIC, null, Long.class) != null);
+
+      return syllabusRepository.saveAll(
+        map.map(
+          syllabusSheet
+            .map(rowSyllabus -> {
+              String code = getCellValue(rowSyllabus.getCell(1), CellType.STRING, null, String.class) == null
+                ? Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase()
+                : getCellValue(rowSyllabus.getCell(1), CellType.STRING, null, String.class).toUpperCase();
+              code =
+                syllabusRepository.existsByCode(code) == true
+                  ? Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase()
+                  : code;
+              return Syllabus
+                .builder()
+                .id(getCellValue(rowSyllabus.getCell(0), CellType.NUMERIC, null, Long.class))
+                .code(code)
+                .name(getCellValue(rowSyllabus.getCell(2), CellType.STRING, null, String.class))
+                .attendeeNumber(getCellValue(rowSyllabus.getCell(3), CellType.NUMERIC, null, Integer.class))
+                .status(SyllabusStatus.DRAFT)
+                .version(1.0F)
+                .courseObjective(getCellValue(rowSyllabus.getCell(4), CellType.STRING, null, String.class))
+                .technicalRequirement(getCellValue(rowSyllabus.getCell(5), CellType.STRING, null, String.class))
+                .trainingPrinciple(getCellValue(rowSyllabus.getCell(6), CellType.STRING, null, String.class))
+                .level(levelRepository.findById(getCellValue(rowSyllabus.getCell(7), CellType.NUMERIC, 0L, Long.class)).orElse(null))
+                .assessment(
+                  assessmentSheet
+                    .get()
+                    .filter(rowAssessment ->
+                      getCellValue(rowAssessment.getCell(0), CellType.NUMERIC, null, Long.class) ==
+                      getCellValue(rowSyllabus.getCell(8), CellType.NUMERIC, null, Long.class)
+                    )
+                    .findFirst()
+                    .map(rowAssessment ->
+                      Assessment
+                        .builder()
+                        .id(getCellValue(rowAssessment.getCell(0), CellType.NUMERIC, null, Long.class))
+                        .assignment(getCellValue(rowAssessment.getCell(1), CellType.NUMERIC, null, Float.class))
+                        .finalField(getCellValue(rowAssessment.getCell(2), CellType.NUMERIC, null, Float.class))
+                        .finalPractice(getCellValue(rowAssessment.getCell(3), CellType.NUMERIC, null, Float.class))
+                        .finalTheory(getCellValue(rowAssessment.getCell(4), CellType.NUMERIC, null, Float.class))
+                        .gpa(getCellValue(rowAssessment.getCell(5), CellType.NUMERIC, null, Float.class))
+                        .quiz(getCellValue(rowAssessment.getCell(6), CellType.NUMERIC, null, Float.class))
+                        .build()
+                    )
+                    .orElse(null)
+                )
+                .sessions(
+                  sessionSheet
+                    .get()
+                    .filter(rowSession ->
+                      getCellValue(rowSession.getCell(3), CellType.NUMERIC, null, Long.class) ==
+                      getCellValue(rowSyllabus.getCell(0), CellType.NUMERIC, null, Long.class)
+                    )
+                    .map(rowSession ->
+                      Session
+                        .builder()
+                        .id(getCellValue(rowSession.getCell(0), CellType.NUMERIC, null, Long.class))
+                        .index(getCellValue(rowSession.getCell(1), CellType.NUMERIC, null, Integer.class))
+                        .name(getCellValue(rowSession.getCell(2), CellType.STRING, null, String.class))
+                        .units(
+                          unitSheet
+                            .get()
+                            .filter(rowUnit ->
+                              getCellValue(rowSession.getCell(0), CellType.NUMERIC, null, Long.class) ==
+                              getCellValue(rowUnit.getCell(4), CellType.NUMERIC, null, Long.class)
+                            )
+                            .map(rowUnit ->
+                              Unit
+                                .builder()
+                                .id(getCellValue(rowUnit.getCell(0), CellType.NUMERIC, null, Long.class))
+                                .index(getCellValue(rowUnit.getCell(1), CellType.NUMERIC, null, Integer.class))
+                                .name(getCellValue(rowUnit.getCell(2), CellType.STRING, null, String.class))
+                                .title(getCellValue(rowUnit.getCell(3), CellType.STRING, null, String.class))
+                                .lessons(
+                                  lessonSheet
+                                    .get()
+                                    .filter(rowLesson ->
+                                      getCellValue(rowUnit.getCell(0), CellType.NUMERIC, null, Long.class) ==
+                                      getCellValue(rowLesson.getCell(7), CellType.NUMERIC, null, Long.class)
+                                    )
+                                    .map(rowLesson ->
+                                      Lesson
+                                        .builder()
+                                        .id(getCellValue(rowLesson.getCell(0), CellType.NUMERIC, null, Long.class))
+                                        .name(getCellValue(rowLesson.getCell(1), CellType.STRING, null, String.class))
+                                        .index(getCellValue(rowLesson.getCell(2), CellType.NUMERIC, null, Integer.class))
+                                        .duration(getCellValue(rowLesson.getCell(3), CellType.NUMERIC, null, Integer.class))
+                                        .delivery(
+                                          deliveryRepository
+                                            .findById(getCellValue(rowLesson.getCell(4), CellType.NUMERIC, 0L, Long.class))
+                                            .orElse(null)
+                                        )
+                                        .formatType(
+                                          formatTypeRepository
+                                            .findById(getCellValue(rowLesson.getCell(5), CellType.NUMERIC, 0L, Long.class))
+                                            .orElse(null)
+                                        )
+                                        .outputStandard(
+                                          outputStandardRepository
+                                            .findById(getCellValue(rowLesson.getCell(6), CellType.NUMERIC, 0L, Long.class))
+                                            .orElse(null)
+                                        )
+                                        .materials(
+                                          materialSheet
+                                            .get()
+                                            .filter(rowMaterial ->
+                                              getCellValue(rowLesson.getCell(0), CellType.NUMERIC, null, Long.class) ==
+                                              getCellValue(rowMaterial.getCell(3), CellType.NUMERIC, null, Long.class)
+                                            )
+                                            .map(rowMaterial ->
+                                              Material
+                                                .builder()
+                                                .id(getCellValue(rowMaterial.getCell(0), CellType.NUMERIC, null, Long.class))
+                                                .name(getCellValue(rowMaterial.getCell(1), CellType.STRING, null, String.class))
+                                                .fileUrl(getCellValue(rowMaterial.getCell(2), CellType.STRING, null, String.class))
+                                                .build()
+                                            )
+                                            .toList()
+                                        )
+                                        .build()
+                                    )
+                                    .toList()
+                                )
+                                .build()
+                            )
+                            .toList()
+                        )
+                        .build()
+                    )
+                    .toList()
+                )
+                .build();
+            })
+            .toList(),
+          new TypeToken<List<Syllabus>>() {}.getType()
+        )
+      );
+    } catch (IOException e) {
+      throw new ResourceBadRequestException("Error reading file", e);
+    }
   }
 
   public List<SyllabusDto.SyllabusListDto> findSyllabusesByName(String name) {

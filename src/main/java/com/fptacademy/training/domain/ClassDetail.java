@@ -36,7 +36,7 @@ public class ClassDetail implements Serializable {
     private LocalTime finishAt;
     @Column(length = 200)
     private String others;
-    @OneToMany(mappedBy = "classDetail")
+    @OneToMany(mappedBy = "classDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClassSchedule> schedules;
     @ManyToMany
     @JoinTable(
@@ -46,6 +46,5 @@ public class ClassDetail implements Serializable {
     )
     private List<User> users;
     private String detailLocation;
-    @Email
     private String contactPoint;
 }

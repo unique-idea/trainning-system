@@ -22,6 +22,7 @@ public class ClassDto implements Serializable{
     private String code;
     private Integer duration;
     private String name;
+    private String status;
     private Creator created_by;
     private AttendeeSimplified  attendee;
     private LocationSimplified location_id;

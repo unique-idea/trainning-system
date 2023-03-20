@@ -67,7 +67,7 @@ public class ClassResourceImpl implements ClassResource {
                 fsu,
                 trainerCode);
         // Apply pagination
-        int start = page * size;
+        int start = (page - 1) * size;
         int end = Math.min(start + size, classDtos.size());
         Page<ClassDto> pageResult = new PageImpl<>(
                 classDtos.subList(start, end),
@@ -134,6 +134,12 @@ public class ClassResourceImpl implements ClassResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(classService.getAllLocations());
+    }
+
+    @Override
+    public ResponseEntity<ClassDetailDto> updateClass(Long class_id, ClassVM classVM) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(classService.updateClass(class_id, classVM));
     }
 
 

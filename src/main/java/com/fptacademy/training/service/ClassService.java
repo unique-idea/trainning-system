@@ -7,10 +7,12 @@ import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.*;
+import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.service.mapper.*;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,12 @@ public class ClassService {
     private final AttendeeMapper attendeeMapper;
     private final LocationMapper locationMapper;
 
+    @PostFilter("(hasAnyAuthority('" + Permissions.CLASS_VIEW + "') " +
+            "and filterObject.status != 'DRAFT' and filterObject.status != 'INACTIVE') or " +
+            "(hasAnyAuthority('" +
+            Permissions.CLASS_CREATE + "', '" +
+            Permissions.CLASS_MODIFY + "', '" +
+            Permissions.CLASS_FULL_ACCESS  + "'))")
     public List<ClassDto> filterClass(List<String> keywords,
                             LocalDate from,
                             LocalDate to,
@@ -69,9 +77,7 @@ public class ClassService {
         }
         else classes = classRepository.findAll();
         classes = classes.stream()
-                .filter(c -> !c.getClassDetail().getStatus().equals("DELETED") &&
-                        !c.getClassDetail().getStatus().equals("DRAFT") &&
-                        !c.getClassDetail().getStatus().equals("INACTIVE"))
+                .filter(c -> !c.getClassDetail().getStatus().equals("DELETED"))
                 .filter(c -> {
             LocalDate minStudyDate =
                     Collections.min(c.getClassDetail().getSchedules().stream().map(ClassSchedule::getStudyDate).toList());
@@ -125,12 +131,6 @@ public class ClassService {
                 .orElseThrow(() -> new ResourceNotFoundException("FSU ID not found"));
         Attendee attendee = attendeeRepository.findById(classVM.attendeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attendee ID not found"));
-        int totalStudyMinutes = program.getSyllabuses().stream()
-                        .flatMap(s -> s.getSessions().stream())
-                        .flatMap(se -> se.getUnits().stream())
-                        .flatMap(u -> u.getLessons().stream())
-                        .mapToInt(Lesson::getDuration)
-                        .sum();
         newClass.setDuration(totalStudyDates);
         newClass.setProgram(program);
         newClass.setCode("Generating");
@@ -153,6 +153,8 @@ public class ClassService {
         newClassDetail.setStartAt(classVM.startAt());
         newClassDetail.setFinishAt(classVM.finishAt());
         newClassDetail.setOthers(classVM.others());
+        newClassDetail.setDetailLocation(classVM.detailLocation());
+        newClassDetail.setContactPoint(classVM.contactPoint());
         newClassDetail.setUsers(
                 classVM.userIds().stream().map(userId ->
                         userRepository.findById(userId)
@@ -222,5 +224,83 @@ public class ClassService {
     public List<LocationDto> getAllLocations() {
         List<Location> locations = locationRepository.findAll();
         return locations.stream().map(locationMapper::toDto).toList();
+    }
+
+    public ClassDetailDto updateClass(Long classId, ClassVM classVM) {
+        Class currentClass = classRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Class ID " + classId + " not found"));
+
+        Program program;
+        int totalStudyDates = 0;
+        if (currentClass.getProgram().getId().equals(classVM.programId())) {
+            program = currentClass.getProgram();
+            totalStudyDates = currentClass.getClassDetail().getSchedules().size();
+        }
+        else {
+            program = programRepository.findById(classVM.programId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Program ID not found"));
+            totalStudyDates = program.getSyllabuses().stream()
+                    .mapToInt(s -> s.getSessions().size())
+                    .sum();
+        }
+        if (classVM.studyDates().size() != totalStudyDates)
+            throw new ResourceBadRequestException("Class have to last exactly for " + totalStudyDates + " dates");
+        classVM.studyDates().sort(null);
+
+        currentClass.setName(classVM.name());
+        Location location = locationRepository.findById(classVM.fsuId())
+                .orElseThrow(() -> new ResourceNotFoundException("FSU ID not found"));
+        Attendee attendee = attendeeRepository.findById(classVM.attendeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Attendee ID not found"));
+        currentClass.setDuration(totalStudyDates);
+        currentClass.setCode(
+                location.getCode() +
+                        String.valueOf(classVM.studyDates().get(0).getYear()).substring(2, 4) +
+                        "_" + attendee.getCode() + "_" + currentClass.getName().split(" ")[0] +
+                        "_" + String.valueOf(currentClass.getId())
+        );
+
+        ClassDetail currentClassDetail = currentClass.getClassDetail();
+        currentClassDetail.setStatus(classVM.status());
+        currentClassDetail.setLocation(location);
+        currentClassDetail.setAttendee(attendee);
+        currentClassDetail.setPlanned(classVM.planned());
+        currentClassDetail.setAccepted(classVM.accepted());
+        currentClassDetail.setActual(classVM.actual());
+        currentClassDetail.setStartAt(classVM.startAt());
+        currentClassDetail.setFinishAt(classVM.finishAt());
+        currentClassDetail.setOthers(classVM.others());
+        currentClassDetail.setDetailLocation(classVM.detailLocation());
+        currentClassDetail.setContactPoint(classVM.contactPoint());
+
+        currentClassDetail.setUsers(
+                classVM.userIds().stream().map(userId ->
+                                userRepository.findById(userId)
+                                        .orElseThrow(() -> new ResourceNotFoundException("User ID ot found")))
+                        .toList()
+        );
+
+        //change schedules
+        if (currentClass.getProgram().getId().equals(classVM.programId())) {
+            for (int i = 0; i < classVM.studyDates().size(); i++) {
+                ClassSchedule currentClassSchedule = currentClassDetail.getSchedules().get(i);
+                currentClassSchedule.setStudyDate(classVM.studyDates().get(i));
+            }
+        }
+        else {
+            currentClass.setProgram(program);
+            currentClassDetail.getSchedules().clear();
+            List<Session> sessionList = program.getSyllabuses().stream()
+                    .flatMap(s -> s.getSessions().stream())
+                    .toList();
+            for (int i = 0; i < sessionList.size(); i++) {
+                ClassSchedule classSchedule = new ClassSchedule();
+                classSchedule.setClassDetail(currentClassDetail);
+                classSchedule.setStudyDate(classVM.studyDates().get(i));
+                classSchedule.setSession(sessionList.get(i));
+                currentClassDetail.getSchedules().add(classSchedule);
+            }
+        }
+        return classDetailMapper.toDto(currentClassDetail);
     }
 }
