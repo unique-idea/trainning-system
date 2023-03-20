@@ -18,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSpecificationExecutor<Syllabus> {
   Optional<Syllabus> findByCode(String code);
+  boolean existsByCode(String code);
 
   static Specification<Syllabus> searchByKeywordsOrBycreateDates(String[] keywords, Instant[] createDate, Authentication authentication) {
     return (root, query, builder) -> {

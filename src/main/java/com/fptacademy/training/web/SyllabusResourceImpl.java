@@ -22,6 +22,7 @@ import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -302,6 +304,9 @@ public class SyllabusResourceImpl {
       .createTypeMap(Syllabus.class, Syllabus.class)
       .addMappings(mapper -> {
         mapper.skip(Syllabus::setId);
+        mapper
+          .using((Converter<String, String>) ctx -> ctx.getSource().contains("duplicate") ? ctx.getSource() : ctx.getSource() + " (duplicate)")
+          .map(Syllabus::getName, Syllabus::setName);
         mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
       });
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
@@ -324,7 +329,11 @@ public class SyllabusResourceImpl {
 
   @Operation(summary = "", description = "", tags = "syllabuses", security = @SecurityRequirement(name = "token_auth"))
   @PostMapping(value = "/syllabuses/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> importSyllabus(@RequestPart(value = "file") MultipartFile file) {
-    return ResponseEntity.status(HttpStatus.OK).body("File '" + file.getOriginalFilename() + "' đã được tải lên thành công!");
+  public ResponseEntity<?> importSyllabus(
+    @RequestPart(value = "file", required = true) MultipartFile file,
+    @Schema(description = "code or name", type = "array") @RequestParam(required = false) String[] scanning,
+    @Schema(allowableValues = { "allow", "replace", "skip" }) @RequestParam(required = true) String handle
+  ) {
+    return ResponseEntity.ok(syllabusService.importExcel(file, scanning, handle));
   }
 }
