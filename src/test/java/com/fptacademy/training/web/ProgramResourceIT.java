@@ -13,6 +13,12 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.ProgramVM;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -22,13 +28,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AutoConfigureMockMvc
 @IntegrationTest
@@ -155,6 +165,41 @@ public class ProgramResourceIT {
                 .andReturn();
         Assertions.assertThat(mvcResult.getResponse().getContentType())
                 .isEqualTo(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    }
+
+    @Test
+    void testCreateProgramsByImportingExcel() throws Exception {
+        List<Syllabus> syllabuses = List.of(SyllabusFactory.createDummySyllabus(), SyllabusFactory.createDummySyllabus());
+        syllabusRepository.saveAllAndFlush(syllabuses);
+        SecurityContextHolder.clearContext();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (outputStream; Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Programs");
+
+            Row row1 = sheet.createRow(0);
+            Cell cell1 = row1.createCell(0);
+            cell1.setCellValue("Program ID");
+            Cell cell2 = row1.createCell(1);
+            cell2.setCellValue("Program Name");
+            Cell cell3 = row1.createCell(2);
+            cell3.setCellValue("Syllabus Codes");
+            Cell cell4 = row1.createCell(3);
+            cell4.setCellValue("Activated");
+
+            Row row2 = sheet.createRow(1);
+            Cell cell5 = row2.createCell(0);
+            Cell cell6 = row2.createCell(1);
+            cell6.setCellValue("Example Program Name");
+            Cell cell7 = row2.createCell(2);
+            cell7.setCellValue(syllabuses.stream().map(Syllabus::getCode).collect(Collectors.joining(",")));
+            Cell cell8 = row2.createCell(3);
+            cell8.setCellValue(false);
+            workbook.write(outputStream);
+        }
+        mockMvc
+                .perform(multipart("/api/programs/import").file("file", outputStream.toByteArray())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isCreated());
     }
 
     @Test
