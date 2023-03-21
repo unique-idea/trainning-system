@@ -22,4 +22,7 @@ public class Delivery implements Serializable {
 
   @Column(length = 50)
   private String name;
+
+  @Transient
+  private Double present;
 }

@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
+import com.fptacademy.training.web.vm.ProgramListResponseVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,7 +66,7 @@ public interface ProgramResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/programs", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ProgramDto>> getPrograms(
+    ResponseEntity<ProgramListResponseVM> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,

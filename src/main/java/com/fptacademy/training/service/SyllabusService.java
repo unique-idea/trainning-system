@@ -1,6 +1,7 @@
 package com.fptacademy.training.service;
 
 import com.fptacademy.training.domain.Assessment;
+import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Lesson;
 import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
@@ -27,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -64,10 +66,6 @@ public class SyllabusService {
   private final FormatTypeRepository formatTypeRepository;
   private final DeliveryRepository deliveryRepository;
   private final OutputStandardRepository outputStandardRepository;
-  private final SessionRepository sessionRepository;
-  private final UnitRepository unitRepository;
-  private final LessonRepository lessonRepository;
-  private final MaterialRepository materialRepository;
 
   @Transactional(readOnly = true)
   public Page<SyllabusListDto> findAll(Specification<Syllabus> spec, Pageable pageable) {
@@ -222,20 +220,16 @@ public class SyllabusService {
               ctx
                 .getSource()
                 .stream()
-                .sorted(Comparator.comparing(session -> session.getIndex(), Comparator.nullsLast(Integer::compareTo)))
+                .sorted(Comparator.comparing(Session::getIndex, Comparator.nullsLast(Integer::compareTo)))
                 .peek(session ->
                   session.setUnits(
                     session
                       .getUnits()
                       .stream()
-                      .sorted(Comparator.comparing(unit -> unit.getIndex(), Comparator.nullsLast(Integer::compareTo)))
+                      .sorted(Comparator.comparing(Unit::getIndex, Comparator.nullsLast(Integer::compareTo)))
                       .peek(unit ->
                         unit.setLessons(
-                          unit
-                            .getLessons()
-                            .stream()
-                            .sorted(Comparator.comparing(lession -> lession.getIndex(), Comparator.nullsLast(Integer::compareTo)))
-                            .toList()
+                          unit.getLessons().stream().sorted(Comparator.comparing(Lesson::getIndex, Comparator.nullsLast(Integer::compareTo))).toList()
                         )
                       )
                       .toList()
@@ -244,6 +238,31 @@ public class SyllabusService {
                 .toList()
           )
           .map(Syllabus::getSessions, SyllabusDetailDto::setSessions);
+        mapper
+          .using(
+            (Converter<List<Session>, List<Delivery>>) ctx -> {
+              Map<Delivery, Long> deliveryCount = ctx
+                .getSource()
+                .stream()
+                .flatMap(session -> session.getUnits().stream())
+                .flatMap(unit -> unit.getLessons().stream())
+                .collect(Collectors.groupingBy(Lesson::getDelivery, Collectors.counting()));
+              long totalLessons = deliveryCount.values().stream().mapToLong(Long::longValue).sum();
+              List<Delivery> timeAllocation = deliveryCount
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                  double percentage = Math.round(((entry.getValue() * 100.0) / totalLessons) * 1.0) / 1.0;
+                  Delivery delivery = entry.getKey();
+                  delivery.setPresent(percentage);
+                  return delivery;
+                })
+                .sorted(Comparator.comparing(Delivery::getPresent, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+              return timeAllocation;
+            }
+          )
+          .map(Syllabus::getSessions, SyllabusDetailDto::setTimeAllocation);
       });
 
     return syllabusRepository.findById(id).map(syl -> map.map(syl, SyllabusDetailDto.class));

@@ -6,6 +6,7 @@ import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.api.ProgramResource;
+import com.fptacademy.training.web.vm.ProgramListResponseVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -48,19 +49,20 @@ public class ProgramResourceImpl implements ProgramResource {
     }
 
     @Override
-    public ResponseEntity<List<ProgramDto>> getPrograms(List<String> keywords, String sort, int page, int size) {
-        List<ProgramDto> programDtos = programService.getPrograms(keywords, sort);
+    public ResponseEntity<ProgramListResponseVM> getPrograms(List<String> keywords, String sort, int page, int size) {
+        List<ProgramDto> programDTOs = programService.getPrograms(keywords, sort);
+        int numberOfFoundPrograms = programDTOs.size();
         // Apply pagination
         int start = (page - 1) * size;
-        int end = Math.min(start + size, programDtos.size());
-        Page<ProgramDto> pageResult = new PageImpl<>(
-                programDtos.subList(start, end),
+        int end = Math.min(start + size, programDTOs.size());
+        Page<ProgramDto> pageOfPrograms = new PageImpl<>(
+                programDTOs.subList(start, end),
                 PageRequest.of(page - 1, size),
-                programDtos.size());
+                numberOfFoundPrograms);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(pageResult.getContent());
+                .body(new ProgramListResponseVM(numberOfFoundPrograms, pageOfPrograms.getContent()));
     }
     @Override
     public ResponseEntity<List<SyllabusDto.SyllabusListDto>>getSyllabusesByName(String name) {
