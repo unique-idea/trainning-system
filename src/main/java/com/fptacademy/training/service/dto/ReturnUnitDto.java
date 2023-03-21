@@ -9,6 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 public class ReturnUnitDto {
 
+    Long id;
+
     Integer index;
 
     String name;

@@ -18,6 +18,7 @@ public class UnitMapper {
         if (unit == null)
             return null;
         ReturnUnitDto result = new ReturnUnitDto();
+        result.setId(unit.getId());
         result.setName(unit.getName());
         result.setTitle(unit.getTitle());
         result.setIndex(unit.getIndex());

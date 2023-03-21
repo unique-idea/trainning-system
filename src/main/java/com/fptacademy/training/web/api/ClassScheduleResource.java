@@ -1,6 +1,6 @@
 package com.fptacademy.training.web.api;
 
-import com.fptacademy.training.service.dto.ReturnClassScheduleDtoOld;
+import com.fptacademy.training.service.dto.ReturnClassScheduleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,7 +36,7 @@ public interface ClassScheduleResource {
     })
     @PreAuthorize("hasAuthority('Class_FullAccess')")
     @GetMapping(value = "/admin/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassSchedule(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassSchedule(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
 
     @Operation(
@@ -53,7 +53,7 @@ public interface ClassScheduleResource {
     })
     @PreAuthorize("hasAuthority('Class_FullAccess')")
     @GetMapping(value = "/admin/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassScheduleByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
 
     @Operation(
@@ -70,7 +70,7 @@ public interface ClassScheduleResource {
     })
 //    @PreAuthorize("hasAuthority('Class_FullAccess')")
     @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassScheduleOfCurrentUser(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
     @Operation(
             summary = "Get class schedule of user by date",
@@ -86,5 +86,5 @@ public interface ClassScheduleResource {
     })
 //    @PreAuthorize("hasAuthority('Class_FullAccess')")
     @GetMapping(value = "/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDtoOld>> getAllClassScheduleOfCurrentUserByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 }
