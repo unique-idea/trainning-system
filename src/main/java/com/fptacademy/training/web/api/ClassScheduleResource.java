@@ -20,6 +20,7 @@ import java.util.List;
 
 @RequestMapping("/api")
 @EnableMethodSecurity
+@SuppressWarnings("unused")
 public interface ClassScheduleResource {
 
     @Operation(

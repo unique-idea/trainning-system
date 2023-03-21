@@ -37,10 +37,10 @@ class ClassScheduleServiceTest {
     private ClassScheduleService classScheduleService;
 
     private ClassSchedule classSchedule;
-    private User trainer;
 
     @BeforeEach
     void setUp() {
+        User trainer;
         trainer = new User();
         trainer.setFullName("Dao Minh Tri");
         trainer.setId(1L);
@@ -76,9 +76,9 @@ class ClassScheduleServiceTest {
         //given
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleByDate(null);
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleByDate(null)
+        )
                 .hasMessage("date is null")
                 .isInstanceOf(ResourceBadRequestException.class)
         ;
@@ -95,9 +95,9 @@ class ClassScheduleServiceTest {
                 .willReturn(classScheduleList);
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleByDate(LocalDate.of(2023, 3, 10));
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleByDate(LocalDate.of(2023, 3, 10))
+        )
                 .hasMessage("There are no class at date " + LocalDate.of(2023, 3, 10))
                 .isInstanceOf(ResourceNotFoundException.class)
         ;
@@ -177,9 +177,9 @@ class ClassScheduleServiceTest {
                 .willReturn(classSchedules);
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleOfAUserByDate(LocalDate.of(2022, 3, 3), 1L);
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.of(2022, 3, 3), 1L)
+        )
                 .hasMessage("There are no class at date " + LocalDate.of(2022, 3, 3)
                         + " of user 1")
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -192,14 +192,14 @@ class ClassScheduleServiceTest {
         //given
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleOfAUserByDate(null, 1L);
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleOfAUserByDate(null, 1L)
+        )
                 .hasMessage("Bad request for date and userId value")
                 .isInstanceOf(ResourceBadRequestException.class);
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), null);
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), null)
+        )
                 .hasMessage("Bad request for date and userId value")
                 .isInstanceOf(ResourceBadRequestException.class);
 
@@ -240,12 +240,12 @@ class ClassScheduleServiceTest {
                 .willReturn(classSchedules);
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleOfAUserByDateBetween(
-                    1L,
-                    LocalDate.of(2023, 3, 10),
-                    LocalDate.of(2023, 3, 15));
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleOfAUserByDateBetween(
+                        1L,
+                        LocalDate.of(2023, 3, 10),
+                        LocalDate.of(2023, 3, 15))
+        )
                 .hasMessage("There are no class between "
                         + LocalDate.of(2023, 3, 10) + " and "
                         + LocalDate.of(2023, 3, 15)
@@ -265,12 +265,12 @@ class ClassScheduleServiceTest {
         //given
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleOfAUserByDateBetween(
-                    null,
-                    LocalDate.of(2023, 3, 10),
-                    LocalDate.of(2023, 3, 15));
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleOfAUserByDateBetween(
+                        null,
+                        LocalDate.of(2023, 3, 10),
+                        LocalDate.of(2023, 3, 15))
+        )
                 .hasMessage("Bad request")
                 .isInstanceOf(ResourceBadRequestException.class);
 
@@ -309,12 +309,12 @@ class ClassScheduleServiceTest {
                 .willReturn(classSchedules);
         //when
         //then
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleByDateBetween(
-                    LocalDate.of(2023, 3, 10),
-                    LocalDate.of(2023, 3, 15)
-            );
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleByDateBetween(
+                        LocalDate.of(2023, 3, 10),
+                        LocalDate.of(2023, 3, 15)
+                )
+        )
                 .hasMessage("There are no class between "
                         + LocalDate.of(2023, 3, 10) + " and "
                         + LocalDate.of(2023, 3, 15))
@@ -329,11 +329,11 @@ class ClassScheduleServiceTest {
         //when
         //then
 
-        assertThatThrownBy(() -> {
-            classScheduleService.getClassScheduleByDateBetween(
-                    null, null
-            );
-        })
+        assertThatThrownBy(
+                () -> classScheduleService.getClassScheduleByDateBetween(
+                        null, null
+                )
+        )
                 .hasMessage("Bad request")
                 .isInstanceOf(ResourceBadRequestException.class);
         verify(classScheduleRepository, never()).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class));
