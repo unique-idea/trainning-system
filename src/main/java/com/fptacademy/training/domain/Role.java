@@ -1,9 +1,7 @@
 package com.fptacademy.training.domain;
 
 import com.fptacademy.training.service.util.ListToStringConverter;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -13,6 +11,9 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "roles")
 @Entity
 public class Role implements Serializable {
