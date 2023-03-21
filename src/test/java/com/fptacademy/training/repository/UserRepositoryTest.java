@@ -74,65 +74,10 @@ public class UserRepositoryTest {
     
     @BeforeEach
     void createFakeData() {
-        Role roleUser = roleRepository.save(
-                Role.builder()
-                        .name("ROLE_USER")
-                        .permissions(List.of(Permissions.USER_FULL_ACCESS))
-                        .build());
-        Role roleAdmin = roleRepository.save(
-                Role.builder()
-                        .name("ROLE_ADMIN")
-                        .permissions(List.of(Permissions.USER_FULL_ACCESS))
-                        .build());
-
-        Level beginner = levelRepository.save(Level.builder().name("Beginner").build());
-        Level intermediate = levelRepository.save(Level.builder().name("Intermediate").build());
-        Level advanced = levelRepository.save(Level.builder().name("Advanced").build());
-
-        User user1 = User.builder()
-                .code("USER001")
-                .fullName("Nguyen Van A")
-                .email("a@gmail.com")
-                .password("123456")
-                .birthday(LocalDate.of(2001, 1, 1))
-                .level(beginner)
-                .role(roleUser)
-                .activated(true)
-                .status(UserStatus.IN_CLASS)
-                .build();
-
-        User user2 = User.builder()
-                .code("USER002")
-                .fullName("Nguyen Van B")
-                .email("b@gmail.com")
-                .password("123456")
-                .birthday(LocalDate.of(1999, 1, 1))
-                .level(intermediate)
-                .role(roleAdmin)
-                .activated(true)
-                .status(UserStatus.ACTIVE)
-                .build();
-
-        User user3 = User.builder()
-                .code("USER003")
-                .fullName("Nguyen Van C")
-                .email("c@gmail.com")
-                .password("123456")
-                .birthday(LocalDate.of(1997, 1, 1))
-                .level(advanced)
-                .role(roleUser)
-                .activated(true)
-                .status(UserStatus.OFF_CLASS)
-                .build();
-
-        userRepository.saveAll(List.of(user1, user2, user3));
     }
 
     @AfterEach
     void deleteFakeData() {
-        userRepository.deleteAll();
-        levelRepository.deleteAll();
-        roleRepository.deleteAll();
     }
 
     private Boolean isUserMatchFilters(User user, String email, String fullName, String code, String levelName,

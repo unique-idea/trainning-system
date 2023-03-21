@@ -39,9 +39,9 @@ class ClassScheduleMapperTest {
     private ClassScheduleMapper classScheduleMapper;
 
     private Class classField;
-    private Location location1, location2, location3;
-    private Attendee attendee1, attendee2;
-    private ReturnUnitDto unit1, unit2, unit3, unit4;
+    private Location location1/*, location2, location3*/;
+    private Attendee attendee1;
+    private ReturnUnitDto unit1, unit2/*, unit3, unit4*/;
     private List<ReturnUnitDto> returnUnitDtos;
 
     @BeforeEach
@@ -52,13 +52,13 @@ class ClassScheduleMapperTest {
         location1.setCity("Hồ Chí Minh");
         location1.setFsu("Ftown1");
 
-        location2 = new Location();
-        location2.setCity("Hồ Chí Minh");
-        location2.setFsu("Ftown3");
-
-        location3 = new Location();
-        location3.setCity("Hà Nội");
-        location3.setFsu("Headquarter");
+//        location2 = new Location();
+//        location2.setCity("Hồ Chí Minh");
+//        location2.setFsu("Ftown3");
+//
+//        location3 = new Location();
+//        location3.setCity("Hà Nội");
+//        location3.setFsu("Headquarter");
 
         attendee1 = new Attendee();
         attendee1.setType("Intern");
@@ -77,18 +77,18 @@ class ClassScheduleMapperTest {
         unit2.setName("Test unit 2");
         unit2.setTitle("Test unit 2 title");
         unit2.setIndex(2);
-
-        unit3 = new ReturnUnitDto();
-        unit3.setId(3L);
-        unit3.setName("Test unit 3");
-        unit3.setTitle("Test unit 3 title");
-        unit3.setIndex(3);
-
-        unit4 = new ReturnUnitDto();
-        unit4.setId(4L);
-        unit4.setName("Test unit 4");
-        unit4.setTitle("Test unit 4 title");
-        unit4.setIndex(4);
+//
+//        unit3 = new ReturnUnitDto();
+//        unit3.setId(3L);
+//        unit3.setName("Test unit 3");
+//        unit3.setTitle("Test unit 3 title");
+//        unit3.setIndex(3);
+//
+//        unit4 = new ReturnUnitDto();
+//        unit4.setId(4L);
+//        unit4.setName("Test unit 4");
+//        unit4.setTitle("Test unit 4 title");
+//        unit4.setIndex(4);
 
         returnUnitDtos = new ArrayList<>();
         returnUnitDtos.add(unit1);

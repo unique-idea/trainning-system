@@ -49,21 +49,27 @@ public interface UserResource {
 
     ResponseEntity<UserDto> deActiveUser();
 
-    // @Operation(summary = "Get list of users", description = "Get list of users
-    // with sort and pagination", tags = "user", security =
-    // @SecurityRequirement(name = "token_auth"))
-    // @ApiResponses(value = {
-    // @ApiResponse(responseCode = "200", description = "Found users"),
-    // @ApiResponse(responseCode = "400", description = "Invalid parameters",
-    // content = @Content),
-    // @ApiResponse(responseCode = "401", description = "Unauthorized, missing or
-    // invalid JWT", content = @Content),
-    // @ApiResponse(responseCode = "403", description = "Access denied, do not have
-    // permission to access this resource", content = @Content),
-    // })
-    // @ResponseStatus(HttpStatus.OK)
-    // @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    // ResponseEntity<List<UserDto>> getUsers(Integer pageNumber, Integer pageSize);
+    @Operation(summary = "Get users by filters", description = "Get users by filters", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found users"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<List<UserDto>> getUsers(
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "name", required = false) String fullName,
+            @RequestParam(name = "code", required = false) String code,
+            @RequestParam(name = "level", required = false) String levelName,
+            @RequestParam(name = "role", required = false) String roleName,
+            @RequestParam(name = "birthdayFrom", required = false) String birthdayFrom,
+            @RequestParam(name = "birthdayTo", required = false) String birthdayTo,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "sort", required = false, defaultValue = "id,asc") String sort,
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "size", required = false, defaultValue = "10") Integer pageSize);
 
     @Operation(summary = "Get user by email", description = "Get user by email", tags = "user", security = @SecurityRequirement(name = "token_auth"))
     @ApiResponses(value = {
@@ -191,5 +197,4 @@ public interface UserResource {
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/user/template/excel", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     ResponseEntity<Resource> downloadUserExcelTemplate(HttpServletResponse response);
-
 }

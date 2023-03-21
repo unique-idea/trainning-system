@@ -32,9 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class ClassScheduleResourceImplTest {
 
-    //    @Autowired
-//    private Jackson2ObjectMapperBuilder mapperBuilder;
-    private static final String token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJhdXRoIjoiQ2xhc3NfRnVsbEFjY2VzcyxNYXRlcmlhbF9GdWxsQWNjZXNzLFByb2dyYW1fRnVsbEFjY2VzcyxTeWxsYWJ1c19GdWxsQWNjZXNzLFVzZXJfRnVsbEFjY2VzcyIsImV4cCI6MTY3ODk1OTcyNn0.SaWGkjSJW0iPbhJrsMqgu162GN3Y7cVfEMRkBQBiCfw";
     @Mock
     private ClassScheduleService classScheduleService;
     @Mock
@@ -46,16 +43,16 @@ class ClassScheduleResourceImplTest {
     @Autowired
     private MockMvc mockMvc;
     private List<ReturnClassScheduleDto> classScheduleDTOList;
-    private ReturnClassScheduleDto classScheduleDTO1;
-    private ReturnClassScheduleDto classScheduleDTO2;
-    private ReturnUnitDto unitDto1;
-    private ReturnUnitDto unitDto2;
-    private List<ReturnUnitDto> unitDtos;
     private User user1;
 
 
     @BeforeEach
     void setUp() {
+
+        ReturnClassScheduleDto classScheduleDTO1, classScheduleDTO2;
+        ReturnUnitDto unitDto1, unitDto2;
+        List<ReturnUnitDto> unitDtos;
+
         unitDto1 = new ReturnUnitDto(1L, 1, "Test unit 1", "Test unit 1");
         unitDto2 = new ReturnUnitDto(2L, 2, "Test unit 2", "Test unit 2");
         unitDtos = new ArrayList<>();
