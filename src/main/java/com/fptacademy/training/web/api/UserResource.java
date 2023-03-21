@@ -86,7 +86,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(value = "/user/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestMapping(value = "/user/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> importUsersFromExcel(@RequestParam("file") MultipartFile file);
 
     @Operation(summary = "Get user by name", description = "Get user by name", tags = "user", security = @SecurityRequirement(name = "token_auth"))

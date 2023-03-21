@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 public class UserResourceImpl implements UserResource {
 
+//    @Autowired
     private final UserService userService;
 
     private final ResourceLoader resourceLoader;
@@ -71,7 +73,7 @@ public class UserResourceImpl implements UserResource {
                 .body(userService.findUserByEmail(email));
     }
 
-//    @Override
+    //    @Override
 //    public ResponseEntity<List<UserDto>> getUsers(String email, String fullName, String code,
 //            String levelName, String roleName, String birthdayFrom, String birthdayTo,
 //            String status, String sort, Integer pageNumber, Integer pageSize) {
@@ -80,11 +82,11 @@ public class UserResourceImpl implements UserResource {
 //                .body(userService.getUsersByFilters(email, fullName, code, levelName,
 //                        roleName, true, birthdayFrom, birthdayTo, status, sort, pageNumber, pageSize));
 //    }
-
-    public ResponseEntity<?> importUsersFromExcel(MultipartFile file) {
-        this.userService.importUsersToDB(file);
+    @Override
+    public ResponseEntity<List<UserDto>> importUsersFromExcel(MultipartFile file) {
         return ResponseEntity
-                .ok(Map.of("Message", "Users data uploaded and saved database successfully"));
+                .status(HttpStatus.OK)
+                .body(userService.importUsersToDB(file));
     }
 
     @Override

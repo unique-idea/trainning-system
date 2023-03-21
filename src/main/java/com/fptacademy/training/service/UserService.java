@@ -21,13 +21,17 @@ import com.fptacademy.training.service.util.ExcelExportUtils;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -47,14 +51,19 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @Transactional
 public class UserService {
+
+    @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
     private final RoleService roleService;
 
+    @Autowired
     private final LevelService levelService;
-
+    @Autowired
     private final UserMapper userMapper;
 
+    @Autowired
     private final ExcelUploadService excelUploadService;
 
     @Value("${spring.servlet.multipart.max-file-size}")
@@ -223,17 +232,17 @@ public class UserService {
         return userMapper.toDtos(page.getContent());
     }
 
-    public void importUsersToDB(MultipartFile file) {
-
+    public List<UserDto> importUsersToDB(MultipartFile file) {
+        List<User> users = null;
             try {
                 if (ExcelUploadService.isValidExcelFile(file)) {
-                    List<User> users = excelUploadService.getUserDataFromExcel(file.getInputStream());
+                     users = excelUploadService.getUserDataFromExcel(file.getInputStream());
                     this.userRepository.saveAll(users);
                 }
             } catch (IOException e) {
                 throw new IllegalArgumentException("The file is not a valid excel file");
             }
-
+        return userMapper.toDtos(users);
     }
 
     public UserDto getUserById(Long id) {
