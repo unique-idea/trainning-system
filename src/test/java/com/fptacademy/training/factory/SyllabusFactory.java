@@ -12,6 +12,7 @@ public class SyllabusFactory {
         int numberOfSessions = faker.random().nextInt(10, 35);
         Syllabus syllabus = Syllabus.builder()
                 .duration(numberOfSessions)
+                .code(faker.random().hex(6).toUpperCase())
                 .build();
         List<Session> sessions = new ArrayList<>();
         for (int i = 0; i < numberOfSessions; ++i) {
