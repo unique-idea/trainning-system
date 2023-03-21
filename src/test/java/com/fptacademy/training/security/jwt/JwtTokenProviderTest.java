@@ -2,6 +2,8 @@ package com.fptacademy.training.security.jwt;
 
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.factory.RoleFactory;
+import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
@@ -15,18 +17,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class JwtTokenProviderTest {
     @Autowired
-    private JwtTokenProvider tokenProvider;
-    @Autowired
     private RoleRepository roleRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtTokenProvider tokenProvider;
     private final long ONE_MINUTE = 1;
     private User user;
 
@@ -35,9 +35,9 @@ class JwtTokenProviderTest {
     void setup() {
         ReflectionTestUtils.setField(tokenProvider, "accessExpireTimeInMinutes", ONE_MINUTE);
         ReflectionTestUtils.setField(tokenProvider, "refreshExpireTimeInMinutes", ONE_MINUTE);
-        Role role = TestUtil.getRole(List.of(Permissions.CLASS_CREATE));
+        Role role = RoleFactory.createRoleWithPermissions(Permissions.CLASS_CREATE);
         roleRepository.saveAndFlush(role);
-        user = TestUtil.getUser(role);
+        user = UserFactory.createActiveUser(role);
         userRepository.saveAndFlush(user);
     }
 

@@ -1,8 +1,6 @@
 package com.fptacademy.training.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -14,6 +12,9 @@ import java.util.List;
 @ToString
 @Table(name = "programs")
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Program extends AbstractAuditEntity implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
