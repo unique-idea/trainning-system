@@ -13,6 +13,8 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.ProgramVM;
+import org.assertj.core.api.Assertions;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -72,6 +75,7 @@ public class ProgramResourceIT {
                 SyllabusFactory.createDummySyllabus(),
                 SyllabusFactory.createDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
+        SecurityContextHolder.clearContext();
         List<Long> syllabusIds = syllabuses.stream().mapToLong(Syllabus::getId).boxed().toList();
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, syllabusIds);
         mockMvc
@@ -87,6 +91,7 @@ public class ProgramResourceIT {
     void testCreateProgramWithConflictName() throws Exception {
         Program program = Program.builder().name(DEFAULT_PROGRAM_NAME).build();
         programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of());
         mockMvc
                 .perform(post("/api/programs")
@@ -109,10 +114,56 @@ public class ProgramResourceIT {
 
     @Test
     @Transactional
+    void testGetProgramListWithPagination() throws Exception {
+        for (int i = 0; i < 20; ++i) {
+            Program program = ProgramFactory.createDummyProgram();
+            syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+            programRepository.saveAndFlush(program);
+        }
+        SecurityContextHolder.clearContext();
+        mockMvc
+                .perform(get("/api/programs")
+                        .param("page", "2")
+                        .param("size", "10")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(20))
+                .andExpect(jsonPath("$.programs").isArray())
+                .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
+                .andExpect(jsonPath("$.programs[0].id").value(11));
+
+        mockMvc
+                .perform(get("/api/programs")
+                        .param("sort", "id,desc")
+                        .param("page", "2")
+                        .param("size", "10")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(20))
+                .andExpect(jsonPath("$.programs").isArray())
+                .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
+                .andExpect(jsonPath("$.programs[0].id").value(10));
+    }
+
+    @Test
+    void testDownloadProgramExcelTemplate() throws Exception {
+        SecurityContextHolder.clearContext();
+        MvcResult mvcResult = mockMvc
+                .perform(get("/api/programs/import/template")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn();
+        Assertions.assertThat(mvcResult.getResponse().getContentType())
+                .isEqualTo(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    }
+
+    @Test
+    @Transactional
     public void testDeleteProgram() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
         programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
         mockMvc.perform(delete("/api/programs/{id}", program.getId())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isOk());

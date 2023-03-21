@@ -69,8 +69,8 @@ public interface ProgramResource {
     ResponseEntity<ProgramListResponseVM> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
-            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int size);
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size);
 
     @Operation(
             summary = "Get list of syllabuses by name",
