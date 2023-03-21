@@ -166,7 +166,6 @@ public interface UserResource {
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")
     )
-
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Export successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid file", content = @Content),

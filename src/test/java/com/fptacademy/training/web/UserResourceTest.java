@@ -88,5 +88,4 @@ public class UserResourceTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
-
 }

@@ -2,12 +2,7 @@ package com.fptacademy.training.domain;
 
 import com.fptacademy.training.service.util.ListToStringConverter;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -32,4 +27,9 @@ public class Role implements Serializable {
     @Column(nullable = false)
     @Convert(converter = ListToStringConverter.class)
     private List<String> permissions;
+
+    public Role(String name, List<String> permissions) {
+        this.name = name;
+        this.permissions = permissions;
+    }
 }
