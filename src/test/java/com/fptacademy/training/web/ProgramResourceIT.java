@@ -5,6 +5,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fptacademy.training.IntegrationTest;
 import com.fptacademy.training.domain.*;
+import com.fptacademy.training.factory.ProgramFactory;
+import com.fptacademy.training.factory.RoleFactory;
+import com.fptacademy.training.factory.SyllabusFactory;
+import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
@@ -27,53 +31,48 @@ import java.util.List;
 @IntegrationTest
 public class ProgramResourceIT {
     @Autowired
-    private JwtTokenProvider tokenProvider;
-    @Autowired
-    private MockMvc mockMvc;
-    private final String DEFAULT_PROGRAM_NAME = "Test Program";
-    @Autowired
     private SyllabusRepository syllabusRepository;
+    @Autowired
+    private ProgramRepository programRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
-    private String accessToken;
     @Autowired
-    private ProgramRepository programRepository;
+    private JwtTokenProvider tokenProvider;
+    @Autowired
+    private MockMvc mockMvc;
+    private String accessToken;
+    private final String DEFAULT_PROGRAM_NAME = "Test Program";
 
     @BeforeEach
     @Transactional
     void setup() {
-        Role role = TestUtil.getRole(List.of(Permissions.PROGRAM_FULL_ACCESS));
+        Role role = RoleFactory.createRoleWithPermissions(Permissions.PROGRAM_FULL_ACCESS);
         roleRepository.saveAndFlush(role);
-        User user = TestUtil.getUser(role);
+        User user = UserFactory.createActiveUser(role);
         userRepository.saveAndFlush(user);
         Authentication authentication = TestUtil.createAuthentication(user);
         accessToken = tokenProvider.generateAccessToken(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        Syllabus syllabus = new Syllabus();
-        syllabus.setDuration(1);
-        Session session = new Session();
-        session.setSyllabus(syllabus);
-        Unit unit = new Unit();
-        unit.setSession(session);
-        unit.setTotalDurationLesson(12.5);
-        session.setUnits(List.of(unit));
-        List<Syllabus> syllabuses = List.of(syllabus);
-        syllabusRepository.saveAllAndFlush(syllabuses);
     }
     @AfterEach
     @Transactional
     void teardown() {
+        SecurityContextHolder.clearContext();
         programRepository.deleteAll();
         syllabusRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
     @Test
+    @Transactional
     void testCreateProgram() throws Exception {
-        List<Long> syllabusIds = syllabusRepository.findAll().stream().mapToLong(Syllabus::getId).boxed().toList();
+        List<Syllabus> syllabuses = List.of(
+                SyllabusFactory.createDummySyllabus(),
+                SyllabusFactory.createDummySyllabus());
+        syllabusRepository.saveAllAndFlush(syllabuses);
+        List<Long> syllabusIds = syllabuses.stream().mapToLong(Syllabus::getId).boxed().toList();
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, syllabusIds);
         mockMvc
                 .perform(post("/api/programs")
@@ -86,8 +85,7 @@ public class ProgramResourceIT {
     @Test
     @Transactional
     void testCreateProgramWithConflictName() throws Exception {
-        Program program = new Program();
-        program.setName(DEFAULT_PROGRAM_NAME);
+        Program program = Program.builder().name(DEFAULT_PROGRAM_NAME).build();
         programRepository.saveAndFlush(program);
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of());
         mockMvc
@@ -105,6 +103,24 @@ public class ProgramResourceIT {
                 .perform(post("/api/programs")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    public void testDeleteProgram() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        mockMvc.perform(delete("/api/programs/{id}", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testDeleteProgramNotFound() throws Exception {
+        mockMvc.perform(delete("/api/programs/{id}", 999)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }

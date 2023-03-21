@@ -3,6 +3,8 @@ package com.fptacademy.training.web;
 import com.fptacademy.training.IntegrationTest;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.factory.RoleFactory;
+import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
@@ -17,8 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -28,20 +28,20 @@ public class AuthenticationResourceIT {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
     private JwtTokenProvider tokenProvider;
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private RoleRepository roleRepository;
+    private final String DEFAULT_PASSWORD = "test-password";
     private User user;
 
     @BeforeEach
     @Transactional
     void setup() {
-        Role role = TestUtil.getRole(List.of(Permissions.CLASS_CREATE));
+        Role role = RoleFactory.createRoleWithPermissions(Permissions.CLASS_CREATE);
         roleRepository.saveAndFlush(role);
-
-        user = TestUtil.getUser(role);
+        user = UserFactory.createActiveUser(DEFAULT_PASSWORD, role);
         userRepository.saveAndFlush(user);
     }
 
@@ -55,7 +55,7 @@ public class AuthenticationResourceIT {
     @Test
     @Transactional
     void testLogin() throws Exception {
-        LoginVM loginVM = new LoginVM(TestUtil.EMAIL, TestUtil.PASSWORD);
+        LoginVM loginVM = new LoginVM(user.getEmail(), DEFAULT_PASSWORD);
 
         mockMvc
                 .perform(post("/api/auth/login")
@@ -82,7 +82,7 @@ public class AuthenticationResourceIT {
 
     @Test
     void testGetAccessTokenFromRefreshToken() throws Exception {
-        String refreshToken = tokenProvider.generateRefreshToken("test@gmail.com");
+        String refreshToken = tokenProvider.generateRefreshToken(user.getEmail());
         mockMvc
                 .perform(get("/api/auth/refresh").header("Refresh-Token", refreshToken))
                 .andExpect(jsonPath("$.accessToken").isString())
