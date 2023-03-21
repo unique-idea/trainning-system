@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.factory.RoleFactory;
+import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
@@ -18,32 +20,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
 
 @SpringBootTest
 public class JwtAuthenticationFilterTest {
     @Autowired
-    private JwtTokenProvider tokenProvider;
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
     private RoleRepository roleRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
     private User user;
 
     @BeforeEach
     @Transactional
     void setup() {
-        Role role = TestUtil.getRole(List.of(Permissions.CLASS_CREATE));
+        Role role = RoleFactory.createRoleWithPermissions(Permissions.CLASS_CREATE);
         roleRepository.saveAndFlush(role);
-        user = TestUtil.getUser(role);
+        user = UserFactory.createActiveUser(role);
         userRepository.saveAndFlush(user);
         jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider);
         SecurityContextHolder.getContext().setAuthentication(null);
@@ -67,7 +64,7 @@ public class JwtAuthenticationFilterTest {
         MockFilterChain filterChain = new MockFilterChain();
         jwtAuthenticationFilter.doFilter(request, response, filterChain);
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(SecurityContextHolder.getContext().getAuthentication().getName()).isEqualTo(TestUtil.EMAIL);
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getName()).isEqualTo(user.getEmail());
         assertThat(SecurityContextHolder.getContext().getAuthentication().getCredentials()).hasToString(jwt);
     }
 
