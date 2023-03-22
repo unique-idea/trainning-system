@@ -181,7 +181,11 @@ public class ProgramService {
                             "If not specify ID, please make sure ID cell is empty");
                 }
                 program.setName(row.getCell(1).getStringCellValue().trim());
-                List<Syllabus> syllabuses = Arrays.stream(row.getCell(2).getStringCellValue().trim().split(","))
+                String syllabusCodes = row.getCell(2).getStringCellValue().trim();
+                if (!StringUtils.hasText(program.getName()) || !StringUtils.hasText(syllabusCodes)) {
+                    continue;
+                }
+                List<Syllabus> syllabuses = Arrays.stream(syllabusCodes.split(","))
                         .map(code -> syllabusRepository
                                 .findByCode(code)
                                 .orElseThrow(() -> new ResourceNotFoundException("Syllabus with code '" + code + "' not found")))
