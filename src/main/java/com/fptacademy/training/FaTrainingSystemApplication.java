@@ -25,7 +25,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 				version = "1.0"
 		),
 		servers = {
-				@Server(url = "http://localhost:8080", description = "Local server")
+				@Server(url = "http://localhost:8080", description = "Local development server"),
+				@Server(url = "http://localhost:5000", description = "Local production server")
 		},
 		tags = {
 				@Tag(name = "authentication", description = "REST API endpoints for authentication"),
