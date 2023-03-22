@@ -7,7 +7,6 @@ import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
-import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.security.Permissions;

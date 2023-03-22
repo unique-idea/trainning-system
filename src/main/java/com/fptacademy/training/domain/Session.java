@@ -20,6 +20,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Setter
 @Getter
@@ -43,6 +45,7 @@ public class Session implements Serializable {
   private String name;
 
   @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Unit> units = new ArrayList<>();
 
   @JsonIgnore
