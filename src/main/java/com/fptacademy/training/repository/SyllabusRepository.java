@@ -11,12 +11,18 @@ import java.util.stream.Stream;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
+@SuppressWarnings("NullableProblems")
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSpecificationExecutor<Syllabus> {
+    @Override
+    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy"})
+    Optional<Syllabus> findById(Long id);
+    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy"})
   Optional<Syllabus> findByCode(String code);
   boolean existsByCode(String code);
 
