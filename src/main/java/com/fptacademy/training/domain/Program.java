@@ -9,12 +9,26 @@ import java.util.List;
 
 @Setter
 @Getter
-@ToString
 @Table(name = "programs")
 @Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "graph.Program.syllabus.session", includeAllAttributes = true,
+                attributeNodes = @NamedAttributeNode(value = "syllabuses", subgraph = "subgraph.syllabus"),
+                subgraphs = @NamedSubgraph(name = "subgraph.syllabus", attributeNodes = @NamedAttributeNode(value = "sessions"))
+        ),
+        @NamedEntityGraph(
+                name = "graph.Program.syllabus.session.unit", includeAllAttributes = true,
+                attributeNodes = @NamedAttributeNode(value = "syllabuses", subgraph = "subgraph.syllabus.session"),
+                subgraphs = {
+                        @NamedSubgraph(name = "subgraph.syllabus.session", attributeNodes = @NamedAttributeNode(value = "sessions", subgraph = "subgraph.syllabus.session.unit")),
+                        @NamedSubgraph(name = "subgraph.syllabus.session.unit", attributeNodes = @NamedAttributeNode("units"))
+                }
+        )
+})
 public class Program extends AbstractAuditEntity implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
