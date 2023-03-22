@@ -3,14 +3,20 @@ package com.fptacademy.training.service.util;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.enumeration.RoleName;
 import com.fptacademy.training.domain.enumeration.UserStatus;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.LevelRepository;
 import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.RoleService;
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -19,10 +25,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @AllArgsConstructor
 @Service
@@ -43,7 +46,7 @@ public class ExcelUploadService {
 
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-            XSSFSheet sheet = workbook.getSheet("users");
+            XSSFSheet sheet = workbook.getSheet("User");
             int rowIndex = 0;
             for (Row row : sheet) {
                 if (rowIndex == 0) {
@@ -58,51 +61,77 @@ public class ExcelUploadService {
                     Cell cell = cellIterator.next();
                     switch (cellIndex) {
                         case 0: // full name
-                            if (cell.getStringCellValue() != null) {
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
                                 user.setFullName(cell.getStringCellValue());
                             }
                             break;
 
                         case 1: // email
-                            if (cell.getStringCellValue() != null) {
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
                                 user.setEmail(cell.getStringCellValue());
                             }
                             break;
 
                         case 2: // code
-                            if (cell.getStringCellValue() != null) {
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
                                 user.setCode(cell.getStringCellValue());
                             }
                             break;
 
                         case 3: // password
-                            if (cell.getStringCellValue() != null) {
-                                user.setPassword(cell.getStringCellValue());
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
+                                PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+                                user.setPassword(passwordEncoder.encode(cell.getStringCellValue()));
                             }
                             break;
 
                         case 4: // gender
-                            if (cell.getNumericCellValue() == 0 || cell.getNumericCellValue() == 1) {
-                                user.setGender(cell.getNumericCellValue() == 1);
+                            if (cell.getBooleanCellValue()) {
+                                user.setGender(Boolean.TRUE);
+                            } else {
+                                user.setGender(Boolean.FALSE);
                             }
                             break;
 
                         case 5: // role
-                            if (cell.getStringCellValue() != null) {
-                                Role role = roleService.getRoleByName(cell.getStringCellValue());
-                                user.setRole(role);
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
+                                boolean checkRole = false;
+                                for (RoleName name : RoleName.values()) {
+                                    if (String.valueOf(name).equalsIgnoreCase(cell.getStringCellValue())) {
+                                        checkRole = true;
+                                        Role role = roleService.getRoleByName(cell.getStringCellValue());
+                                        if (role == null) {
+                                            List<String> permissions = null;
+                                            if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.SUPER_ADMIN))) {
+                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_FULL_ACCESS, Permissions.PROGRAM_FULL_ACCESS, Permissions.CLASS_FULL_ACCESS, Permissions.MATERIAL_FULL_ACCESS, Permissions.SYLLABUS_FULL_ACCESS));
+                                            } else if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.CLASS_ADMIN))) {
+                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_MODIFY, Permissions.PROGRAM_FULL_ACCESS, Permissions.CLASS_FULL_ACCESS, Permissions.MATERIAL_FULL_ACCESS, Permissions.SYLLABUS_FULL_ACCESS));
+                                            } else if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.TRAINER))) {
+                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_VIEW, Permissions.PROGRAM_VIEW, Permissions.CLASS_VIEW, Permissions.MATERIAL_MODIFY, Permissions.SYLLABUS_FULL_ACCESS));
+                                            } else if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.TRAINEE))) {
+                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_ACCESS_DENIED, Permissions.PROGRAM_VIEW, Permissions.CLASS_ACCESS_DENIED, Permissions.MATERIAL_VIEW, Permissions.SYLLABUS_VIEW));
+                                            }
+                                            role = new Role(cell.getStringCellValue(), permissions);
+                                        }
+                                        user.setRole(role);
+                                    }
+                                }
+                                if (!checkRole) {
+                                    throw new ResourceNotFoundException("Role " + cell.getStringCellValue() + "at line " + rowIndex + " does not exist!");
+                                }
                             }
                             break;
 
                         case 6: // Activated
-                            if (cell.getNumericCellValue() == 0 || cell.getNumericCellValue() == 1) {
-                                user.setActivated(cell.getNumericCellValue() == 1);
-                                System.out.println("Activated: " + user.getActivated());
+                            if (cell.getBooleanCellValue()) {
+                                user.setActivated(Boolean.TRUE);
+                            } else {
+                                user.setActivated(Boolean.FALSE);
                             }
                             break;
 
                         case 7: //level
-                            if (cell.getStringCellValue() != null) {
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
                                 Level level = null;
                                 boolean checkLevel = levelService.checkLevelIsExist(cell.getStringCellValue());
                                 if (checkLevel) {
@@ -116,14 +145,16 @@ public class ExcelUploadService {
                             break;
 
                         case 8: //status
-                            if (cell.getStringCellValue() != null) {
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
                                 UserStatus status = UserStatus.valueOf(cell.getStringCellValue());
-                                user.setStatus(status);
+                                if (status != null) {
+                                    user.setStatus(status);
+                                }
                             }
                             break;
 
                         case 9:
-                            if (cell.getStringCellValue() != null) {
+                            if (cell.getStringCellValue() != null && !cell.getStringCellValue().isEmpty()) {
                                 user.setAvatarUrl(cell.getStringCellValue());
                             }
                             break;
@@ -139,14 +170,22 @@ public class ExcelUploadService {
                     }
                     cellIndex++;
                 }
-                if (user.getActivated() != null) {
+                if (isValidUser(user) && !userRepository.existsByCodeIgnoreCase(user.getCode())) {
                     users.add(user);
                 }
             }
+        } catch (NullPointerException e) {
+            throw new ResourceNotFoundException("Sheet 'User' does not exist");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ResourceNotFoundException("File must end with .xlsx and have same format with User Excel Template");
+        } catch (Exception e){
+            throw new ResourceBadRequestException("File does not have correct format");
         }
 
         return users;
+    }
+
+    public boolean isValidUser(User user) {
+        return user.getEmail() != null && user.getPassword() != null && user.getFullName() != null &&user.getCode() != null && user.getActivated() != null;
     }
 }

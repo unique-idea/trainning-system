@@ -105,7 +105,6 @@ public class ClassScheduleService {
         return getClassScheduleOfAUserByDateBetween(userId, firstDayOfCurrentWeek, endDayOfCurrentWeek);
     }
 
-
     public List<ClassSchedule> getClassScheduleInAWeek(LocalDate date) {
 
         DayOfWeek firstDayOfWeek = DayOfWeek.MONDAY;

@@ -1,22 +1,31 @@
 package com.fptacademy.training.web.api;
 
-import com.fptacademy.training.domain.Class;
-import com.fptacademy.training.domain.ClassDetail;
-import com.fptacademy.training.service.dto.*;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fptacademy.training.service.dto.AttendeeDto;
+import com.fptacademy.training.service.dto.ClassDetailDto;
+import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.LocationDto;
+import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.ClassVM;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.data.repository.query.Param;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 
 @RequestMapping("/api/class")

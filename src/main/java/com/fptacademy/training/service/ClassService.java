@@ -1,25 +1,47 @@
 package com.fptacademy.training.service;
 
-import com.fptacademy.training.domain.*;
-import com.fptacademy.training.domain.Class;
-import com.fptacademy.training.domain.enumeration.ClassStatus;
-import com.fptacademy.training.exception.ResourceAlreadyExistsException;
-import com.fptacademy.training.exception.ResourceBadRequestException;
-import com.fptacademy.training.exception.ResourceNotFoundException;
-import com.fptacademy.training.repository.*;
-import com.fptacademy.training.service.dto.*;
-import com.fptacademy.training.service.mapper.*;
-import com.fptacademy.training.web.vm.ClassVM;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fptacademy.training.domain.Attendee;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
+import com.fptacademy.training.domain.ClassSchedule;
+import com.fptacademy.training.domain.Lesson;
+import com.fptacademy.training.domain.Location;
+import com.fptacademy.training.domain.Program;
+import com.fptacademy.training.domain.Session;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.exception.ResourceNotFoundException;
+import com.fptacademy.training.repository.AttendeeRepository;
+import com.fptacademy.training.repository.ClassDetailRepository;
+import com.fptacademy.training.repository.ClassRepository;
+import com.fptacademy.training.repository.ClassScheduleRepository;
+import com.fptacademy.training.repository.LocationRepository;
+import com.fptacademy.training.repository.ProgramRepository;
+import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.service.dto.AttendeeDto;
+import com.fptacademy.training.service.dto.ClassDetailDto;
+import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.LocationDto;
+import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.service.mapper.AttendeeMapper;
+import com.fptacademy.training.service.mapper.ClassDetailMapper;
+import com.fptacademy.training.service.mapper.ClassMapper;
+import com.fptacademy.training.service.mapper.LocationMapper;
+import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.web.vm.ClassVM;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service

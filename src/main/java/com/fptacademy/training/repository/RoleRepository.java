@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByName(String name);
 
+
     @Modifying
     @Query("UPDATE Role r SET r.permissions = :permission WHERE r.name = :role")
     void updatePermission(@Param("role") String role,@Param("permission") List<String> permission);
