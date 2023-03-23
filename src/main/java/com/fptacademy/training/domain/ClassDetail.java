@@ -1,8 +1,6 @@
 package com.fptacademy.training.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -14,6 +12,9 @@ import java.util.List;
 @Getter
 @Table(name = "class_details")
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ClassDetail implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

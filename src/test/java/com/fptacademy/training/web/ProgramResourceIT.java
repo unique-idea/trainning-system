@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fptacademy.training.IntegrationTest;
 import com.fptacademy.training.domain.*;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.factory.ProgramFactory;
 import com.fptacademy.training.factory.RoleFactory;
 import com.fptacademy.training.factory.SyllabusFactory;
@@ -13,6 +15,8 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.ProgramVM;
+import com.github.javafaker.Faker;
+import com.sun.xml.bind.v2.ClassFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -57,6 +61,8 @@ public class ProgramResourceIT {
     private MockMvc mockMvc;
     private String accessToken;
     private final String DEFAULT_PROGRAM_NAME = "Test Program";
+    @Autowired
+    private ClassRepository classRepository;
 
     @BeforeEach
     @Transactional
@@ -73,6 +79,7 @@ public class ProgramResourceIT {
     @Transactional
     void teardown() {
         SecurityContextHolder.clearContext();
+        classRepository.deleteAll();
         programRepository.deleteAll();
         syllabusRepository.deleteAll();
         userRepository.deleteAll();
@@ -203,6 +210,51 @@ public class ProgramResourceIT {
     }
 
     @Test
+    public void testDeactivateProgram() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        program.setActivated(true);
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/deactivate", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(program.getId()))
+                .andExpect(jsonPath("$.activated").value(false));
+    }
+
+    @Test
+    public void testDeactivateProgramWithClassStillActive() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        Class c = Class.builder()
+                .name("className")
+                .code("abc")
+                .program(program)
+                        .build();
+        ClassDetail classDetail = ClassDetail.builder()
+                .classField(c)
+                .status(ClassStatus.OPENNING.name())
+                .build();
+        c.setClassDetail(classDetail);
+        classRepository.saveAndFlush(c);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/deactivate", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testDeactivateProgramNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/deactivate", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
     @Transactional
     public void testDeleteProgram() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
@@ -213,6 +265,7 @@ public class ProgramResourceIT {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isOk());
     }
+
 
     @Test
     public void testDeleteProgramNotFound() throws Exception {
