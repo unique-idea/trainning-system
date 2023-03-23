@@ -241,4 +241,28 @@ public class ProgramResourceIT {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
+
+    // thanh tai
+
+    @Test
+    @Transactional
+    public void testGetProgramById() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(program.getId()));
+
+    }
+    @Test
+    public void testGetProgramByIdNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+    // thanh tai
 }
