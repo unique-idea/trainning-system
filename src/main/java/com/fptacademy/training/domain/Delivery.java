@@ -23,6 +23,11 @@ public class Delivery implements Serializable {
   @Column(length = 50)
   private String name;
 
+  private String code;
+
+  @Column(columnDefinition = "TEXT")
+  private String description;
+
   @Transient
   private Double present;
 }

@@ -5,6 +5,7 @@ import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
+import com.fptacademy.training.domain.TrainingPrinciple;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class SyllabusDto {
     private SyllabusStatus status;
     private String technicalRequirement;
     private String courseObjective;
-    private String trainingPrinciple;
+    private TrainingPrinciple trainingPrinciple;
     private Instant createdAt;
     private String createdBy;
     private Integer duration;
@@ -64,8 +65,8 @@ public class SyllabusDto {
     private Double durationInHours;
     private String technicalRequirement;
     private String courseObjective;
-    private String trainingPrinciple;
-    private Level level;
+    private TrainingPrinciple trainingPrinciple;
+    private Level levels;
     private Assessment assessment;
     private List<Delivery> timeAllocation;
     private List<OutputStandard> outputStandard;

@@ -22,4 +22,9 @@ public class FormatType implements Serializable {
 
   @Column(length = 20)
   private String name;
+
+  private String code;
+
+  @Column(columnDefinition = "TEXT")
+  private String description;
 }

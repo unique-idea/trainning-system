@@ -7,6 +7,7 @@ import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.Syllabus;
+import com.fptacademy.training.domain.TrainingPrinciple;
 import com.fptacademy.training.domain.Unit;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
@@ -114,6 +115,7 @@ public class SyllabusService {
         mapper.<SyllabusStatus>map(src -> SyllabusStatus.DRAFT, Syllabus::setStatus);
         mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
       });
+    map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map
@@ -263,6 +265,7 @@ public class SyllabusService {
             }
           )
           .map(Syllabus::getSessions, SyllabusDetailDto::setTimeAllocation);
+        mapper.map(Syllabus::getLevel, SyllabusDetailDto::setLevels);
       });
 
     return syllabusRepository.findById(id).map(syl -> map.map(syl, SyllabusDetailDto.class));
@@ -391,7 +394,7 @@ public class SyllabusService {
                 .version(1.0F)
                 .courseObjective(getCellValue(rowSyllabus.getCell(4), CellType.STRING, null, String.class))
                 .technicalRequirement(getCellValue(rowSyllabus.getCell(5), CellType.STRING, null, String.class))
-                .trainingPrinciple(getCellValue(rowSyllabus.getCell(6), CellType.STRING, null, String.class))
+                // .trainingPrinciple(getCellValue(rowSyllabus.getCell(6), CellType.STRING, null, String.class))
                 .level(levelRepository.findById(getCellValue(rowSyllabus.getCell(7), CellType.NUMERIC, 0L, Long.class)).orElse(null))
                 .assessment(
                   assessmentSheet
