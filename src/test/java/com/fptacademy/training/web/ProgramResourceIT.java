@@ -220,4 +220,24 @@ public class ProgramResourceIT {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @Transactional
+    public void testGetSyllabusesByProgramId() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}/syllabus", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(program.getSyllabuses().size()));
+    }
+
+    @Test
+    public void testGetSyllabusesByProgramIdNotFound() throws Exception {
+        mockMvc.perform(get("/api/programs/{id}/syllabus", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
 }
