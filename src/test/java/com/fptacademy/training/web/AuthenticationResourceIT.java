@@ -37,7 +37,6 @@ public class AuthenticationResourceIT {
     private User user;
 
     @BeforeEach
-    @Transactional
     void setup() {
         Role role = RoleFactory.createRoleWithPermissions(Permissions.CLASS_CREATE);
         roleRepository.saveAndFlush(role);
@@ -46,14 +45,12 @@ public class AuthenticationResourceIT {
     }
 
     @AfterEach
-    @Transactional
     void teardown() {
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
 
     @Test
-    @Transactional
     void testLogin() throws Exception {
         LoginVM loginVM = new LoginVM(user.getEmail(), DEFAULT_PASSWORD);
 

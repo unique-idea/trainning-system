@@ -1,7 +1,5 @@
 package com.fptacademy.training.web;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -17,13 +15,10 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
 import com.fptacademy.training.web.vm.ProgramVM;
-import com.github.javafaker.Faker;
-import com.sun.xml.bind.v2.ClassFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -34,15 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,16 +51,15 @@ public class ProgramResourceIT {
     @Autowired
     private RoleRepository roleRepository;
     @Autowired
+    private ClassRepository classRepository;
+    @Autowired
     private JwtTokenProvider tokenProvider;
     @Autowired
     private MockMvc mockMvc;
     private String accessToken;
     private final String DEFAULT_PROGRAM_NAME = "Test Program";
-    @Autowired
-    private ClassRepository classRepository;
 
     @BeforeEach
-    @Transactional
     void setup() {
         Role role = RoleFactory.createRoleWithPermissions(Permissions.PROGRAM_FULL_ACCESS);
         roleRepository.saveAndFlush(role);
@@ -79,7 +70,6 @@ public class ProgramResourceIT {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
     @AfterEach
-    @Transactional
     void teardown() {
         SecurityContextHolder.clearContext();
         classRepository.deleteAll();
@@ -89,7 +79,6 @@ public class ProgramResourceIT {
         roleRepository.deleteAll();
     }
     @Test
-    @Transactional
     void testCreateProgram() throws Exception {
         List<Syllabus> syllabuses = List.of(
                 SyllabusFactory.createDummySyllabus(),
@@ -107,7 +96,6 @@ public class ProgramResourceIT {
     }
 
     @Test
-    @Transactional
     void testCreateProgramWithConflictName() throws Exception {
         Program program = Program.builder().name(DEFAULT_PROGRAM_NAME).build();
         programRepository.saveAndFlush(program);
@@ -133,12 +121,13 @@ public class ProgramResourceIT {
     }
 
     @Test
-    @Transactional
     void testGetProgramListWithPagination() throws Exception {
+        List<Program> programs = new ArrayList<>();
         for (int i = 0; i < 20; ++i) {
             Program program = ProgramFactory.createDummyProgram();
             syllabusRepository.saveAllAndFlush(program.getSyllabuses());
             programRepository.saveAndFlush(program);
+            programs.add(program);
         }
         SecurityContextHolder.clearContext();
         mockMvc
@@ -150,7 +139,7 @@ public class ProgramResourceIT {
                 .andExpect(jsonPath("$.total").value(20))
                 .andExpect(jsonPath("$.programs").isArray())
                 .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
-                .andExpect(jsonPath("$.programs[0].id").value(11));
+                .andExpect(jsonPath("$.programs[0].id").value(programs.get(10).getId()));
 
         mockMvc
                 .perform(get("/api/programs")
@@ -162,7 +151,7 @@ public class ProgramResourceIT {
                 .andExpect(jsonPath("$.total").value(20))
                 .andExpect(jsonPath("$.programs").isArray())
                 .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
-                .andExpect(jsonPath("$.programs[0].id").value(10));
+                .andExpect(jsonPath("$.programs[0].id").value(programs.get(9).getId()));
     }
 
     @Test
@@ -258,7 +247,6 @@ public class ProgramResourceIT {
 
 
     @Test
-    @Transactional
     public void testDeleteProgram() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
@@ -278,7 +266,6 @@ public class ProgramResourceIT {
     }
 
     @Test
-    @Transactional
     public void testGetSyllabusesByProgramId() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
@@ -301,7 +288,6 @@ public class ProgramResourceIT {
     // thanh tai
 
     @Test
-    @Transactional
     public void testGetProgramById() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
@@ -323,7 +309,6 @@ public class ProgramResourceIT {
     // thanh tai
 
     @Test
-    @Transactional
     public void testActivateProgram() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());

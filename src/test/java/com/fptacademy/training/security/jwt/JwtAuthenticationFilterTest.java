@@ -36,7 +36,6 @@ public class JwtAuthenticationFilterTest {
     private User user;
 
     @BeforeEach
-    @Transactional
     void setup() {
         Role role = RoleFactory.createRoleWithPermissions(Permissions.CLASS_CREATE);
         roleRepository.saveAndFlush(role);
@@ -47,7 +46,6 @@ public class JwtAuthenticationFilterTest {
     }
 
     @AfterEach
-    @Transactional
     void teardown() {
         userRepository.deleteAll();
         roleRepository.deleteAll();
