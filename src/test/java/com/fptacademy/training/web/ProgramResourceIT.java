@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fptacademy.training.IntegrationTest;
 import com.fptacademy.training.domain.*;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.factory.ProgramFactory;
 import com.fptacademy.training.factory.RoleFactory;
 import com.fptacademy.training.factory.SyllabusFactory;
@@ -17,7 +19,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
@@ -28,15 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,6 +51,8 @@ public class ProgramResourceIT {
     @Autowired
     private RoleRepository roleRepository;
     @Autowired
+    private ClassRepository classRepository;
+    @Autowired
     private JwtTokenProvider tokenProvider;
     @Autowired
     private MockMvc mockMvc;
@@ -59,7 +60,6 @@ public class ProgramResourceIT {
     private final String DEFAULT_PROGRAM_NAME = "Test Program";
 
     @BeforeEach
-    @Transactional
     void setup() {
         Role role = RoleFactory.createRoleWithPermissions(Permissions.PROGRAM_FULL_ACCESS);
         roleRepository.saveAndFlush(role);
@@ -70,16 +70,15 @@ public class ProgramResourceIT {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
     @AfterEach
-    @Transactional
     void teardown() {
         SecurityContextHolder.clearContext();
+        classRepository.deleteAll();
         programRepository.deleteAll();
         syllabusRepository.deleteAll();
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
     @Test
-    @Transactional
     void testCreateProgram() throws Exception {
         List<Syllabus> syllabuses = List.of(
                 SyllabusFactory.createDummySyllabus(),
@@ -97,7 +96,6 @@ public class ProgramResourceIT {
     }
 
     @Test
-    @Transactional
     void testCreateProgramWithConflictName() throws Exception {
         Program program = Program.builder().name(DEFAULT_PROGRAM_NAME).build();
         programRepository.saveAndFlush(program);
@@ -123,12 +121,13 @@ public class ProgramResourceIT {
     }
 
     @Test
-    @Transactional
     void testGetProgramListWithPagination() throws Exception {
+        List<Program> programs = new ArrayList<>();
         for (int i = 0; i < 20; ++i) {
             Program program = ProgramFactory.createDummyProgram();
             syllabusRepository.saveAllAndFlush(program.getSyllabuses());
             programRepository.saveAndFlush(program);
+            programs.add(program);
         }
         SecurityContextHolder.clearContext();
         mockMvc
@@ -140,7 +139,7 @@ public class ProgramResourceIT {
                 .andExpect(jsonPath("$.total").value(20))
                 .andExpect(jsonPath("$.programs").isArray())
                 .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
-                .andExpect(jsonPath("$.programs[0].id").value(11));
+                .andExpect(jsonPath("$.programs[0].id").value(programs.get(10).getId()));
 
         mockMvc
                 .perform(get("/api/programs")
@@ -152,7 +151,7 @@ public class ProgramResourceIT {
                 .andExpect(jsonPath("$.total").value(20))
                 .andExpect(jsonPath("$.programs").isArray())
                 .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
-                .andExpect(jsonPath("$.programs[0].id").value(10));
+                .andExpect(jsonPath("$.programs[0].id").value(programs.get(9).getId()));
     }
 
     @Test
@@ -203,7 +202,51 @@ public class ProgramResourceIT {
     }
 
     @Test
-    @Transactional
+    public void testDeactivateProgram() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        program.setActivated(true);
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/deactivate", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(program.getId()))
+                .andExpect(jsonPath("$.activated").value(false));
+    }
+
+    @Test
+    public void testDeactivateProgramWithClassStillActive() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        Class c = Class.builder()
+                .name("className")
+                .code("abc")
+                .program(program)
+                        .build();
+        ClassDetail classDetail = ClassDetail.builder()
+                .classField(c)
+                .status(ClassStatus.OPENNING.name())
+                .build();
+        c.setClassDetail(classDetail);
+        classRepository.saveAndFlush(c);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/deactivate", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testDeactivateProgramNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/deactivate", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
     public void testDeleteProgram() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
@@ -216,8 +259,145 @@ public class ProgramResourceIT {
 
     @Test
     public void testDeleteProgramNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
         mockMvc.perform(delete("/api/programs/{id}", 999)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void testGetSyllabusesByProgramId() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}/syllabus", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(program.getSyllabuses().size()));
+    }
+
+    @Test
+    public void testGetSyllabusesByProgramIdNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}/syllabus", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    // thanh tai
+
+    @Test
+    public void testGetProgramById() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(program.getId()));
+
+    }
+    @Test
+    public void testGetProgramByIdNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/programs/{id}", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+    // thanh tai
+
+    @Test
+    public void testActivateProgram() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+
+        mockMvc.perform(post("/api/programs/{id}/activate", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(program.getId()))
+                .andExpect(jsonPath("$.activated").value(true));
+
+    }
+
+    @Test
+    public void testActivateProgramNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/api/programs/{id}/activate", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateProgram() throws Exception{
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        List<Syllabus> syllabusList = List.of(SyllabusFactory.createDummySyllabus(),
+                SyllabusFactory.createDummySyllabus());
+        syllabusRepository.saveAllAndFlush(syllabusList);
+        SecurityContextHolder.clearContext();
+        List<Long> syllabusIds = syllabusList.stream().mapToLong(Syllabus::getId).boxed().toList();
+        ProgramVM programVM = new ProgramVM("Update Program Name", syllabusIds);
+        mockMvc.perform(put("/api/programs/{id}", program.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(TestUtil.convertObjectToJsonBytes(programVM))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Update Program Name"));
+
+    }
+
+    @Test
+    public void testUpdateProgramIdNotFound() throws Exception{
+        SecurityContextHolder.clearContext();
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of(99L));
+        mockMvc.perform(put("/api/programs/{id}", 999)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateProgramWithNonExistSyllabuses() throws Exception{
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of(99L));
+        mockMvc.perform(put("/api/programs/{id}", program.getId())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    public void testGetSyllabusesByName() throws Exception {
+        Syllabus syllabus1=SyllabusFactory.createDummySyllabus();
+        syllabus1.setName("syllabus 1");
+        Syllabus syllabus2=SyllabusFactory.createDummySyllabus();
+        syllabus2.setName("syllabus 2");
+        Syllabus syllabus3=SyllabusFactory.createDummySyllabus();
+        syllabus3.setName("syllabus 3");
+        List<Syllabus> syllabusList=List.of(syllabus1,
+                syllabus2,
+                syllabus3);
+        syllabusRepository.saveAllAndFlush(syllabusList);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/syllabuses/search")
+                        .param("name","syllabus")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3));
+        mockMvc.perform(get("/api/syllabuses/search")
+                        .param("name","abc")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
 }

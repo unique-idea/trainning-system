@@ -188,8 +188,8 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
-    @PatchMapping(value = "/programs/{id}" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ProgramDto> updateProgram(@NotNull @RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
+    @PutMapping(value = "/programs/{id}" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ProgramDto> updateProgram(@RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
 
     @Operation(
             summary = "Delete training program by id",
