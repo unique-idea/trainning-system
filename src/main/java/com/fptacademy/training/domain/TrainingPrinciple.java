@@ -1,12 +1,10 @@
 package com.fptacademy.training.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +22,7 @@ import lombok.Setter;
 public class TrainingPrinciple {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(columnDefinition = "TEXT")
@@ -40,10 +39,4 @@ public class TrainingPrinciple {
 
   @Column(columnDefinition = "TEXT")
   private String others;
-
-  @OneToOne
-  @JoinColumn(name = "id", referencedColumnName = "id")
-  @MapsId
-  @JsonIgnore
-  private Syllabus syllabus;
 }

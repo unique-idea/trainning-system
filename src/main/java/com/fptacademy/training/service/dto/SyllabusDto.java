@@ -66,7 +66,7 @@ public class SyllabusDto {
     private String technicalRequirement;
     private String courseObjective;
     private TrainingPrinciple trainingPrinciple;
-    private Level levels;
+    private Level level;
     private Assessment assessment;
     private List<Delivery> timeAllocation;
     private List<OutputStandard> outputStandard;

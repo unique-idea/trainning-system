@@ -703,9 +703,6 @@ public class SyllabusResourceImpl {
   public ResponseEntity<Syllabus> duplicateSyllabus(@PathVariable Long id) {
     ModelMapper map = new ModelMapper();
     Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
-    syllabus.getCreatedBy().setLevel(null);
-    syllabus.getLastModifiedBy().setLevel(null);
-    // syllabus.setLevel(null);
     map
       .createTypeMap(Syllabus.class, Syllabus.class)
       .addMappings(mapper -> {
@@ -715,7 +712,7 @@ public class SyllabusResourceImpl {
           .map(Syllabus::getName, Syllabus::setName);
         mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
       });
-    // map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
+    map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map.createTypeMap(Unit.class, Unit.class).addMappings(mapper -> mapper.skip(Unit::setId));
@@ -755,5 +752,4 @@ public class SyllabusResourceImpl {
   ) {
     return ResponseEntity.ok(syllabusService.importExcel(file, scanning, handle));
   }
-  //endregion
 }

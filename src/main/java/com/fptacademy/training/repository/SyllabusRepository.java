@@ -19,11 +19,9 @@ import org.springframework.security.core.GrantedAuthority;
 
 @SuppressWarnings("NullableProblems")
 public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSpecificationExecutor<Syllabus> {
-    @Override
-    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy"})
-    Optional<Syllabus> findById(Long id);
-    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy"})
+  @EntityGraph(attributePaths = { "createdBy", "lastModifiedBy" })
   Optional<Syllabus> findByCode(String code);
+
   boolean existsByCode(String code);
 
   static Specification<Syllabus> searchByKeywordsOrBycreateDates(String[] keywords, Instant[] createDate, Authentication authentication) {

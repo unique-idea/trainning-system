@@ -1,6 +1,5 @@
 package com.fptacademy.training.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,7 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,10 +62,10 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   private String courseObjective;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @PrimaryKeyJoinColumn
+  @JoinColumn(name = "training_principle_id")
   private TrainingPrinciple trainingPrinciple;
 
-  @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
+  @ManyToOne
   @JoinColumn(name = "level_id")
   private Level level;
 

@@ -13,13 +13,9 @@ import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.repository.DeliveryRepository;
 import com.fptacademy.training.repository.FormatTypeRepository;
-import com.fptacademy.training.repository.LessonRepository;
 import com.fptacademy.training.repository.LevelRepository;
-import com.fptacademy.training.repository.MaterialRepository;
 import com.fptacademy.training.repository.OutputStandardRepository;
-import com.fptacademy.training.repository.SessionRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
-import com.fptacademy.training.repository.UnitRepository;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
@@ -265,7 +261,6 @@ public class SyllabusService {
             }
           )
           .map(Syllabus::getSessions, SyllabusDetailDto::setTimeAllocation);
-        mapper.map(Syllabus::getLevel, SyllabusDetailDto::setLevels);
       });
 
     return syllabusRepository.findById(id).map(syl -> map.map(syl, SyllabusDetailDto.class));
@@ -311,6 +306,7 @@ public class SyllabusService {
         mapper.skip(Syllabus::setId);
         mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(Syllabus::getSessions, Syllabus::setDuration);
       });
+    map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map
@@ -373,6 +369,12 @@ public class SyllabusService {
           .skip(1)
           .filter(row -> getCellValue(row.getCell(3), CellType.NUMERIC, null, Long.class) != null);
 
+      Supplier<Stream<Row>> trainingPrincipleSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("trainingPrinciple").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(0), CellType.NUMERIC, null, Long.class) != null);
+
       return syllabusRepository.saveAll(
         map.map(
           syllabusSheet
@@ -394,7 +396,27 @@ public class SyllabusService {
                 .version(1.0F)
                 .courseObjective(getCellValue(rowSyllabus.getCell(4), CellType.STRING, null, String.class))
                 .technicalRequirement(getCellValue(rowSyllabus.getCell(5), CellType.STRING, null, String.class))
-                // .trainingPrinciple(getCellValue(rowSyllabus.getCell(6), CellType.STRING, null, String.class))
+                .trainingPrinciple(
+                  trainingPrincipleSheet
+                    .get()
+                    .filter(rowTrainingPrinciple ->
+                      getCellValue(rowTrainingPrinciple.getCell(0), CellType.NUMERIC, null, Long.class) ==
+                      getCellValue(rowSyllabus.getCell(6), CellType.NUMERIC, null, Long.class)
+                    )
+                    .findFirst()
+                    .map(rowTrainingPrinciple ->
+                      TrainingPrinciple
+                        .builder()
+                        .id(getCellValue(rowTrainingPrinciple.getCell(0), CellType.NUMERIC, null, Long.class))
+                        .training(getCellValue(rowTrainingPrinciple.getCell(1), CellType.STRING, null, String.class))
+                        .reTest(getCellValue(rowTrainingPrinciple.getCell(2), CellType.STRING, null, String.class))
+                        .marking(getCellValue(rowTrainingPrinciple.getCell(3), CellType.STRING, null, String.class))
+                        .waiverCriteria(getCellValue(rowTrainingPrinciple.getCell(4), CellType.STRING, null, String.class))
+                        .others(getCellValue(rowTrainingPrinciple.getCell(5), CellType.STRING, null, String.class))
+                        .build()
+                    )
+                    .orElse(null)
+                )
                 .level(levelRepository.findById(getCellValue(rowSyllabus.getCell(7), CellType.NUMERIC, 0L, Long.class)).orElse(null))
                 .assessment(
                   assessmentSheet
