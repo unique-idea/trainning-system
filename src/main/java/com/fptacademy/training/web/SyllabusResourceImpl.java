@@ -20,6 +20,7 @@ import com.fptacademy.training.service.DeliveryService;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Instant;
 import java.util.List;
@@ -48,16 +50,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -719,6 +712,27 @@ public class SyllabusResourceImpl {
     map.createTypeMap(Lesson.class, Lesson.class).addMappings(mapper -> mapper.skip(Lesson::setId));
     map.createTypeMap(Material.class, Material.class).addMappings(mapper -> mapper.skip(Material::setId));
     return ResponseEntity.ok(syllabusRepository.save(map.map(syllabus, Syllabus.class)));
+  }
+
+  @Operation(
+    summary = "Get list of syllabuses by name",
+    description = "Get list of syllabuses by name",
+    tags = "Syllabus",
+    security = @SecurityRequirement(name = "token_auth")
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", description = "Found syllabuses"),
+      @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
+      @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+      @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+    }
+  )
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping(value = "/syllabuses/search", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByName(String name) {
+    List<SyllabusDto.SyllabusListDto> syllabusDTOs = syllabusService.findActivatedSyllabusesByName(name);
+    return ResponseEntity.status(HttpStatus.OK).body(syllabusDTOs);
   }
 
   @Operation(

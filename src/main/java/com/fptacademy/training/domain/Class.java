@@ -1,8 +1,6 @@
 package com.fptacademy.training.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -13,6 +11,9 @@ import java.io.Serializable;
 @ToString
 @Table(name = "classes")
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Class extends AbstractAuditEntity implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +28,6 @@ public class Class extends AbstractAuditEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name = "program_id")
     private Program program;
-    @OneToOne(mappedBy = "classField")
+    @OneToOne(mappedBy = "classField", cascade = CascadeType.ALL)
     private ClassDetail classDetail;
 }

@@ -31,7 +31,6 @@ class JwtTokenProviderTest {
     private User user;
 
     @BeforeEach
-    @Transactional
     void setup() {
         ReflectionTestUtils.setField(tokenProvider, "accessExpireTimeInMinutes", ONE_MINUTE);
         ReflectionTestUtils.setField(tokenProvider, "refreshExpireTimeInMinutes", ONE_MINUTE);
@@ -42,7 +41,6 @@ class JwtTokenProviderTest {
     }
 
     @AfterEach
-    @Transactional
     void teardown() {
         userRepository.deleteAll();
         roleRepository.deleteAll();

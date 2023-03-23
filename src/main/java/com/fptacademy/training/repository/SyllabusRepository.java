@@ -97,5 +97,5 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSp
     };
   }
 
-  List<Syllabus> findByNameContainsIgnoreCase(String name);
+  List<Syllabus> findByNameContainsIgnoreCaseAndStatus(String name, SyllabusStatus status);
 }

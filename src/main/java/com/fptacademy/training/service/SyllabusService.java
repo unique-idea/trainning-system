@@ -21,14 +21,7 @@ import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
 import com.fptacademy.training.service.mapper.SyllabusMapper;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -536,9 +529,8 @@ public class SyllabusService {
     }
   }
 
-  public List<SyllabusDto.SyllabusListDto> findSyllabusesByName(String name) {
-    List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCase(name);
-    List<SyllabusDto.SyllabusListDto> syllabusesDto = syllabusMapper.toDtos(syllabuses);
-    return syllabusesDto;
+  public List<SyllabusDto.SyllabusListDto> findActivatedSyllabusesByName(String name) {
+    List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCaseAndStatus(name, SyllabusStatus.ACTIVATED);
+      return new ArrayList<>(syllabusMapper.toDtos(syllabuses));
   }
 }
