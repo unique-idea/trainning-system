@@ -1,6 +1,7 @@
 package com.fptacademy.training.factory;
 
 import com.fptacademy.training.domain.*;
+import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.github.javafaker.Faker;
 
 import java.util.ArrayList;
@@ -51,6 +52,11 @@ public class SyllabusFactory {
             sessions.add(session);
         }
         syllabus.setSessions(sessions);
+        return syllabus;
+    }
+    public static Syllabus createActivatedDummySyllabus() {
+        Syllabus syllabus = createDummySyllabus();
+        syllabus.setStatus(SyllabusStatus.ACTIVATED);
         return syllabus;
     }
 }

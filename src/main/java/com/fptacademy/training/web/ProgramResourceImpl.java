@@ -64,13 +64,6 @@ public class ProgramResourceImpl implements ProgramResource {
                 .status(HttpStatus.OK)
                 .body(new ProgramListResponseVM(numberOfFoundPrograms, pageOfPrograms.getContent()));
     }
-    @Override
-    public ResponseEntity<List<SyllabusDto.SyllabusListDto>>getSyllabusesByName(String name) {
-        List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusService.findSyllabusesByName(name);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(syllabusDtos);
-    }
 
     @Override
     public ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByProgramId(Long id) {

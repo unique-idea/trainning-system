@@ -377,11 +377,11 @@ public class ProgramResourceIT {
     }
     @Test
     public void testGetSyllabusesByName() throws Exception {
-        Syllabus syllabus1=SyllabusFactory.createDummySyllabus();
+        Syllabus syllabus1=SyllabusFactory.createActivatedDummySyllabus();
         syllabus1.setName("syllabus 1");
-        Syllabus syllabus2=SyllabusFactory.createDummySyllabus();
+        Syllabus syllabus2=SyllabusFactory.createActivatedDummySyllabus();
         syllabus2.setName("syllabus 2");
-        Syllabus syllabus3=SyllabusFactory.createDummySyllabus();
+        Syllabus syllabus3=SyllabusFactory.createActivatedDummySyllabus();
         syllabus3.setName("syllabus 3");
         List<Syllabus> syllabusList=List.of(syllabus1,
                 syllabus2,
