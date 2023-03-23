@@ -236,6 +236,7 @@ public class ProgramResourceIT {
 
     @Test
     public void testGetSyllabusesByProgramIdNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
         mockMvc.perform(get("/api/programs/{id}/syllabus", 999)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
