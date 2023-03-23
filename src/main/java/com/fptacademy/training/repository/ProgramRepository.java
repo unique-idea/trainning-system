@@ -11,7 +11,7 @@ import java.util.Optional;
 @SuppressWarnings("NullableProblems")
 public interface ProgramRepository extends JpaRepository<Program, Long> {
     @Override
-    @EntityGraph(value = "graph.Program.syllabus.session.unit")
+    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses.createdBy", "syllabuses.sessions.units"})
     Optional<Program> findById(Long id);
 
     @Override
