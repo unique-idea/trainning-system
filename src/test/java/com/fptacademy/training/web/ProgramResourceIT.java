@@ -231,12 +231,15 @@ public class ProgramResourceIT {
 
         mockMvc.perform(post("/api/programs/{id}/activate", program.getId())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(program.getId()))
+                .andExpect(jsonPath("$.activated").value(true));
 
     }
 
     @Test
     public void testActivateProgramNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
         mockMvc.perform(post("/api/programs/{id}/activate", 999)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
