@@ -216,7 +216,53 @@ public class ProgramResourceIT {
 
     @Test
     public void testDeleteProgramNotFound() throws Exception {
+        SecurityContextHolder.clearContext();
         mockMvc.perform(delete("/api/programs/{id}", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateProgram() throws Exception{
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        List<Syllabus> syllabusList = List.of(SyllabusFactory.createDummySyllabus(),
+                SyllabusFactory.createDummySyllabus());
+        syllabusRepository.saveAllAndFlush(syllabusList);
+        SecurityContextHolder.clearContext();
+        List<Long> syllabusIds = syllabusList.stream().mapToLong(Syllabus::getId).boxed().toList();
+        ProgramVM programVM = new ProgramVM("Update Program Name", syllabusIds);
+        mockMvc.perform(put("/api/programs/{id}", program.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(TestUtil.convertObjectToJsonBytes(programVM))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Update Program Name"));
+
+    }
+
+    @Test
+    public void testUpdateProgramIdNotFound() throws Exception{
+        SecurityContextHolder.clearContext();
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of(99L));
+        mockMvc.perform(put("/api/programs/{id}", 999)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateProgramWithNonExistSyllabuses() throws Exception{
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, List.of(99L));
+        mockMvc.perform(put("/api/programs/{id}", program.getId())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(TestUtil.convertObjectToJsonBytes(programVM))
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }

@@ -277,7 +277,7 @@ public class ProgramService {
                 .stream()
                 .map(syllabusId -> syllabusRepository
                         .findById(syllabusId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
+                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + syllabusId + " not found")))
                 .toList());
         p.setSyllabuses(syllabuses);
         programRepository.saveAndFlush(p);
