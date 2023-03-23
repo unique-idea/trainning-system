@@ -220,4 +220,23 @@ public class ProgramResourceIT {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @Transactional
+    public void testActivateProgram() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(post("/programs/{id}/activate", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testActivateProgramNotFound() throws Exception {
+        mockMvc.perform(post("/programs/{id}/activate", 999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
 }
