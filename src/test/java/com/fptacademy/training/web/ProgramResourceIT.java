@@ -228,14 +228,16 @@ public class ProgramResourceIT {
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
         programRepository.saveAndFlush(program);
         SecurityContextHolder.clearContext();
-        mockMvc.perform(post("/programs/{id}/activate", program.getId())
+
+        mockMvc.perform(post("/api/programs/{id}/activate", program.getId())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isOk());
+
     }
 
     @Test
     public void testActivateProgramNotFound() throws Exception {
-        mockMvc.perform(post("/programs/{id}/activate", 999)
+        mockMvc.perform(post("/api/programs/{id}/activate", 999)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
