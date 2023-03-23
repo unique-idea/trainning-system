@@ -11,6 +11,7 @@ public class SyllabusFactory {
         Faker faker = new Faker();
         int numberOfSessions = faker.random().nextInt(10, 35);
         Syllabus syllabus = Syllabus.builder()
+                .name(faker.educator().course())
                 .duration(numberOfSessions)
                 .code(faker.random().hex(6).toUpperCase())
                 .build();

@@ -1,5 +1,7 @@
 package com.fptacademy.training.web;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -220,4 +223,29 @@ public class ProgramResourceIT {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
+    @Test
+    public void testGetSyllabusesByName() throws Exception {
+        Syllabus syllabus1=SyllabusFactory.createDummySyllabus();
+        syllabus1.setName("syllabus 1");
+        Syllabus syllabus2=SyllabusFactory.createDummySyllabus();
+        syllabus2.setName("syllabus 2");
+        Syllabus syllabus3=SyllabusFactory.createDummySyllabus();
+        syllabus3.setName("syllabus 3");
+        List<Syllabus> syllabusList=List.of(syllabus1,
+                syllabus2,
+                syllabus3);
+        syllabusRepository.saveAllAndFlush(syllabusList);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/syllabuses/search")
+                        .param("name","syllabus")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3));
+        mockMvc.perform(get("/api/syllabuses/search")
+                        .param("name","abc")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
 }
