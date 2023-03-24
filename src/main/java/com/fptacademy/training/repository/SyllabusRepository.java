@@ -1,6 +1,7 @@
 package com.fptacademy.training.repository;
 
 import com.fptacademy.training.domain.Syllabus;
+import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.security.Permissions;
 import java.time.Instant;
@@ -24,7 +25,12 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSp
 
   boolean existsByCode(String code);
 
-  static Specification<Syllabus> searchByKeywordsOrBycreateDates(String[] keywords, Instant[] createDate, Authentication authentication) {
+  static Specification<Syllabus> searchByKeywordsOrBycreateDates(
+    String[] keywords,
+    Instant[] createDate,
+    Authentication authentication,
+    Boolean draft
+  ) {
     return (root, query, builder) -> {
       query.distinct(true);
       Predicate predicatesStatus;
@@ -77,21 +83,26 @@ public interface SyllabusRepository extends JpaRepository<Syllabus, Long>, JpaSp
           : predicates;
 
       predicatesStatus =
-        switch (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).filter(r -> r.contains("Syllabus_")).findFirst().get()) {
-          case Permissions.SYLLABUS_MODIFY -> builder
-            .in(root.get("status"))
-            .value(Arrays.asList(SyllabusStatus.DRAFT, SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
-          case Permissions.SYLLABUS_CREATE -> builder
-            .in(root.get("status"))
-            .value(Arrays.asList(SyllabusStatus.DRAFT, SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
-          case Permissions.SYLLABUS_VIEW -> builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.ACTIVATED));
-          case Permissions.SYLLABUS_FULL_ACCESS -> builder
-            .in(root.get("status"))
-            .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED, SyllabusStatus.DRAFT, SyllabusStatus.REJECTED));
-          default -> builder
-            .in(root.get("status"))
-            .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED, SyllabusStatus.DRAFT, SyllabusStatus.REJECTED));
-        };
+        draft == true
+          ? builder.and(
+            builder.equal(root.get("createdBy").get("email"), ((User) authentication.getPrincipal()).getEmail()),
+            builder.equal(root.get("status"), SyllabusStatus.DRAFT)
+          )
+          : switch (
+            authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).filter(r -> r.contains("Syllabus_")).findFirst().get()
+          ) {
+            case Permissions.SYLLABUS_MODIFY -> builder
+              .in(root.get("status"))
+              .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
+            case Permissions.SYLLABUS_CREATE -> builder
+              .in(root.get("status"))
+              .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
+            case Permissions.SYLLABUS_VIEW -> builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.ACTIVATED));
+            case Permissions.SYLLABUS_FULL_ACCESS -> builder
+              .in(root.get("status"))
+              .value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
+            default -> builder.in(root.get("status")).value(Arrays.asList(SyllabusStatus.ACTIVATED, SyllabusStatus.DEACTIVATED));
+          };
 
       return predicates != null ? builder.and(builder.or(predicates), predicatesStatus) : predicatesStatus;
     };

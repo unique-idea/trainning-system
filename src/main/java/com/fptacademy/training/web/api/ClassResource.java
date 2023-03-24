@@ -3,6 +3,7 @@ package com.fptacademy.training.web.api;
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.service.dto.*;
+import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,7 +66,7 @@ public interface ClassResource {
             @ApiResponse(responseCode = "200", description = "Find list of class successfully"),
     })
     @GetMapping
-    public ResponseEntity<List<ClassDto>> filterClass(
+    public ResponseEntity<ClassListResponseVM> filterClass(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(name = "from", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

@@ -2,6 +2,7 @@ package com.fptacademy.training.web;
 
 import com.fptacademy.training.domain.Assessment;
 import com.fptacademy.training.domain.Delivery;
+import com.fptacademy.training.domain.FormatType;
 import com.fptacademy.training.domain.Lesson;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Material;
@@ -17,6 +18,7 @@ import com.fptacademy.training.repository.LevelRepository;
 import com.fptacademy.training.repository.OutputStandardRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.service.DeliveryService;
+import com.fptacademy.training.service.FormatTypeService;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.OutputStandardService;
 import com.fptacademy.training.service.SyllabusService;
@@ -50,7 +52,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -69,6 +81,7 @@ public class SyllabusResourceImpl {
 
   private final SyllabusRepository syllabusRepository;
   private final SyllabusService syllabusService;
+  private final FormatTypeService formatTypeService;
 
   /**
    * Output Standard
@@ -502,7 +515,7 @@ public class SyllabusResourceImpl {
   //region Syllabus
   @Operation(
     summary = "List all syllabuses",
-    description = "Syllabus Input: Panaging, Search by keywords and date" + ", Sort by keywords",
+    description = "sort createby : createdBy.code,desc || createdBy.code,asc",
     tags = "Syllabus",
     security = @SecurityRequirement(name = "token_auth"),
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
@@ -513,10 +526,11 @@ public class SyllabusResourceImpl {
     @org.springdoc.api.annotations.ParameterObject Pageable pageable,
     @RequestParam(required = false) String[] keywords,
     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
-    Authentication authentication
+    Authentication authentication,
+    @Schema(allowableValues = { "false", "true" }) @RequestParam(required = true) Boolean draft
   ) {
     return ResponseEntity.ok(
-      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable)
+      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication, draft), pageable)
     );
   }
 
@@ -765,5 +779,55 @@ public class SyllabusResourceImpl {
     @Schema(allowableValues = { "allow", "replace", "skip" }) @RequestParam(required = true) String handle
   ) {
     return ResponseEntity.ok(syllabusService.importExcel(file, scanning, handle));
+  }
+
+  @Operation(tags = "Format type", security = @SecurityRequirement(name = "token_auth"))
+  @PostMapping(path = "/formattype")
+  public ResponseEntity<FormatType> createFormatType(@RequestBody FormatType formatType) {
+    if (formatType.getId() != null) {
+      throw new ResourceBadRequestException("A new formatType cannot already have an ID");
+    }
+    return ResponseEntity.ok().body(formatTypeService.save(formatType));
+  }
+
+  @Operation(tags = "Format type", security = @SecurityRequirement(name = "token_auth"))
+  @PutMapping(path = "/formattype/{id}")
+  public ResponseEntity<FormatType> updateFormatType(
+    @PathVariable(value = "id", required = false) final Long id,
+    @RequestBody(required = false) FormatType formatType
+  ) {
+    if (formatType.getId() == null) {
+      throw new ResourceBadRequestException("id null");
+    }
+    if (!Objects.equals(id, formatType.getId())) {
+      throw new ResourceBadRequestException("id invalid");
+    }
+
+    return formatTypeService
+      .update(formatType)
+      .map(response -> ResponseEntity.ok().body(response))
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+  }
+
+  @Operation(tags = "Format type", security = @SecurityRequirement(name = "token_auth"))
+  @GetMapping("/formattype")
+  public ResponseEntity<List<FormatType>> getFormatType() {
+    return ResponseEntity.ok().body(formatTypeService.getAll());
+  }
+
+  @Operation(tags = "Format type", security = @SecurityRequirement(name = "token_auth"))
+  @GetMapping("/formattype/{id}")
+  public ResponseEntity<FormatType> getFormatType(@PathVariable Long id) {
+    return formatTypeService
+      .getOne(id)
+      .map(response -> ResponseEntity.ok().body(response))
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+  }
+
+  @Operation(deprecated = true, tags = "Format type", security = @SecurityRequirement(name = "token_auth"))
+  @DeleteMapping("/formattype/{id}")
+  public ResponseEntity<?> deleteFormatType(@PathVariable Long id) {
+    formatTypeService.delete(id);
+    return ResponseEntity.ok("OK");
   }
 }
