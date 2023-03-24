@@ -13,6 +13,7 @@ import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
+import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.web.TestUtil;
 import com.fptacademy.training.web.vm.ProgramVM;
 import org.junit.jupiter.api.AfterEach;
@@ -24,11 +25,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 class ProgramServiceTest {
+    private final String DEFAULT_PROGRAM_NAME = "Test Program";
+    private User user;
     @Autowired
     private ProgramService programService;
     @Autowired
@@ -39,8 +43,6 @@ class ProgramServiceTest {
     private SyllabusRepository syllabusRepository;
     @Autowired
     private ProgramRepository programRepository;
-    private final String DEFAULT_PROGRAM_NAME = "Test Program";
-    private User user;
     @Autowired
     private ClassRepository classRepository;
 
@@ -121,5 +123,37 @@ class ProgramServiceTest {
 
         assertThatExceptionOfType(ResourceBadRequestException.class)
                 .isThrownBy(() -> programService.deleteProgram(program.getId()));
+    }
+
+    @Test
+    void testFindSyllabusesByProgramId() {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        List<SyllabusDto.SyllabusListDto> syllabuses = programService.findSyllabusesByProgramId(program.getId());
+        assertThat(syllabuses.size()).isEqualTo(program.getSyllabuses().size());
+        assertThat(syllabuses.stream()
+                .anyMatch(s1 -> program.getSyllabuses().stream()
+                        .anyMatch(s2 -> s1.getId().equals(s2.getId()))))
+                .isTrue();
+    }
+
+    @Test
+    void testFindSyllabusesByProgramIdFails() {
+        Long id = 999L;
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> programService.findSyllabusesByProgramId(id))
+                .withMessage("Training program with id '" + id + "' not existed");
+    }
+
+    @Test
+    void testActivateProgram() {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        programService.activateProgram(program.getId());
+        Optional<Program> optionalProgram = programRepository.findById(program.getId());
+        assertThat(optionalProgram).isPresent();
+        assertThat(optionalProgram.get().getActivated()).isTrue();
     }
 }
