@@ -1,5 +1,6 @@
 package com.fptacademy.training.web;
 
+import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.ProgramService;
 import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.ProgramDto;
@@ -18,6 +19,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,6 +54,12 @@ public class ProgramResourceImpl implements ProgramResource {
 
     @Override
     public ResponseEntity<ProgramListResponseVM> getPrograms(List<String> keywords, Boolean activated, String sort, int page, int size) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (activated != null &&
+                authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority).toList().contains(Permissions.PROGRAM_VIEW)) {
+            activated = true;
+        }
         List<ProgramDto> programDTOs = programService.getPrograms(keywords, activated, sort);
         int numberOfFoundPrograms = programDTOs.size();
         if (numberOfFoundPrograms <= size) {
