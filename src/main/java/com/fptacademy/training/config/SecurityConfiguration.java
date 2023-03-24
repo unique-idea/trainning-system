@@ -1,8 +1,5 @@
 package com.fptacademy.training.config;
 
-import com.fptacademy.training.security.Permissions;
-import com.fptacademy.training.security.jwt.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,10 +10,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.util.List;
+import com.fptacademy.training.security.Permissions;
+import com.fptacademy.training.security.jwt.JwtAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -42,8 +40,10 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(CustomCorsConfiguration::new)
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf()
+                .disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
@@ -70,7 +70,29 @@ public class SecurityConfiguration {
                         Permissions.CLASS_CREATE,
                         Permissions.CLASS_MODIFY,
                         Permissions.CLASS_FULL_ACCESS)
-                .anyRequest().authenticated()
-                .and().build();
+                .mvcMatchers(HttpMethod.DELETE, "/api/programs")
+                .hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.PATCH, "/api/programs")
+                .hasAnyAuthority(Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers(HttpMethod.POST, "/api/programs")
+                .hasAnyAuthority(Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers("/api/programs/**")
+                .hasAnyAuthority(Permissions.PROGRAM_VIEW, Permissions.PROGRAM_CREATE, Permissions.PROGRAM_MODIFY, Permissions.PROGRAM_FULL_ACCESS)
+                .mvcMatchers( HttpMethod.DELETE,"/api/users/")
+                .hasAnyAuthority(Permissions.USER_FULL_ACCESS)
+                .mvcMatchers( HttpMethod.PUT,"/api/users/")
+                .hasAnyAuthority(Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
+                .mvcMatchers( HttpMethod.PATCH,"/api/users/")
+                .hasAnyAuthority(Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
+                .mvcMatchers( HttpMethod.POST,"/api/users/")
+                .hasAnyAuthority(Permissions.USER_CREATE, Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
+                .mvcMatchers("/api/users/**")
+                .hasAnyAuthority(Permissions.USER_VIEW, Permissions.USER_CREATE, Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
+                .anyRequest()
+                .authenticated()
+                .and()
+                .build();
     }
+
+
 }

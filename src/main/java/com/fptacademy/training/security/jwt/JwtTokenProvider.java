@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -44,31 +42,35 @@ public class JwtTokenProvider {
                 .setSigningKey(refreshKey).build();
     }
 
-    public String generateAccessToken(Authentication authentication) {
-        String email = authentication.getName();
-        String authorities = authentication.getAuthorities()
-                .stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+    private String getAccessToken(String email, String role, String authorities) {
         Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * accessExpireTimeInMinutes);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        claims.put("auth", authorities);
         return accessJwtBuilder
                 .setSubject(email)
-                .claim("auth", authorities)
+                .addClaims(claims)
                 .setExpiration(expiredTime)
                 .compact();
     }
 
+    public String generateAccessToken(Authentication authentication) {
+        String email = authentication.getName();
+        String role = userService.getUserRoleByEmail(email).getName();
+        String authorities = authentication.getAuthorities()
+                .stream().map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        return getAccessToken(email, role, authorities);
+    }
+
     public String generateAccessToken(String refreshToken) {
-        Claims claims = refreshJwtParser.parseClaimsJws(refreshToken).getBody();
-        String email = claims.getSubject();
+        Claims refreshClaims = refreshJwtParser.parseClaimsJws(refreshToken).getBody();
+        String email = refreshClaims.getSubject();
+        String role = userService.getUserRoleByEmail(email).getName();
         String authorities = userService.getUserPermissionsByEmail(email)
                 .stream().map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * accessExpireTimeInMinutes);
-        return accessJwtBuilder
-                .setSubject(email)
-                .claim("auth", authorities)
-                .setExpiration(expiredTime)
-                .compact();
+        return getAccessToken(email, role, authorities);
     }
 
     public String generateRefreshToken(String email) {

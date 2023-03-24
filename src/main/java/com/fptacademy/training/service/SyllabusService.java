@@ -62,7 +62,7 @@ public class SyllabusService {
     TypeMap<Syllabus, SyllabusListDto> typeMap = modelMapper.getTypeMap(Syllabus.class, SyllabusListDto.class);
     if (typeMap == null) {
       typeMap =
-        modelMapper
+      modelMapper
           .createTypeMap(Syllabus.class, SyllabusListDto.class)
           .addMappings(mapper -> {
             mapper.map(src -> src.getCreatedBy().getCode(), SyllabusListDto::setCreatedBy);
@@ -531,6 +531,6 @@ public class SyllabusService {
 
   public List<SyllabusDto.SyllabusListDto> findActivatedSyllabusesByName(String name) {
     List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCaseAndStatus(name, SyllabusStatus.ACTIVATED);
-      return new ArrayList<>(syllabusMapper.toDtos(syllabuses));
+    return new ArrayList<>(syllabusMapper.toDtos(syllabuses));
   }
 }
