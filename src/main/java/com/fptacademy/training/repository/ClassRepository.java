@@ -13,5 +13,5 @@ public interface ClassRepository extends JpaRepository<Class, Long> {
     boolean existsByName(String name);
     @Query("select c from Class c where c.id = :id and c.classDetail.status <> 'DELETED'")
     Optional<Class> findByIdAndStatusNotDeleted(@Param("id") Long id);
-    List<Class> findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(String name, String fullName);
+    List<Class> findByNameContainsIgnoreCaseOrCreatedBy_CodeContainsIgnoreCase(String name, String code);
 }
