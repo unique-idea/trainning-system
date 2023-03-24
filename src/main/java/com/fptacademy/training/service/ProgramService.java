@@ -69,12 +69,16 @@ public class ProgramService {
             Permissions.PROGRAM_CREATE + "', '" +
             Permissions.PROGRAM_MODIFY + "', '" +
             Permissions.PROGRAM_FULL_ACCESS + "'))")
-    public List<ProgramDto> getPrograms(List<String> keywords, String sort) {
+    public List<ProgramDto> getPrograms(List<String> keywords, Boolean activated, String sort) {
         // Get training programs based on keywords or get all if there's no keyword
         List<Program> programs;
         if (keywords != null) {
-            List<Program> firstFilteredPrograms = programRepository
-                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
+            List<Program> firstFilteredPrograms =
+                    activated != null ?
+                            programRepository
+                                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCaseAndActivated(keywords.get(0), keywords.get(0), activated) :
+                            programRepository
+                                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
             if (keywords.size() > 1) {
                 programs = firstFilteredPrograms
                         .stream()
@@ -88,7 +92,9 @@ public class ProgramService {
                 programs = firstFilteredPrograms;
             }
         } else {
-            programs = programRepository.findAll();
+            programs = activated != null ?
+                    programRepository.findByActivated(activated) :
+                    programRepository.findAll();
         }
 
         // Convert list of program entities to list of program DTOs

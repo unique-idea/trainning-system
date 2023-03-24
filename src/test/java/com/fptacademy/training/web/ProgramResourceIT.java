@@ -125,6 +125,9 @@ public class ProgramResourceIT {
         List<Program> programs = new ArrayList<>();
         for (int i = 0; i < 20; ++i) {
             Program program = ProgramFactory.createDummyProgram();
+            if (i == 10) {
+                program.setActivated(true);
+            }
             syllabusRepository.saveAllAndFlush(program.getSyllabuses());
             programRepository.saveAndFlush(program);
             programs.add(program);
@@ -152,6 +155,15 @@ public class ProgramResourceIT {
                 .andExpect(jsonPath("$.programs").isArray())
                 .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
                 .andExpect(jsonPath("$.programs[0].id").value(programs.get(9).getId()));
+
+        mockMvc
+                .perform(get("/api/programs")
+                        .param("activated", "true")
+                        .param("page", "2")
+                        .param("size", "10")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1));
     }
 
     @Test
