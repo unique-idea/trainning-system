@@ -12,6 +12,9 @@ import com.fptacademy.training.web.api.ClassResource;
 import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fptacademy.training.service.ClassService;
+import com.fptacademy.training.service.dto.AttendeeDto;
+import com.fptacademy.training.service.dto.ClassDetailDto;
+import com.fptacademy.training.service.dto.ClassDto;
+import com.fptacademy.training.service.dto.LocationDto;
+import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.web.api.ClassResource;
+import com.fptacademy.training.web.vm.ClassVM;
+
+import lombok.RequiredArgsConstructor;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
