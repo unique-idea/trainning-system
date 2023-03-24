@@ -42,7 +42,7 @@ public interface RoleResource {
     ResponseEntity<List<RoleDto>> getAllPermission();
 
     @Operation(
-            summary = "Update permission",
+            summary = "Update permission when click save button",
             description = "Update permission. Must be super admin role",
             tags = "user",
             security = @SecurityRequirement(name = "token_auth")

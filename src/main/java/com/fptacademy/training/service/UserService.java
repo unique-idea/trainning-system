@@ -82,6 +82,7 @@ public class UserService {
         User user = userMapper.toEntity(userVM, levelService, roleService);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(userVM.code()));
+        user.setGender(userVM.gender().equals("male"));
         return userMapper.toDto(userRepository.save(user));
     }
 

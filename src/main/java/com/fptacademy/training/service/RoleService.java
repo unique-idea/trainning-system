@@ -2,21 +2,23 @@ package com.fptacademy.training.service;
 
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.enumeration.RoleName;
+import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.service.dto.RoleDto;
 import com.fptacademy.training.service.mapper.RoleMapper;
 import com.fptacademy.training.web.vm.RoleVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class RoleService {
+    @Autowired
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
 
@@ -33,32 +35,42 @@ public class RoleService {
     }
 
     public List<RoleDto> getAllPermission() {
-
-            return roleMapper.toDtos(roleRepository.findAll());
-
+        return roleMapper.toDtos(roleRepository.findAll());
     }
 
     public List<Role> updatePermission(List<RoleVM> role) {
-
         for (int i = 0; i < role.size(); i++) {
             if (role.get(i).permissions().size() == 5) {
-                String permission = String.join(",", role.get(i).permissions());
-                    System.out.println(permission);
-                    if (role.get(i).name().equalsIgnoreCase(RoleName.SUPER_ADMIN.toString())) {
-                        roleRepository.updatePermission(RoleName.SUPER_ADMIN.toString(), role.get(i).permissions());
-                    } else if (role.get(i).name().equalsIgnoreCase(RoleName.CLASS_ADMIN.toString())) {
-                        roleRepository.updatePermission(RoleName.CLASS_ADMIN.toString(), role.get(i).permissions());
-                    } else if (role.get(i).name().equalsIgnoreCase(RoleName.TRAINER.toString())) {
-                        roleRepository.updatePermission(RoleName.TRAINER.toString(), role.get(i).permissions());
-                    } else if (role.get(i).name().equalsIgnoreCase(RoleName.TRAINEE.toString())) {
-                        roleRepository.updatePermission(RoleName.TRAINEE.toString(), role.get(i).permissions());
-                    } else {
-                        throw new ResourceNotFoundException("Do no have this role: " + role.get(i).name());
-                    }
+                if (role.get(i).name().equalsIgnoreCase(RoleName.SUPER_ADMIN.toString())) {
+                    List<String> listPermission = role.get(i).permissions().stream().toList();
+                    updatePermission(RoleName.SUPER_ADMIN.toString(), listPermission);
+                } else if (role.get(i).name().equalsIgnoreCase(RoleName.CLASS_ADMIN.toString())) {
+                    List<String> listPermission = role.get(i).permissions().stream().toList();
+                    updatePermission(RoleName.CLASS_ADMIN.toString(), listPermission);
+                } else if (role.get(i).name().equalsIgnoreCase(RoleName.TRAINER.toString())) {
+                    List<String> listPermission = role.get(i).permissions().stream().toList();
+                    updatePermission(RoleName.TRAINER.toString(), listPermission);
+                } else if (role.get(i).name().equalsIgnoreCase(RoleName.TRAINEE.toString())) {
+                    List<String> listPermission = role.get(i).permissions().stream().toList();
+                    updatePermission(RoleName.TRAINEE.toString(), listPermission);
+                } else {
+                    throw new ResourceNotFoundException("Do no have this role: " + role.get(i).name());
                 }
-
+            } else {
+                throw new ResourceBadRequestException("Permission must have value of Syllabus, Program, Class, Material, User");
             }
-            return roleRepository.findAll();
         }
+        return roleRepository.findAll();
+    }
 
+    public void updatePermission(String role, List<String> permissions) {
+        Role roleEntity = roleRepository
+                .findByName(role)
+                .orElseThrow(() -> new ResourceNotFoundException("Role " + role + " not found"));
+        ;
+        if (roleEntity != null) {
+            roleEntity.setPermissions(permissions);
+            roleRepository.save(roleEntity);
+        }
+    }
 }

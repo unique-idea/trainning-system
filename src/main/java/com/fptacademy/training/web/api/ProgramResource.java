@@ -104,7 +104,7 @@ public interface ProgramResource {
     ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByProgramId(
             @PathVariable Long id
     );
-     /// tai nguyen test
+
      @Operation(
              summary = "Get specific program by program id",
              description = "Get specific program by program id",
@@ -121,8 +121,6 @@ public interface ProgramResource {
      ResponseEntity<ProgramDto> getProgramById(
              @PathVariable Long id
      );
-
-    /// tai nguyen test
 
     @Operation(
             summary = "Download excel template for importing training programs",

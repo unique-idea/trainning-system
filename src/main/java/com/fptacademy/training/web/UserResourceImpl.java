@@ -109,8 +109,8 @@ public class UserResourceImpl implements UserResource {
 
     @Override
     public ResponseEntity<?> exportUsersToExcel(HttpServletResponse response) {
-        response.setContentType("application/json");
-        String headerKey = "Content-Disposition";
+        response.setContentType(String.valueOf(MediaType.APPLICATION_OCTET_STREAM));
+        String headerKey = HttpHeaders.CONTENT_DISPOSITION;
         String headerValue = "attachment;filename=User_Export.xlsx";
         response.setHeader(headerKey, headerValue);
         userService.exportUsersToExcel(response);
