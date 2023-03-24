@@ -27,9 +27,4 @@ public class Role implements Serializable {
     @Column(nullable = false)
     @Convert(converter = ListToStringConverter.class)
     private List<String> permissions;
-
-    public Role(String name, List<String> permissions) {
-        this.name = name;
-        this.permissions = permissions;
-    }
 }

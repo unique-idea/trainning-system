@@ -100,20 +100,9 @@ public class ExcelUploadService {
                                     if (String.valueOf(name).equalsIgnoreCase(cell.getStringCellValue())) {
                                         checkRole = true;
                                         Role role = roleService.getRoleByName(cell.getStringCellValue());
-                                        if (role == null) {
-                                            List<String> permissions = null;
-                                            if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.SUPER_ADMIN))) {
-                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_FULL_ACCESS, Permissions.PROGRAM_FULL_ACCESS, Permissions.CLASS_FULL_ACCESS, Permissions.MATERIAL_FULL_ACCESS, Permissions.SYLLABUS_FULL_ACCESS));
-                                            } else if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.CLASS_ADMIN))) {
-                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_MODIFY, Permissions.PROGRAM_FULL_ACCESS, Permissions.CLASS_FULL_ACCESS, Permissions.MATERIAL_FULL_ACCESS, Permissions.SYLLABUS_FULL_ACCESS));
-                                            } else if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.TRAINER))) {
-                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_VIEW, Permissions.PROGRAM_VIEW, Permissions.CLASS_VIEW, Permissions.MATERIAL_MODIFY, Permissions.SYLLABUS_FULL_ACCESS));
-                                            } else if (cell.getStringCellValue().equalsIgnoreCase(String.valueOf(RoleName.TRAINEE))) {
-                                                permissions = new ArrayList<>(Arrays.asList(Permissions.USER_ACCESS_DENIED, Permissions.PROGRAM_VIEW, Permissions.CLASS_ACCESS_DENIED, Permissions.MATERIAL_VIEW, Permissions.SYLLABUS_VIEW));
-                                            }
-                                            role = new Role(cell.getStringCellValue(), permissions);
+                                        if (role != null) {
+                                            user.setRole(role);
                                         }
-                                        user.setRole(role);
                                     }
                                 }
                                 if (!checkRole) {

@@ -13,6 +13,6 @@ import java.util.List;
 public class RoleDto {
     private Long Id;
     private String name;
-    private List<String> permission;
+    private List<String> permissions;
 }
 

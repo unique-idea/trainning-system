@@ -179,7 +179,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(value = "/user/export", method = RequestMethod.GET)
+    @RequestMapping(value = "/user/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     ResponseEntity<?> exportUsersToExcel(HttpServletResponse response);
 
     @Operation(
