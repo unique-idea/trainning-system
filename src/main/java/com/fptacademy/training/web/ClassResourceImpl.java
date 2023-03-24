@@ -9,6 +9,7 @@ import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.service.mapper.ClassDetailMapper;
 import com.fptacademy.training.service.mapper.ClassMapper;
 import com.fptacademy.training.web.api.ClassResource;
+import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +50,7 @@ public class ClassResourceImpl implements ClassResource {
     }
 
     @Override
-    public ResponseEntity<List<ClassDto>> filterClass(List<String> keywords,
+    public ResponseEntity<ClassListResponseVM> filterClass(List<String> keywords,
                                                       LocalDate from,
                                                       LocalDate to,
                                                       List<String> cities,
@@ -66,17 +68,23 @@ public class ClassResourceImpl implements ClassResource {
                 attendeeTypes,
                 fsu,
                 trainerCode);
+        List<ClassDto> result;
+        int totalElements = classDtos.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
         // Apply pagination
         int start = (page - 1) * size;
         int end = Math.min(start + size, classDtos.size());
-        Page<ClassDto> pageResult = new PageImpl<>(
-                classDtos.subList(start, end),
-                PageRequest.of(page, size),
-                classDtos.size());
-
+        if (start > end) result = new ArrayList<>();
+        else {
+            Page<ClassDto> pageResult = new PageImpl<>(
+                    classDtos.subList(start, end),
+                    PageRequest.of(page, size),
+                    classDtos.size());
+            result = pageResult.getContent();
+        }
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(pageResult.getContent());
+                .body(new ClassListResponseVM(totalPages, totalElements, size, page, result));
     }
 
 

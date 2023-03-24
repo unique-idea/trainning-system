@@ -1,5 +1,6 @@
 package com.fptacademy.training.service;
 
+import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
@@ -42,5 +43,9 @@ public class UserService {
                 .getRole()
                 .getPermissions()
                 .stream().map(SimpleGrantedAuthority::new).toList();
+    }
+
+    public Role getUserRoleByEmail(String email) {
+        return getUserByEmail(email).getRole();
     }
 }
