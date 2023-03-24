@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
+import com.fptacademy.training.web.vm.ProgramListResponseVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,27 +66,11 @@ public interface ProgramResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/programs", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ProgramDto>> getPrograms(
+    ResponseEntity<ProgramListResponseVM> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
-            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int size);
-
-    @Operation(
-            summary = "Get list of syllabuses by name",
-            description = "Get list of syllabuses by name",
-            tags = "syllabuses",
-            security = @SecurityRequirement(name = "token_auth")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found syllabuses"),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-    })
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/syllabuses/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<SyllabusDto.SyllabusListDto>>getSyllabusesByName(@RequestParam String name);
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size);
 
     @Operation(
             summary = "Get list of syllabuses details by program id",
@@ -185,8 +170,8 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
-    @PatchMapping(value = "/programs/{id}" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ProgramDto> updateProgram(@NotNull @RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
+    @PutMapping(value = "/programs/{id}" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ProgramDto> updateProgram(@RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
 
     @Operation(
             summary = "Delete training program by id",

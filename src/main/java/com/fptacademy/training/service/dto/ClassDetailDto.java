@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ClassDetailDto implements Serializable{
     private static final Long serialVersionUID = 1L;
-    private Long id;
+    private Long class_id;
     private Integer accepted;
     private Integer actual;
     private LocalTime finish_at;
@@ -27,11 +27,12 @@ public class ClassDetailDto implements Serializable{
     private String status;
     private String detailLocation;
     private String contactPoint;
-    private ClassSimplified class_id;
+    private ClassSimplified classInfo;
     private AttendeeSimplified attendee;
     private LocationSimplified location;
     private List<UserSimplified> trainer;
     private List<UserSimplified> admin;
+    private ProgramSimplified program;
     private List<ScheduleSimplified> schedules;
 
     @Getter

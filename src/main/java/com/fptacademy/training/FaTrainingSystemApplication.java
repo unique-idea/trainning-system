@@ -10,34 +10,33 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-
 @SpringBootApplication
 @EnableJpaAuditing
 @SecurityScheme(
-        name = "token_auth",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT"
+		name = "token_auth",
+		type = SecuritySchemeType.HTTP,
+		scheme = "bearer",
+		bearerFormat = "JWT"
 )
 @OpenAPIDefinition(
-        info = @Info(
-                title = "Swagger for FPT Academy Training System",
-                description = "This is list of endpoints and documentations of REST API for FPT Academy Training System",
-                version = "1.0"
-        ),
-        servers = {
-                @Server(url = "http://fademouser-env.eba-rr6m3qyp.ap-southeast-1.elasticbeanstalk.com", description = "Deploy server"),
-                @Server(url = "http://localhost:5000", description = "Local server")
-        },
-        tags = {
-                @Tag(name = "authentication", description = "REST API endpoints for authentication"),
-                @Tag(name = "program", description = "REST API endpoints for training program")
-        }
+		info = @Info(
+				title = "Swagger for FPT Academy Training System",
+				description = "This is list of endpoints and documentations of REST API for FPT Academy Training System",
+				version = "1.0"
+		),
+		servers = {
+				@Server(url = "http://localhost:8080", description = "Local development server"),
+				@Server(url = "http://localhost:5000", description = "Local production server")
+		},
+		tags = {
+				@Tag(name = "authentication", description = "REST API endpoints for authentication"),
+				@Tag(name = "program", description = "REST API endpoints for training program"),
+				@Tag(name = "class", description = "REST API endpoints for training classes")
+		}
 )
 public class FaTrainingSystemApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(FaTrainingSystemApplication.class, args);
-    }
-
+	public static void main(String[] args) {
+		SpringApplication.run(FaTrainingSystemApplication.class, args);
+	}
 }

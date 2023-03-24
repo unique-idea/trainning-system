@@ -28,4 +28,9 @@ public class OutputStandard implements Serializable {
 
   @Column(length = 10)
   private String name;
+
+  private String code;
+
+  @Column(columnDefinition = "TEXT")
+  private String description;
 }

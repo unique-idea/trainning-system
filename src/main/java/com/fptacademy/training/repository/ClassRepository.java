@@ -11,8 +11,7 @@ import com.fptacademy.training.domain.Class;
 public interface ClassRepository extends JpaRepository<Class, Long> {
     List<Class> findByProgram_Id(Long id);
     boolean existsByName(String name);
-    @Query("select c from Class c where c.id = :id and c.classDetail.status <> 'DELETED' " +
-            "and c.classDetail.status <> 'DRAFT' and c.classDetail.status <> 'INACTIVE'")
+    @Query("select c from Class c where c.id = :id and c.classDetail.status <> 'DELETED'")
     Optional<Class> findByIdAndStatusNotDeleted(@Param("id") Long id);
     List<Class> findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(String name, String fullName);
 }

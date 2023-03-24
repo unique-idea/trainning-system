@@ -2,12 +2,7 @@ package com.fptacademy.training.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,4 +23,12 @@ public class Delivery implements Serializable {
 
   @Column(length = 50)
   private String name;
+
+  private String code;
+
+  @Column(columnDefinition = "TEXT")
+  private String description;
+
+  @Transient
+  private Double present;
 }
