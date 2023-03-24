@@ -85,4 +85,10 @@ class UserServiceTest {
                 .anyMatch(e1 -> user.getRole().getPermissions().stream()
                         .anyMatch(e1::equals))).isTrue();
     }
+
+    @Test
+    void testGetUserRoleByEmail() {
+        Role role = userService.getUserRoleByEmail(user.getEmail());
+        assertThat(role.getId()).isEqualTo(user.getRole().getId());
+    }
 }
