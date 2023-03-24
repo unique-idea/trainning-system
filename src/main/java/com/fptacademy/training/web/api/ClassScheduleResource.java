@@ -31,6 +31,7 @@ public interface ClassScheduleResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get class schedule successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request, invalid request parameter", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
@@ -48,6 +49,7 @@ public interface ClassScheduleResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get class schedule successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request, invalid request parameter", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
@@ -65,11 +67,12 @@ public interface ClassScheduleResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get class schedule successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request, invalid request parameter", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
-//    @PreAuthorize("hasAuthority('Class_FullAccess')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
@@ -81,11 +84,12 @@ public interface ClassScheduleResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get class schedule successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request, invalid request parameter", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
-//    @PreAuthorize("hasAuthority('Class_FullAccess')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 }
