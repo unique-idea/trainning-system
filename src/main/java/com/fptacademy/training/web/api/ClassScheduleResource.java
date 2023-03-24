@@ -69,7 +69,7 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
-//    @PreAuthorize("hasAuthority('Class_FullAccess')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
@@ -85,7 +85,7 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
-//    @PreAuthorize("hasAuthority('Class_FullAccess')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 }
