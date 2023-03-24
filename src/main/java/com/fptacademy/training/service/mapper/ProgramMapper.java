@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Component
@@ -42,6 +43,9 @@ public class ProgramMapper {
     }
 
     public List<ProgramDto> toDtos(List<Program> programs) {
-        return programs.stream().map(this::toDto).toList();
+        if (programs == null) {
+            return null;
+        }
+        return programs.stream().filter(Objects::nonNull).map(this::toDto).toList();
     }
 }

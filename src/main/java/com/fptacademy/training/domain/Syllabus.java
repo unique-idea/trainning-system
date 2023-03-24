@@ -61,8 +61,9 @@ public class Syllabus extends AbstractAuditEntity implements Serializable {
   @Column(columnDefinition = "TEXT")
   private String courseObjective;
 
-  @Column(columnDefinition = "TEXT")
-  private String trainingPrinciple;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "training_principle_id")
+  private TrainingPrinciple trainingPrinciple;
 
   @ManyToOne
   @JoinColumn(name = "level_id")

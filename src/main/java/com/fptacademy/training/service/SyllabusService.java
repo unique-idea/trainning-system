@@ -7,6 +7,7 @@ import com.fptacademy.training.domain.Material;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
 import com.fptacademy.training.domain.Syllabus;
+import com.fptacademy.training.domain.TrainingPrinciple;
 import com.fptacademy.training.domain.Unit;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
@@ -103,6 +104,7 @@ public class SyllabusService {
         mapper.<SyllabusStatus>map(src -> SyllabusStatus.DRAFT, Syllabus::setStatus);
         mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
       });
+    map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map
@@ -297,6 +299,7 @@ public class SyllabusService {
         mapper.skip(Syllabus::setId);
         mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(Syllabus::getSessions, Syllabus::setDuration);
       });
+    map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
     map.createTypeMap(Assessment.class, Assessment.class).addMappings(mapper -> mapper.skip(Assessment::setId));
     map.createTypeMap(Session.class, Session.class).addMappings(mapper -> mapper.skip(Session::setId));
     map
@@ -359,6 +362,12 @@ public class SyllabusService {
           .skip(1)
           .filter(row -> getCellValue(row.getCell(3), CellType.NUMERIC, null, Long.class) != null);
 
+      Supplier<Stream<Row>> trainingPrincipleSheet = () ->
+        StreamSupport
+          .stream(workbook.getSheet("trainingPrinciple").spliterator(), false)
+          .skip(1)
+          .filter(row -> getCellValue(row.getCell(0), CellType.NUMERIC, null, Long.class) != null);
+
       return syllabusRepository.saveAll(
         map.map(
           syllabusSheet
@@ -380,7 +389,27 @@ public class SyllabusService {
                 .version(1.0F)
                 .courseObjective(getCellValue(rowSyllabus.getCell(4), CellType.STRING, null, String.class))
                 .technicalRequirement(getCellValue(rowSyllabus.getCell(5), CellType.STRING, null, String.class))
-                .trainingPrinciple(getCellValue(rowSyllabus.getCell(6), CellType.STRING, null, String.class))
+                .trainingPrinciple(
+                  trainingPrincipleSheet
+                    .get()
+                    .filter(rowTrainingPrinciple ->
+                      getCellValue(rowTrainingPrinciple.getCell(0), CellType.NUMERIC, null, Long.class) ==
+                      getCellValue(rowSyllabus.getCell(6), CellType.NUMERIC, null, Long.class)
+                    )
+                    .findFirst()
+                    .map(rowTrainingPrinciple ->
+                      TrainingPrinciple
+                        .builder()
+                        .id(getCellValue(rowTrainingPrinciple.getCell(0), CellType.NUMERIC, null, Long.class))
+                        .training(getCellValue(rowTrainingPrinciple.getCell(1), CellType.STRING, null, String.class))
+                        .reTest(getCellValue(rowTrainingPrinciple.getCell(2), CellType.STRING, null, String.class))
+                        .marking(getCellValue(rowTrainingPrinciple.getCell(3), CellType.STRING, null, String.class))
+                        .waiverCriteria(getCellValue(rowTrainingPrinciple.getCell(4), CellType.STRING, null, String.class))
+                        .others(getCellValue(rowTrainingPrinciple.getCell(5), CellType.STRING, null, String.class))
+                        .build()
+                    )
+                    .orElse(null)
+                )
                 .level(levelRepository.findById(getCellValue(rowSyllabus.getCell(7), CellType.NUMERIC, 0L, Long.class)).orElse(null))
                 .assessment(
                   assessmentSheet
