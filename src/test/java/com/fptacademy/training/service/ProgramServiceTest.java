@@ -1,18 +1,16 @@
 package com.fptacademy.training.service;
 
-import com.fptacademy.training.domain.Program;
-import com.fptacademy.training.domain.Role;
-import com.fptacademy.training.domain.Syllabus;
-import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.*;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.factory.ProgramFactory;
 import com.fptacademy.training.factory.RoleFactory;
 import com.fptacademy.training.factory.SyllabusFactory;
 import com.fptacademy.training.factory.UserFactory;
-import com.fptacademy.training.repository.ProgramRepository;
-import com.fptacademy.training.repository.RoleRepository;
-import com.fptacademy.training.repository.SyllabusRepository;
-import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.web.TestUtil;
@@ -43,6 +41,8 @@ class ProgramServiceTest {
     private ProgramRepository programRepository;
     private final String DEFAULT_PROGRAM_NAME = "Test Program";
     private User user;
+    @Autowired
+    private ClassRepository classRepository;
 
     @BeforeEach
     void setup() {
@@ -56,6 +56,7 @@ class ProgramServiceTest {
     @AfterEach
     void teardown() {
         SecurityContextHolder.clearContext();
+        classRepository.deleteAll();
         programRepository.deleteAll();
         syllabusRepository.deleteAll();
         userRepository.deleteAll();
@@ -87,5 +88,38 @@ class ProgramServiceTest {
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, syllabuses.stream().map(Syllabus::getId).toList());
         assertThatExceptionOfType(ResourceAlreadyExistsException.class)
                 .isThrownBy(() -> programService.createProgram(programVM));
+    }
+
+    @Test
+    void testDeleteProgram() {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        programService.deleteProgram(program.getId());
+        assertThat(programRepository.findById(program.getId())).isNotPresent();
+    }
+
+    @Test
+    void testDeleteProgramFails() {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        com.fptacademy.training.domain.Class c = Class.builder()
+                .name("className")
+                .code("ABC123")
+                .program(program)
+                .build();
+        ClassDetail classDetail = ClassDetail.builder()
+                .classField(c)
+                .status(ClassStatus.OPENNING.name())
+                .build();
+        c.setClassDetail(classDetail);
+        classRepository.saveAndFlush(c);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> programService.deleteProgram(999L));
+
+        assertThatExceptionOfType(ResourceBadRequestException.class)
+                .isThrownBy(() -> programService.deleteProgram(program.getId()));
     }
 }

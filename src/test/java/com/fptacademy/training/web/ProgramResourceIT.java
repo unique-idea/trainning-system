@@ -266,6 +266,28 @@ public class ProgramResourceIT {
     }
 
     @Test
+    public void testDeleteProgramBadRequest() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        Class c = Class.builder()
+                .name("className")
+                .code("abc")
+                .program(program)
+                .build();
+        ClassDetail classDetail = ClassDetail.builder()
+                .classField(c)
+                .status(ClassStatus.OPENNING.name())
+                .build();
+        c.setClassDetail(classDetail);
+        classRepository.saveAndFlush(c);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(delete("/api/programs/{id}", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testGetSyllabusesByProgramId() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
