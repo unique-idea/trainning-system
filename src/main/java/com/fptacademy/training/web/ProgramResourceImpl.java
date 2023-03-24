@@ -49,9 +49,14 @@ public class ProgramResourceImpl implements ProgramResource {
     }
 
     @Override
-    public ResponseEntity<ProgramListResponseVM> getPrograms(List<String> keywords, String sort, int page, int size) {
-        List<ProgramDto> programDTOs = programService.getPrograms(keywords, sort);
+    public ResponseEntity<ProgramListResponseVM> getPrograms(List<String> keywords, Boolean activated, String sort, int page, int size) {
+        List<ProgramDto> programDTOs = programService.getPrograms(keywords, activated, sort);
         int numberOfFoundPrograms = programDTOs.size();
+        if (numberOfFoundPrograms <= size) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ProgramListResponseVM(numberOfFoundPrograms, programDTOs));
+        }
         // Apply pagination
         int start = (page - 1) * size;
         int end = Math.min(start + size, programDTOs.size());
