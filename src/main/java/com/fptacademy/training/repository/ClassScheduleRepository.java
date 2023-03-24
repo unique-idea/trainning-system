@@ -18,14 +18,6 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " AND cs.study_date = ?1 ", nativeQuery = true)
     List<ClassSchedule> findActiveClassByStudyDate(LocalDate date);
 
-    /*@Query(value = " SELECT cs.* FROM class_schedules cs " +
-            " INNER JOIN user_class_detail ucd " +
-            " ON cs.class_detail_id = ucd.class_detail_id " +
-            " AND ucd.user_id = ?1" +
-            " AND cs.study_date = ?2", nativeQuery = true)
-    List<ClassSchedule> findActiveClassByUserIdAndStudyDate(Long user_id, LocalDate studyDate);*/
-
-
     @Query(value = " SELECT cs.* FROM class_schedules cs " +
             " INNER JOIN " +
             " (SELECT ucd.class_detail_id as `class_detail_id`, ucd.user_id as `user_id` " +
