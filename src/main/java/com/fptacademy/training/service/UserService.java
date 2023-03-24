@@ -191,7 +191,7 @@ public class UserService {
                 localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             } catch (Exception e) {
                 throw new ResourceBadRequestException(
-                        date + ": Date format is wrong. Please use yyyy-MM-dd format");
+                        date + ": Date formatD is wrong. Please use yyyy-MM-dd format");
             }
         return localDate;
     }
@@ -265,7 +265,7 @@ public class UserService {
                             if (noNullRequiredUserVM.password() != null) {
                                 existUser.setPassword(noNullRequiredUserVM.password());
                             }
-                            if (noNullRequiredUserVM.activated() != null) {
+                            if (noNullRequiredUserVM.email() != null) {
                                 existUser.setEmail(noNullRequiredUserVM.email());
                             }
                             if (noNullRequiredUserVM.birthday() != null) {

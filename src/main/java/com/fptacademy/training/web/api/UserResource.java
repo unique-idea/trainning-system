@@ -150,7 +150,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "500", description = "Error occurred", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/users/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/user/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> getUserById(@PathVariable(value = "id") Long id);
 
     @Operation(summary = "Update user by id", description = "Update user field is changed with user id", tags = "user", security = @SecurityRequirement(name = "token_auth"))
