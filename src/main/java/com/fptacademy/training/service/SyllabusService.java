@@ -59,10 +59,11 @@ public class SyllabusService {
 
   @Transactional(readOnly = true)
   public Page<SyllabusListDto> findAll(Specification<Syllabus> spec, Pageable pageable) {
-    TypeMap<Syllabus, SyllabusListDto> typeMap = modelMapper.getTypeMap(Syllabus.class, SyllabusListDto.class);
+    ModelMapper map = new ModelMapper();
+    TypeMap<Syllabus, SyllabusListDto> typeMap = map.getTypeMap(Syllabus.class, SyllabusListDto.class);
     if (typeMap == null) {
       typeMap =
-        modelMapper
+        map
           .createTypeMap(Syllabus.class, SyllabusListDto.class)
           .addMappings(mapper -> {
             mapper.map(src -> src.getCreatedBy().getCode(), SyllabusListDto::setCreatedBy);
@@ -90,7 +91,7 @@ public class SyllabusService {
             // };
           });
     }
-    return syllabusRepository.findAll(spec, pageable).map(s -> modelMapper.map(s, SyllabusListDto.class));
+    return syllabusRepository.findAll(spec, pageable).map(s -> map.map(s, SyllabusListDto.class));
   }
 
   public SyllabusDetailDto save(SyllabusDetailDto syllabusDetailDto) {
@@ -531,6 +532,6 @@ public class SyllabusService {
 
   public List<SyllabusDto.SyllabusListDto> findActivatedSyllabusesByName(String name) {
     List<Syllabus> syllabuses = syllabusRepository.findByNameContainsIgnoreCaseAndStatus(name, SyllabusStatus.ACTIVATED);
-      return new ArrayList<>(syllabusMapper.toDtos(syllabuses));
+    return new ArrayList<>(syllabusMapper.toDtos(syllabuses));
   }
 }
