@@ -69,6 +69,8 @@ public class SyllabusResourceImpl {
 
   private final SyllabusRepository syllabusRepository;
   private final SyllabusService syllabusService;
+  private final FormatTypeService formatTypeService;
+
 
   /**
    * Output Standard
@@ -766,4 +768,59 @@ public class SyllabusResourceImpl {
   ) {
     return ResponseEntity.ok(syllabusService.importExcel(file, scanning, handle));
   }
+
+  /**
+     * Format type
+     */
+    @PostMapping(path = "/formattype")
+    public ResponseEntity<FormatType> createFormatType(@RequestBody FormatType formatType) {
+        if (formatType.getId() != null) {
+          throw new ResourceBadRequestException("A new formatType cannot already have an ID");
+        }
+        return ResponseEntity.ok().body(formatTypeService.save(formatType));
+    }
+
+    @PutMapping(path = "/formattype/{id}")
+    public ResponseEntity<FormatType> updateFormatType(
+            @PathVariable(value = "id", required = false) final Long id,
+            @RequestBody(required = false) FormatType formatType
+    ) {
+        if (formatType.getId() == null) {
+        throw new ResourceBadRequestException("id null");
+        }
+        if (!Objects.equals(id, formatType.getId())) {
+          throw new ResourceBadRequestException("id invalid");
+        }
+
+        Optional<FormatType> formatTypeOptional = formatTypeService.update(formatType);
+        return formatTypeOptional.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/formattype")
+    public ResponseEntity<List<FormatType>> getFormatType() {
+        return ResponseEntity.ok().body(formatTypeService.getAll());
+    }
+
+    @GetMapping("/formattype/{id}")
+    public ResponseEntity<FormatType> getFormatType(@PathVariable Long id) {
+        Optional<FormatType> formatType = formatTypeService.getOne(id);
+        return formatType.map(response -> ResponseEntity.ok().body(response)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @Operation(
+            deprecated = true,
+            summary = "Delete a format type by id",
+            description = "Format type input: id(long)",
+            tags = "Syllabus/FormatType",
+            security = @SecurityRequirement(name = "token_auth"),
+            responses = {
+                    @ApiResponse(description = "Success | OK", responseCode = "200", content = @Content),
+                    @ApiResponse(description = "Not found", responseCode = "404", content = @Content)
+            }
+    )
+    @DeleteMapping("/formattype/{id}")
+    public ResponseEntity<?> deleteFormatType(@PathVariable Long id) {
+        formatTypeService.delete(id);
+        return ResponseEntity.ok("OK");
+    }
 }
