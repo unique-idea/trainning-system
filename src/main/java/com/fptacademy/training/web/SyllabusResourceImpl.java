@@ -515,7 +515,7 @@ public class SyllabusResourceImpl {
   //region Syllabus
   @Operation(
     summary = "List all syllabuses",
-    description = "Syllabus Input: Panaging, Search by keywords and date" + ", Sort by keywords",
+    description = "sort createby : createdBy.code,desc || createdBy.code,asc",
     tags = "Syllabus",
     security = @SecurityRequirement(name = "token_auth"),
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
