@@ -526,10 +526,11 @@ public class SyllabusResourceImpl {
     @org.springdoc.api.annotations.ParameterObject Pageable pageable,
     @RequestParam(required = false) String[] keywords,
     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant[] createDate,
-    Authentication authentication
+    Authentication authentication,
+    @Schema(allowableValues = { "false", "true" }) @RequestParam(required = true) Boolean draft
   ) {
     return ResponseEntity.ok(
-      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication), pageable)
+      syllabusService.findAll(SyllabusRepository.searchByKeywordsOrBycreateDates(keywords, createDate, authentication, draft), pageable)
     );
   }
 
