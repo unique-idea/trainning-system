@@ -1,5 +1,8 @@
 package com.fptacademy.training.service.dto;
 
+import com.fptacademy.training.domain.Level;
+import com.fptacademy.training.domain.Role;
+
 import lombok.*;
 
 @Data
@@ -21,9 +24,9 @@ public class UserDto {
 
     private Boolean activated;
 
-    private String level;
+    private Level level;
 
-    private String role;
+    private Role role;
 
     private String avatarUrl;
 
