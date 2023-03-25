@@ -219,7 +219,7 @@ public class UserService {
 
         Page<User> page = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated,
                 birthdayFromDate, birthdayToDate, status, pageable);
-        return userMapper.toDtos(page.getContent());
+        return userMapper.toDtos(page.toList());
     }
 
     public List<UserDto> importUsersToDB(MultipartFile file) {
