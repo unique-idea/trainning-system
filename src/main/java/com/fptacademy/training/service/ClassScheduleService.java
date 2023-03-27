@@ -1,6 +1,7 @@
 package com.fptacademy.training.service;
 
 import com.fptacademy.training.domain.ClassSchedule;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.ClassScheduleRepository;
@@ -23,7 +24,7 @@ public class ClassScheduleService {
             throw new ResourceBadRequestException("date is null");
         }
         log.info("Getting all class by date from database.");
-        List<ClassSchedule> result = classScheduleRepository.findActiveClassByStudyDate(date);
+        List<ClassSchedule> result = classScheduleRepository.findActiveClassByStudyDate(date, ClassStatus.OPENNING);
         if (result.isEmpty()) {
             log.error("There are no class at date {}", date);
             throw new ResourceNotFoundException("There are no class at date " + date);
@@ -49,7 +50,7 @@ public class ClassScheduleService {
             throw new ResourceBadRequestException("Bad request for date and userId value");
         }
         log.debug("Getting class schedule of user from database.");
-        List<ClassSchedule> result = classScheduleRepository.findActiveClassByUserIdAndStudyDate(userId, date);
+        List<ClassSchedule> result = classScheduleRepository.findActiveClassByUserIdAndStudyDate(userId, date, ClassStatus.OPENNING);
         if (result.isEmpty()) {
             log.error("There are no class at date {} of user {}", date, userId);
             throw new ResourceNotFoundException("There are no class at date " + date + " of user " + userId);
@@ -66,7 +67,7 @@ public class ClassScheduleService {
         }
         log.debug("Getting class schedule of user from database.");
         List<ClassSchedule> result = classScheduleRepository
-                .findActiveClassByUserIdAndStudyDateBetween(userId, startDate, endDate);
+                .findActiveClassByUserIdAndStudyDateBetween(userId, startDate, endDate, ClassStatus.OPENNING);
 
         if (result.isEmpty()) {
             log.error("There are no class between {} and {} of user {}", startDate, endDate, userId);
@@ -81,7 +82,7 @@ public class ClassScheduleService {
             throw new ResourceBadRequestException("Bad request");
         }
         log.debug("Getting all class schedule in a week.......");
-        List<ClassSchedule> result = classScheduleRepository.findActiveClassByStudyDateBetween(startDate, endDate);
+        List<ClassSchedule> result = classScheduleRepository.findActiveClassByStudyDateBetween(startDate, endDate, ClassStatus.OPENNING);
         if (result.isEmpty()) {
             log.error("There are no class between {} and {}", startDate, endDate);
             throw new ResourceNotFoundException("There are no class between "
