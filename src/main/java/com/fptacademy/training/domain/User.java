@@ -86,9 +86,9 @@ public class User implements Serializable {
                 ", gender=" + gender + '\'' +
                 ", avatarUrl='" + avatarUrl + '\'' +
                 ", activated=" + activated + '\'' +
-                ", level=" + level.getName() + '\'' +
+                ", level=" + level == null ? "" : level.getName() + '\'' +
                 ", role=" + role.getName() + '\'' +
-                ", status=" + status.name() + '\'' +
+                ", status=" + status == null ? "" : status.name() + '\'' +
                 '}';
     }
 }
