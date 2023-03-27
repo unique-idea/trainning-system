@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.UserStatus;
@@ -21,8 +20,6 @@ import com.fptacademy.training.service.util.ExcelExportUtils;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +28,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -51,19 +47,10 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @Transactional
 public class UserService {
-
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final RoleService roleService;
-
-    @Autowired
     private final LevelService levelService;
-    @Autowired
     private final UserMapper userMapper;
-
-    @Autowired
     private final ExcelUploadService excelUploadService;
 
     @Value("${spring.servlet.multipart.max-file-size}")
@@ -163,11 +150,13 @@ public class UserService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getCurrentUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "Something went wrong, can not get current logged in user"));
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof User) {
+                return (User) authentication.getPrincipal();
+            }
+        }
+        throw new UsernameNotFoundException("Something went wrong, can not get current logged in user");
     }
 
     public User getUserByEmail(String email) {
@@ -320,4 +309,7 @@ public class UserService {
         excelExport.exportDataToExcel(response);
     }
 
+    public Role getUserRoleByEmail(String email) {
+        return getUserByEmail(email).getRole();
+    }
 }

@@ -3,6 +3,8 @@ package com.fptacademy.training.repository;
 import com.fptacademy.training.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.fptacademy.training.service.dto.UserDto;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,8 @@ import java.util.Optional;
 
 
 public interface UserRepository extends JpaRepository<User, Long> {
+  @EntityGraph(attributePaths = {"role"})
+  Optional<User> findByEmail(String email);
 
     @Query("Select c from User c where c.role.name = 'Trainer'")
     List<User> findAllTrainers();
@@ -28,8 +32,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByCode(String code);
 
     Page<User> findUserByActivatedIsTrue(Pageable pageable);
-
-    Optional<User> findByEmail(String email);
 
     List<User> findByFullNameContaining(String keyword);
 

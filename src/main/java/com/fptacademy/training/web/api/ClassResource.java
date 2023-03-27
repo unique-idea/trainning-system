@@ -1,31 +1,24 @@
 package com.fptacademy.training.web.api;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.fptacademy.training.service.dto.AttendeeDto;
-import com.fptacademy.training.service.dto.ClassDetailDto;
-import com.fptacademy.training.service.dto.ClassDto;
-import com.fptacademy.training.service.dto.LocationDto;
-import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
+import com.fptacademy.training.service.dto.*;
+import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
-
+import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 
 @RequestMapping("/api/class")
@@ -73,7 +66,7 @@ public interface ClassResource {
             @ApiResponse(responseCode = "200", description = "Find list of class successfully"),
     })
     @GetMapping
-    public ResponseEntity<List<ClassDto>> filterClass(
+    public ResponseEntity<ClassListResponseVM> filterClass(
             @RequestParam(value = "q", required = false) List<String> keywords,
             @RequestParam(name = "from", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -85,7 +78,7 @@ public interface ClassResource {
             @RequestParam(name = "attendee", required = false) List<String> attendeeTypes,
             @RequestParam(name = "fsu", required = false) String fsu,
             @RequestParam(name = "trainer", required = false) String trainerCode,
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     );
 
@@ -136,17 +129,17 @@ public interface ClassResource {
 
     @Operation(
             summary = "Create a new class",
-            description = "Create a new class (can be saved as draft) by set the status field to 'DRAFT'",
+            description = "Create a new class (can be saved as draft by set the status field to 'DRAFT')",
             tags = "class",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
-            @ApiResponse(responseCode = "201", description = "Create a new class by ID successfully"),
+            @ApiResponse(responseCode = "201", description = "Create a new class successfully"),
             @ApiResponse(responseCode = "404", description = "ID not found", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
-            @ApiResponse(responseCode = "409", description = "Conflict training program", content = @Content)
+            @ApiResponse(responseCode = "409", description = "Conflict class", content = @Content)
     })
     @PostMapping
     public ResponseEntity<ClassDetailDto> createClass(@RequestBody ClassVM classVM);
@@ -206,4 +199,22 @@ public interface ClassResource {
     @GetMapping("/locations")
     public ResponseEntity<List<LocationDto>> getAllLocations();
 
+    @Operation(
+            summary = "Update an existing class",
+            description = "Update an existing class",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Update class by ID successfully"),
+            @ApiResponse(responseCode = "404", description = "ID not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Conflict class", content = @Content)
+    })
+    @PutMapping("/{class_id}")
+    public ResponseEntity<ClassDetailDto> updateClass(
+            @PathVariable Long class_id,
+            @RequestBody ClassVM classVM);
 }

@@ -24,6 +24,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.*;
+import org.hibernate.Hibernate;
+
+import javax.persistence.*;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -78,17 +87,19 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", code='" + code + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", gender=" + gender + '\'' +
-                ", avatarUrl='" + avatarUrl + '\'' +
-                ", activated=" + activated + '\'' +
-                ", level=" + level == null ? "" : level.getName() + '\'' +
-                ", role=" + role.getName() + '\'' +
-                ", status=" + status == null ? "" : status.name() + '\'' +
-                '}';
+        return email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        User user = (User) o;
+        return getId() != null && Objects.equals(getId(), user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

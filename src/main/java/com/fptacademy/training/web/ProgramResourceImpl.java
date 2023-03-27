@@ -1,11 +1,13 @@
 package com.fptacademy.training.web;
 
+import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.ProgramService;
 import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.api.ProgramResource;
+import com.fptacademy.training.web.vm.ProgramListResponseVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -17,6 +19,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,26 +53,31 @@ public class ProgramResourceImpl implements ProgramResource {
     }
 
     @Override
-    public ResponseEntity<List<ProgramDto>> getPrograms(List<String> keywords, String sort, int page, int size) {
-        List<ProgramDto> programDtos = programService.getPrograms(keywords, sort);
+    public ResponseEntity<ProgramListResponseVM> getPrograms(List<String> keywords, Boolean activated, String sort, int page, int size) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (activated != null &&
+                authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority).toList().contains(Permissions.PROGRAM_VIEW)) {
+            activated = true;
+        }
+        List<ProgramDto> programDTOs = programService.getPrograms(keywords, activated, sort);
+        int numberOfFoundPrograms = programDTOs.size();
+        if (numberOfFoundPrograms <= size) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ProgramListResponseVM(numberOfFoundPrograms, programDTOs));
+        }
         // Apply pagination
         int start = (page - 1) * size;
-        int end = Math.min(start + size, programDtos.size());
-        Page<ProgramDto> pageResult = new PageImpl<>(
-                programDtos.subList(start, end),
+        int end = Math.min(start + size, programDTOs.size());
+        Page<ProgramDto> pageOfPrograms = new PageImpl<>(
+                programDTOs.subList(start, end),
                 PageRequest.of(page - 1, size),
-                programDtos.size());
+                numberOfFoundPrograms);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(pageResult.getContent());
-    }
-    @Override
-    public ResponseEntity<List<SyllabusDto.SyllabusListDto>>getSyllabusesByName(String name) {
-        List<SyllabusDto.SyllabusListDto> syllabusDtos = syllabusService.findSyllabusesByName(name);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(syllabusDtos);
+                .body(new ProgramListResponseVM(numberOfFoundPrograms, pageOfPrograms.getContent()));
     }
 
     @Override

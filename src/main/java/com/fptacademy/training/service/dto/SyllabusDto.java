@@ -1,15 +1,15 @@
 package com.fptacademy.training.service.dto;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fptacademy.training.domain.Assessment;
+import com.fptacademy.training.domain.Delivery;
 import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.OutputStandard;
 import com.fptacademy.training.domain.Session;
+import com.fptacademy.training.domain.TrainingPrinciple;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
-
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,11 +36,11 @@ public class SyllabusDto {
     private SyllabusStatus status;
     private String technicalRequirement;
     private String courseObjective;
-    private String trainingPrinciple;
+    private TrainingPrinciple trainingPrinciple;
     private Instant createdAt;
     private String createdBy;
     private Integer duration;
-    private Float durationInHours;
+    private Double durationInHours;
     private List<OutputStandard> outputStandard = new ArrayList<>();
     private Float version;
   }
@@ -60,15 +60,16 @@ public class SyllabusDto {
     private String code;
     private Float version;
     private Integer attendeeNumber;
-    private SyllabusStatus status;
+    private String status;
     private Integer duration;
-    private Double totalDurationUnit;
+    private Double durationInHours;
     private String technicalRequirement;
     private String courseObjective;
-    private String trainingPrinciple;
+    private TrainingPrinciple trainingPrinciple;
     private Level level;
     private Assessment assessment;
-    private List<OutputStandard> outputStandard = new ArrayList<>();
-    private List<Session> sessions = new ArrayList<>();
+    private List<Delivery> timeAllocation;
+    private List<OutputStandard> outputStandard;
+    private List<Session> sessions;
   }
 }

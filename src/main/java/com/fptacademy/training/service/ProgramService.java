@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fptacademy.training.repository.ClassRepository;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,7 +25,6 @@ import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
-import com.fptacademy.training.repository.ClassRepository;
 import com.fptacademy.training.repository.ProgramRepository;
 import com.fptacademy.training.repository.SyllabusRepository;
 import com.fptacademy.training.security.Permissions;
@@ -77,12 +77,16 @@ public class ProgramService {
             Permissions.PROGRAM_CREATE + "', '" +
             Permissions.PROGRAM_MODIFY + "', '" +
             Permissions.PROGRAM_FULL_ACCESS + "'))")
-    public List<ProgramDto> getPrograms(List<String> keywords, String sort) {
+    public List<ProgramDto> getPrograms(List<String> keywords, Boolean activated, String sort) {
         // Get training programs based on keywords or get all if there's no keyword
         List<Program> programs;
         if (keywords != null) {
-            List<Program> firstFilteredPrograms = programRepository
-                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
+            List<Program> firstFilteredPrograms =
+                    activated != null ?
+                            programRepository
+                                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCaseAndActivated(keywords.get(0), keywords.get(0), activated) :
+                            programRepository
+                                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
             if (keywords.size() > 1) {
                 programs = firstFilteredPrograms
                         .stream()
@@ -96,7 +100,9 @@ public class ProgramService {
                 programs = firstFilteredPrograms;
             }
         } else {
-            programs = programRepository.findAll();
+            programs = activated != null ?
+                    programRepository.findByActivated(activated) :
+                    programRepository.findAll();
         }
 
         // Convert list of program entities to list of program DTOs
@@ -189,7 +195,11 @@ public class ProgramService {
                             "If not specify ID, please make sure ID cell is empty");
                 }
                 program.setName(row.getCell(1).getStringCellValue().trim());
-                List<Syllabus> syllabuses = Arrays.stream(row.getCell(2).getStringCellValue().trim().split(","))
+                String syllabusCodes = row.getCell(2).getStringCellValue().trim();
+                if (!StringUtils.hasText(program.getName()) || !StringUtils.hasText(syllabusCodes)) {
+                    continue;
+                }
+                List<Syllabus> syllabuses = Arrays.stream(syllabusCodes.split(","))
                         .map(code -> syllabusRepository
                                 .findByCode(code)
                                 .orElseThrow(() -> new ResourceNotFoundException("Syllabus with code '" + code + "' not found")))
@@ -281,7 +291,7 @@ public class ProgramService {
                 .stream()
                 .map(syllabusId -> syllabusRepository
                         .findById(syllabusId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
+                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + syllabusId + " not found")))
                 .toList());
         p.setSyllabuses(syllabuses);
         programRepository.saveAndFlush(p);

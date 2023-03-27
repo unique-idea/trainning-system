@@ -1,6 +1,7 @@
 package com.fptacademy.training.security.jwt;
 
 import com.fptacademy.training.config.ApplicationProperties;
+import com.fptacademy.training.domain.User;
 import com.fptacademy.training.service.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -12,23 +13,23 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
-    private final ApplicationProperties properties;
     private final UserService userService;
+    private final long accessExpireTimeInMinutes;
+    private final long refreshExpireTimeInMinutes;
     private final JwtBuilder accessJwtBuilder;
     private final JwtParser accessJwtParser;
     private final JwtBuilder refreshJwtBuilder;
     private final JwtParser refreshJwtParser;
 
     public JwtTokenProvider(ApplicationProperties properties, UserService userService) {
-        this.properties = properties;
         this.userService = userService;
+        accessExpireTimeInMinutes = properties.getAccessExpireTimeInMinutes();
+        refreshExpireTimeInMinutes = properties.getRefreshExpireTimeInMinutes();
         Key accessKey = Keys.hmacShaKeyFor(properties.getAccessSecretKey().getBytes(StandardCharsets.UTF_8));
         accessJwtBuilder = Jwts.builder()
                 .signWith(accessKey, SignatureAlgorithm.HS256);
@@ -41,35 +42,39 @@ public class JwtTokenProvider {
                 .setSigningKey(refreshKey).build();
     }
 
+    private String getAccessToken(String email, String role, String authorities) {
+        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * accessExpireTimeInMinutes);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        claims.put("auth", authorities);
+        return accessJwtBuilder
+                .setSubject(email)
+                .addClaims(claims)
+                .setExpiration(expiredTime)
+                .compact();
+    }
+
     public String generateAccessToken(Authentication authentication) {
         String email = authentication.getName();
+        String role = userService.getUserRoleByEmail(email).getName();
         String authorities = authentication.getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * properties.getAccessExpireTimeInMinutes());
-        return accessJwtBuilder
-                .setSubject(email)
-                .claim("auth", authorities)
-                .setExpiration(expiredTime)
-                .compact();
+        return getAccessToken(email, role, authorities);
     }
 
     public String generateAccessToken(String refreshToken) {
-        Claims claims = refreshJwtParser.parseClaimsJws(refreshToken).getBody();
-        String email = claims.getSubject();
+        Claims refreshClaims = refreshJwtParser.parseClaimsJws(refreshToken).getBody();
+        String email = refreshClaims.getSubject();
+        String role = userService.getUserRoleByEmail(email).getName();
         String authorities = userService.getUserPermissionsByEmail(email)
                 .stream().map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * properties.getAccessExpireTimeInMinutes());
-        return accessJwtBuilder
-                .setSubject(email)
-                .claim("auth", authorities)
-                .setExpiration(expiredTime)
-                .compact();
+        return getAccessToken(email, role, authorities);
     }
 
     public String generateRefreshToken(String email) {
-        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * properties.getRefreshExpireTimeInMinutes());
+        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * refreshExpireTimeInMinutes);
         return refreshJwtBuilder
                 .setSubject(email)
                 .setExpiration(expiredTime)
@@ -83,7 +88,8 @@ public class JwtTokenProvider {
                 stream(claims.get("auth").toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        return new UsernamePasswordAuthenticationToken(email, accessToken, authorities);
+        User user = userService.getUserByEmail(email);
+        return new UsernamePasswordAuthenticationToken(user, accessToken, authorities);
     }
 
     public boolean validateAccessToken(String accessToken) {

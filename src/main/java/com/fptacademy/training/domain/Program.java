@@ -1,8 +1,6 @@
 package com.fptacademy.training.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -11,9 +9,18 @@ import java.util.List;
 
 @Setter
 @Getter
-@ToString
 @Table(name = "programs")
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "graph.Program.syllabus.session", includeAllAttributes = true,
+                attributeNodes = @NamedAttributeNode(value = "syllabuses", subgraph = "subgraph.syllabus"),
+                subgraphs = @NamedSubgraph(name = "subgraph.syllabus", attributeNodes = @NamedAttributeNode(value = "sessions"))
+        )
+})
 public class Program extends AbstractAuditEntity implements Serializable {
     private static final Long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

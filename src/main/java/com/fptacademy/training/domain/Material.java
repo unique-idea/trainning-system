@@ -3,17 +3,28 @@ package com.fptacademy.training.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.time.Instant;
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Setter
 @Getter
-@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(name = "materials")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -30,13 +41,11 @@ public class Material implements Serializable {
   private String fileUrl;
 
   @CreatedBy
-  @JsonIgnore
   @JoinColumn(name = "created_by")
   @ManyToOne
   private User createdBy;
 
   @CreatedDate
-  @JsonIgnore
   private Instant createdAt;
 
   @ManyToOne
