@@ -59,38 +59,36 @@ public class SyllabusService {
 
   @Transactional(readOnly = true)
   public Page<SyllabusListDto> findAll(Specification<Syllabus> spec, Pageable pageable) {
-    TypeMap<Syllabus, SyllabusListDto> typeMap = modelMapper.getTypeMap(Syllabus.class, SyllabusListDto.class);
-    if (typeMap == null) {
-      typeMap =
-      modelMapper
-          .createTypeMap(Syllabus.class, SyllabusListDto.class)
-          .addMappings(mapper -> {
-            mapper.map(src -> src.getCreatedBy().getCode(), SyllabusListDto::setCreatedBy);
-            mapper
-              .using(
-                (Converter<List<Session>, List<OutputStandard>>) ctx ->
-                  ctx
-                    .getSource()
-                    .stream()
-                    .flatMap(session -> session.getUnits().stream())
-                    .flatMap(unit -> unit.getLessons().stream())
-                    .map(Lesson::getOutputStandard)
-                    .distinct()
-                    .toList()
-              )
-              .map(Syllabus::getSessions, SyllabusListDto::setOutputStandard);
-            // mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(Syllabus::getSessions, SyllabusListDto::setDuration);
-            // mapper.skip(SyllabusListDto::setStatus);
-            // mapper.when(ctx -> Objects.nonNull(ctx.getSource())).map(Syllabus::getStatus, SyllabusListDto::setStatus);
-            // new PropertyMap<Syllabus, SyllabusListDto>() {
-            //   @Override
-            //   protected void configure() {
-            //     skip(destination.getStatus());
-            //   }
-            // };
-          });
-    }
-    return syllabusRepository.findAll(spec, pageable).map(s -> modelMapper.map(s, SyllabusListDto.class));
+    ModelMapper map = new ModelMapper();
+    map
+      .createTypeMap(Syllabus.class, SyllabusListDto.class)
+      .addMappings(mapper -> {
+        mapper.map(src -> src.getCreatedBy().getCode(), SyllabusListDto::setCreatedBy);
+        mapper
+          .using(
+            (Converter<List<Session>, List<OutputStandard>>) ctx ->
+              ctx
+                .getSource()
+                .stream()
+                .flatMap(session -> session.getUnits().stream())
+                .flatMap(unit -> unit.getLessons().stream())
+                .map(Lesson::getOutputStandard)
+                .distinct()
+                .toList()
+          )
+          .map(Syllabus::getSessions, SyllabusListDto::setOutputStandard);
+        // mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(Syllabus::getSessions, SyllabusListDto::setDuration);
+        // mapper.skip(SyllabusListDto::setStatus);
+        // mapper.when(ctx -> Objects.nonNull(ctx.getSource())).map(Syllabus::getStatus, SyllabusListDto::setStatus);
+        // new PropertyMap<Syllabus, SyllabusListDto>() {
+        //   @Override
+        //   protected void configure() {
+        //     skip(destination.getStatus());
+        //   }
+        // };
+      });
+
+    return syllabusRepository.findAll(spec, pageable).map(s -> map.map(s, SyllabusListDto.class));
   }
 
   public SyllabusDetailDto save(SyllabusDetailDto syllabusDetailDto) {

@@ -7,7 +7,9 @@ import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -67,7 +69,8 @@ public interface ClassResource {
     })
     @GetMapping
     public ResponseEntity<ClassListResponseVM> filterClass(
-            @RequestParam(value = "q", required = false) List<String> keywords,
+            @Parameter(description = "Input any keywords for searching the list of classes")
+            @RequestParam(value = "keywords", required = false) List<String> keywords,
             @RequestParam(name = "from", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(name = "to", required = false)
@@ -78,6 +81,13 @@ public interface ClassResource {
             @RequestParam(name = "attendee", required = false) List<String> attendeeTypes,
             @RequestParam(name = "fsu", required = false) String fsu,
             @RequestParam(name = "trainer", required = false) String trainerCode,
+            @Parameter(
+                    description = "Sort string in the format: property,(asc|desc), can just sort with one " +
+                    "criteria. " +
+                    "Property in sort string includes: \"id\", \"name\", \"code\", \"createdOn\", \"createdBy\", " +
+                    "\"duration\", \"attendee\", \"location\", \"fsu\""
+            )
+            @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     );

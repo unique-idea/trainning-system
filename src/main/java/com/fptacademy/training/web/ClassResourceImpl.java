@@ -72,6 +72,7 @@ public class ClassResourceImpl implements ClassResource {
                                                       List<String> attendeeTypes,
                                                       String fsu,
                                                       String trainerCode,
+                                                      String sort,
                                                       int page, int size) {
         List<ClassDto> classDtos = classService.filterClass(
                 keywords, from, to,
@@ -80,7 +81,8 @@ public class ClassResourceImpl implements ClassResource {
                 statuses,
                 attendeeTypes,
                 fsu,
-                trainerCode);
+                trainerCode,
+                sort);
         List<ClassDto> result;
         int totalElements = classDtos.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);

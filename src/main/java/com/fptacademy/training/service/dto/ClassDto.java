@@ -29,6 +29,7 @@ public class ClassDto implements Serializable{
     public static class Creator {
         private Long id;
         private String name;
+        private String code;
     }
 
     @Getter
