@@ -24,7 +24,7 @@ import java.util.List;
 public interface ClassScheduleResource {
 
     @Operation(
-            summary = "Get all active class schedule by date",
+            summary = "Get all opening class schedule by date",
             description = "Get class schedule by date",
             tags = "class schedule",
             security = @SecurityRequirement(name = "token_auth")
@@ -42,7 +42,7 @@ public interface ClassScheduleResource {
 
 
     @Operation(
-            summary = "Get all active class schedule by week",
+            summary = "Get all opening class schedule by week",
             description = "Get class schedule of user by date",
             tags = "class schedule",
             security = @SecurityRequirement(name = "token_auth")
@@ -59,7 +59,7 @@ public interface ClassScheduleResource {
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
     @Operation(
-            summary = "Get all active class schedule of user by date",
+            summary = "Get all opening class schedule of user by date",
             description = "Get class schedule of user by date",
             tags = "class schedule",
             security = @SecurityRequirement(name = "token_auth")
@@ -76,7 +76,7 @@ public interface ClassScheduleResource {
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
 
     @Operation(
-            summary = "Get all active class schedule of user by week",
+            summary = "Get all opening class schedule of user by week",
             description = "Get class schedule of user by date",
             tags = "class schedule",
             security = @SecurityRequirement(name = "token_auth")

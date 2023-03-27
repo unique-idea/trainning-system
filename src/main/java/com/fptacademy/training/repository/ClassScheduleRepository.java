@@ -14,7 +14,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     @Query(value = " SELECT cs.* FROM class_schedules cs " +
             " INNER JOIN class_details cd " +
             " ON cs.class_detail_id = cd.id " +
-            " AND cd.status = 'ACTIVE' " +
+            " AND cd.status = 'OPENING' " +
             " AND cs.study_date = ?1 ", nativeQuery = true)
     List<ClassSchedule> findActiveClassByStudyDate(LocalDate date);
 
@@ -24,7 +24,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " FROM user_class_detail ucd " +
             " INNER JOIN class_details cd " +
             " ON ucd.class_detail_id = cd.id " +
-            " AND cd.status = 'ACTIVE') as t " +
+            " AND cd.status = 'OPENING') as t " +
             " ON cs.class_detail_id = t.class_detail_id " +
             " AND t.user_id = ?1 " +
             " AND cs.study_date = ?2 ", nativeQuery = true)
@@ -36,7 +36,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " FROM user_class_detail ucd " +
             " INNER JOIN class_details cd " +
             " ON ucd.class_detail_id = cd.id " +
-            " AND cd.status = 'ACTIVE') as t " +
+            " AND cd.status = 'OPENING') as t " +
             " ON cs.class_detail_id = t.class_detail_id " +
             " AND t.user_id = ?1 " +
             " AND (cs.study_date BETWEEN ?2 AND ?3) " +
@@ -46,7 +46,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     @Query(value = " SELECT cs.* FROM class_schedules cs " +
             " INNER JOIN class_details cd " +
             " ON cs.class_detail_id = cd.id " +
-            " AND cd.status = 'ACTIVE' " +
+            " AND cd.status = 'OPENING' " +
             " AND (cs.study_date BETWEEN ?1 AND ?2) " +
             " ORDER BY cs.study_date", nativeQuery = true)
     List<ClassSchedule> findActiveClassByStudyDateBetween(LocalDate startDate, LocalDate endDate);
