@@ -126,7 +126,7 @@ public class SyllabusService {
           .createTypeMap(SyllabusDetailDto.class, Syllabus.class)
           .addMappings(mapper -> {
             mapper.skip(Syllabus::setSessions);
-            mapper.skip(Syllabus::setStatus);
+            // mapper.skip(Syllabus::setStatus);
             mapper.skip(Syllabus::setCreatedAt);
             mapper.skip(Syllabus::setLastModifiedAt);
             mapper.skip(Syllabus::setCode);
