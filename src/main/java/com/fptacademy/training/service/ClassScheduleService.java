@@ -94,10 +94,9 @@ public class ClassScheduleService {
                                                               LocalDate date) {
         DayOfWeek firstDayOfWeek = DayOfWeek.MONDAY;
         LocalDate firstDayOfCurrentWeek = date
-                .with(firstDayOfWeek)
                 .minusDays(date.getDayOfWeek()
                         .getValue() - firstDayOfWeek.getValue()
-                ).plusDays(1);
+                );
         log.debug("First day of week is: {}", firstDayOfCurrentWeek);
         LocalDate endDayOfCurrentWeek = firstDayOfCurrentWeek.plusDays(6);
         log.debug("End day of week is: {}", endDayOfCurrentWeek);
@@ -109,10 +108,9 @@ public class ClassScheduleService {
 
         DayOfWeek firstDayOfWeek = DayOfWeek.MONDAY;
         LocalDate firstDayOfCurrentWeek = date
-                .with(firstDayOfWeek)
                 .minusDays(date.getDayOfWeek()
                         .getValue() - firstDayOfWeek.getValue()
-                ).plusDays(1);
+                );
         log.debug("First day of week is: {}", firstDayOfCurrentWeek);
         LocalDate endDayOfCurrentWeek = firstDayOfCurrentWeek.plusDays(6);
         log.debug("End day of week is: {}", endDayOfCurrentWeek);
