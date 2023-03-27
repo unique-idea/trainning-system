@@ -242,7 +242,7 @@ public class ClassService {
         return classDetailMapper.toDto(findingClassDetail);
     }
 
-    public List<ClassDetailDto> getDetailsByStudy_Date(LocalDate date) {
+    public List<ClassDetailDto> getDetailsByStudyDate(LocalDate date) {
         List<ClassDetail> classDetailList = classDetailRepository.findActiveClassByStudyDateAndStatus(date);
         return classDetailMapper.toDtos(classDetailList);
     }

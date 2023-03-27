@@ -210,8 +210,21 @@ public interface ClassResource {
     @GetMapping("/locations")
     public ResponseEntity<List<LocationDto>> getAllLocations();
 
-    @GetMapping("/study_date")
-    public ResponseEntity<List<ClassDetailDto>> getAllClassesByStudy_Date(@RequestParam LocalDate date);
+    @Operation(
+            summary = "Get list of class details by date",
+            description = "Get list of class details by date",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find list of class details by study date successfully")
+    })
+    @GetMapping("/details")
+    public ResponseEntity<List<ClassDetailDto>> getAllClassesDetailsByStudyDate (
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(name = "studyDate", required = true) LocalDate date);
 
     @Operation(
             summary = "Update an existing class",

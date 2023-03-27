@@ -145,10 +145,10 @@ public class ClassResourceImpl implements ClassResource {
     }
 
     @Override
-    public ResponseEntity<List<ClassDetailDto>> getAllClassesByStudy_Date(LocalDate date){
+    public ResponseEntity<List<ClassDetailDto>> getAllClassesDetailsByStudyDate(LocalDate date){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(classService.getDetailsByStudy_Date(date));
+                .body(classService.getDetailsByStudyDate(date));
     }
 
     @Override
