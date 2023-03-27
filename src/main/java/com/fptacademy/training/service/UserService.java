@@ -147,13 +147,12 @@ public class UserService {
         user.get().setRole(role);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getCurrentUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof User) {
-                return (User) authentication.getPrincipal();
+                return (User) principal;
             }
         }
         throw new UsernameNotFoundException("Something went wrong, can not get current logged in user");
