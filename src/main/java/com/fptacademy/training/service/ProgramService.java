@@ -271,7 +271,7 @@ public class ProgramService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
         program.setActivated(true);
-        programRepository.saveAndFlush(program);
+        programRepository.save(program);
         return programMapper.toDto(program);
     }
 
@@ -294,6 +294,7 @@ public class ProgramService {
         if(!isDeactivatable(id))
             throw new ResourceBadRequestException("Cannot deactivate this training program because there are on-going classes depend on this program");
         program.setActivated(false);
+        programRepository.save(program);
         return program;
     }
 
@@ -313,7 +314,7 @@ public class ProgramService {
                 })
                 .toList());
         p.setSyllabuses(syllabuses);
-        programRepository.saveAndFlush(p);
+        programRepository.save(p);
         return programMapper.toDto(p);
     }
 
