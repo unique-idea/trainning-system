@@ -242,6 +242,11 @@ public class ClassService {
         return classDetailMapper.toDto(findingClassDetail);
     }
 
+    public List<ClassDetailDto> getDetailsByStudy_Date(LocalDate date) {
+        List<ClassDetail> classDetailList = classDetailRepository.findActiveClassByStudyDateAndStatus(date);
+        return classDetailMapper.toDtos(classDetailList);
+    }
+
     public void deleteClass(Long id) {
         Class classInfo = classRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Class ID " + id + " not found"));

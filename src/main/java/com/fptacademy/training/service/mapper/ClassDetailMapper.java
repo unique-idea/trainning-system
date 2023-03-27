@@ -125,4 +125,8 @@ public class ClassDetailMapper {
         return dto;
     }
 
+    public List<ClassDetailDto> toDtos(List<ClassDetail> classDetails) {
+        return classDetails.stream().map(this::toDto).toList();
+    }
+
 }

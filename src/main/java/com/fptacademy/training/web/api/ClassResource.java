@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
@@ -208,6 +209,9 @@ public interface ClassResource {
     })
     @GetMapping("/locations")
     public ResponseEntity<List<LocationDto>> getAllLocations();
+
+    @GetMapping("/study_date")
+    public ResponseEntity<List<ClassDetailDto>> getAllClassesByStudy_Date(@RequestParam LocalDate date);
 
     @Operation(
             summary = "Update an existing class",
