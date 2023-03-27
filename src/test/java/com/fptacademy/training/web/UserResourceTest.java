@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -88,4 +89,32 @@ public class UserResourceTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
+    @Test
+    void testGetUserByIdMustReturnOk() throws Exception {
+        Long id = 2L;
+
+        //Will replace value with new database for testing
+        User user = User.builder()
+                .fullName("Tran Huu Tria")
+                .email("tri@gmail.com").
+                code("1234").
+                password("12345").
+                gender(Boolean.TRUE).
+                role(Role.builder().name("Class Admin").build()).
+                activated(Boolean.TRUE).
+                level(Level.builder().name("Intermediate").build()).
+                status(UserStatus.INACTIVE).
+                avatarUrl("http://image")
+                .build();
+
+        UserDto userDto = userMapper.toDto(user);
+        when(userService.getUserById(id)).thenReturn(userDto);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/api/user/id/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
 }
