@@ -7,21 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import com.fptacademy.training.domain.Role;
-import com.fptacademy.training.domain.User;
-import com.fptacademy.training.domain.enumeration.UserStatus;
-import com.fptacademy.training.exception.ResourceAlreadyExistsException;
-import com.fptacademy.training.exception.ResourceBadRequestException;
-import com.fptacademy.training.exception.ResourceNotFoundException;
-import com.fptacademy.training.repository.UserRepository;
-import com.fptacademy.training.service.dto.UserDto;
-import com.fptacademy.training.service.mapper.UserMapper;
-import com.fptacademy.training.service.util.ExcelExportUtils;
-import com.fptacademy.training.service.util.ExcelUploadService;
-import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
-import com.fptacademy.training.web.vm.UserVM;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +29,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
+import com.fptacademy.training.domain.Role;
+import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.enumeration.UserStatus;
+import com.fptacademy.training.exception.ResourceAlreadyExistsException;
+import com.fptacademy.training.exception.ResourceBadRequestException;
+import com.fptacademy.training.exception.ResourceNotFoundException;
+import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.service.dto.ListUsersDto;
+import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.service.mapper.UserMapper;
+import com.fptacademy.training.service.util.ExcelExportUtils;
+import com.fptacademy.training.service.util.ExcelUploadService;
+import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
+import com.fptacademy.training.web.vm.UserVM;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
@@ -186,7 +189,7 @@ public class UserService {
         return localDate;
     }
 
-    public List<UserDto> getUsersByFilters(String email, String fullName, String code,
+    public ListUsersDto getUsersByFilters(String email, String fullName, String code,
             String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo,
             String status, String sort, Integer pageNumber, Integer pageSize) {
         LocalDate birthdayFromDate = parseDate(birthdayFrom);
@@ -219,7 +222,8 @@ public class UserService {
 
         Page<User> page = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated,
                 birthdayFromDate, birthdayToDate, status, pageable);
-        return userMapper.toDtos(page.toList());
+
+        return userMapper.toListUsersDto(page);
     }
 
     public List<UserDto> importUsersToDB(MultipartFile file) {

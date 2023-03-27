@@ -81,7 +81,8 @@ public class UserServiceTest {
     @Test
     void shouldCalledFindByFiltersCorrect_whenUseGetUsersByFiltersService() {
         Random rd = new Random();
-
+        
+        // Declare 
         ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class),
                 fullNameCaptor = ArgumentCaptor.forClass(String.class),
                 codeCaptor = ArgumentCaptor.forClass(String.class),
@@ -93,6 +94,7 @@ public class UserServiceTest {
         ArgumentCaptor<LocalDate> birthdayToCaptor = ArgumentCaptor.forClass(LocalDate.class);
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
+        // Given
         final String email = rd.nextBoolean() ? "Gmail" : null,
                 fullName = rd.nextBoolean() ? "Nguyen Van A" : null,
                 code = rd.nextBoolean() ? "USER001" : null,
@@ -112,17 +114,19 @@ public class UserServiceTest {
         final String sortProperty = sort.split(",")[0];
         final Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortProperty));
 
+        // When
         when(userRepository.findByFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(Page.empty());
         userService.getUsersByFilters(email, fullName, code, levelName, roleName, activated, birthdayFrom, birthdayTo,
                 status, "id,asc", 0, 10);
 
+        // Then
         verify(userRepository).findByFilters(emailCaptor.capture(), fullNameCaptor.capture(),
                 codeCaptor.capture(), levelNameCaptor.capture(),
                 roleNameCaptor.capture(), activatedCaptor.capture(),
                 birthdayFromCaptor.capture(), birthdayToCaptor.capture(),
                 statusCaptor.capture(), pageableCaptor.capture());
-
+        
         assertEquals(email, emailCaptor.getValue());
         assertEquals(fullName, fullNameCaptor.getValue());
         assertEquals(code, codeCaptor.getValue());
