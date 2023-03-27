@@ -42,6 +42,12 @@ import java.util.stream.Collectors;
 @AutoConfigureMockMvc
 @IntegrationTest
 public class ProgramResourceIT {
+    private String accessToken;
+    private final String DEFAULT_PROGRAM_NAME = "Test Program";
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+    @Autowired
+    private MockMvc mockMvc;
     @Autowired
     private SyllabusRepository syllabusRepository;
     @Autowired
@@ -52,12 +58,6 @@ public class ProgramResourceIT {
     private RoleRepository roleRepository;
     @Autowired
     private ClassRepository classRepository;
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-    @Autowired
-    private MockMvc mockMvc;
-    private String accessToken;
-    private final String DEFAULT_PROGRAM_NAME = "Test Program";
 
     @BeforeEach
     void setup() {
@@ -78,11 +78,12 @@ public class ProgramResourceIT {
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
+
     @Test
     void testCreateProgram() throws Exception {
         List<Syllabus> syllabuses = List.of(
-                SyllabusFactory.createDummySyllabus(),
-                SyllabusFactory.createDummySyllabus());
+                SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
         SecurityContextHolder.clearContext();
         List<Long> syllabusIds = syllabuses.stream().mapToLong(Syllabus::getId).boxed().toList();
@@ -180,7 +181,8 @@ public class ProgramResourceIT {
 
     @Test
     void testCreateProgramsByImportingExcel() throws Exception {
-        List<Syllabus> syllabuses = List.of(SyllabusFactory.createDummySyllabus(), SyllabusFactory.createDummySyllabus());
+        List<Syllabus> syllabuses = List.of(SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
         SecurityContextHolder.clearContext();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -370,8 +372,8 @@ public class ProgramResourceIT {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
         programRepository.saveAndFlush(program);
-        List<Syllabus> syllabusList = List.of(SyllabusFactory.createDummySyllabus(),
-                SyllabusFactory.createDummySyllabus());
+        List<Syllabus> syllabusList = List.of(SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabusList);
         SecurityContextHolder.clearContext();
         List<Long> syllabusIds = syllabusList.stream().mapToLong(Syllabus::getId).boxed().toList();
@@ -433,5 +435,4 @@ public class ProgramResourceIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
-
 }
