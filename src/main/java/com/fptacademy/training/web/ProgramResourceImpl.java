@@ -2,7 +2,6 @@ package com.fptacademy.training.web;
 
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.ProgramService;
-import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
@@ -31,10 +30,9 @@ import java.util.List;
 @RestController
 public class ProgramResourceImpl implements ProgramResource {
     private final ProgramService programService;
-    private final SyllabusService syllabusService;
+    private final ProgramMapper programMapper;
     private final ResourceLoader resourceLoader;
 
-    private final ProgramMapper programMapper;
     @Override
     public ResponseEntity<ProgramDto> createProgram(ProgramVM programVM) {
         return ResponseEntity
@@ -82,11 +80,11 @@ public class ProgramResourceImpl implements ProgramResource {
 
     @Override
     public ResponseEntity<List<SyllabusDto.SyllabusListDto>> getSyllabusesByProgramId(Long id) {
-        List<SyllabusDto.SyllabusListDto> syllabusDtos = programService.findSyllabusesByProgramId(id);
+        List<SyllabusDto.SyllabusListDto> syllabusDTOs = programService.findSyllabusesByProgramId(id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(syllabusDtos);
+                .body(syllabusDTOs);
     }
 
     @Override
