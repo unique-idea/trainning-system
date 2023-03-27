@@ -79,8 +79,12 @@ public class ClassDetailMapper {
             List<ClassDetailDto.ScheduleSimplified> simpleSchedules = new ArrayList<>();
 
             for(ClassSchedule schedule : schedules) {
+                Long syllabusId = schedule.getSession().getSyllabus().getId();
+                String syllabusName = schedule.getSession().getSyllabus().getName();
                 ClassDetailDto.ScheduleSimplified simpleSchedule = new ClassDetailDto.ScheduleSimplified (
                         schedule.getStudyDate(),
+                        syllabusId,
+                        syllabusName,
                         schedule.getSession().getUnits().stream().map(u -> new ClassDetailDto.UnitSimplified(
                                 u.getId(),
                                 u.getIndex(),
@@ -123,6 +127,10 @@ public class ClassDetailMapper {
         }
 
         return dto;
+    }
+
+    public List<ClassDetailDto> toDtos(List<ClassDetail> classDetails) {
+        return classDetails.stream().map(this::toDto).toList();
     }
 
 }

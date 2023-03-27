@@ -84,6 +84,8 @@ public class ClassDetailDto implements Serializable{
     @NoArgsConstructor
     public static class ScheduleSimplified{
         private LocalDate study_date;
+        private Long syllabusId;
+        private String syllabusName;
         private List<UnitSimplified> units;
     }
 

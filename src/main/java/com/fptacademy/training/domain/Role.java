@@ -1,6 +1,7 @@
 package com.fptacademy.training.domain;
 
 import com.fptacademy.training.service.util.ListToStringConverter;
+
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,10 +11,10 @@ import java.util.List;
 
 @Setter
 @Getter
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 @Table(name = "roles")
 @Entity
 public class Role implements Serializable {

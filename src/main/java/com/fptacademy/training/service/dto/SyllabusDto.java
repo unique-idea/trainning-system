@@ -34,9 +34,6 @@ public class SyllabusDto {
     private String code;
     private Integer attendeeNumber;
     private SyllabusStatus status;
-    private String technicalRequirement;
-    private String courseObjective;
-    private TrainingPrinciple trainingPrinciple;
     private Instant createdAt;
     private String createdBy;
     private Integer duration;

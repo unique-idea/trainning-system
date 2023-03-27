@@ -1,7 +1,26 @@
 package com.fptacademy.training.service;
 
-import com.fptacademy.training.domain.Class;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
+import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.repository.ClassRepository;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.Program;
 import com.fptacademy.training.domain.Syllabus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
@@ -15,28 +34,18 @@ import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.service.mapper.SyllabusMapper;
 import com.fptacademy.training.web.vm.ProgramVM;
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.security.access.prepost.PostFilter;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 @Transactional
 public class ProgramService {
+    private final SyllabusMapper syllabusMapper;
+    private final ProgramMapper programMapper;
     private final ProgramRepository programRepository;
     private final SyllabusRepository syllabusRepository;
-    private final ProgramMapper programMapper;
     private final ClassRepository classRepository;
-    private final SyllabusMapper syllabusMapper;
 
     public ProgramDto createProgram(ProgramVM programVM) {
         // Check if program name already existed or not
@@ -46,12 +55,18 @@ public class ProgramService {
         // Create new program
         Program program = new Program();
         program.setName(programVM.name());
-        // Add list of syllabuses to program
+        // Add list of syllabuses to program (only activated syllabuses)
         List<Syllabus> syllabuses = programVM.syllabusIds()
                 .stream()
-                .map(id -> syllabusRepository
-                        .findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
+                .map(id -> {
+                    Syllabus s = syllabusRepository
+                            .findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found"));
+                    if (s.getStatus() != SyllabusStatus.ACTIVATED) {
+                        throw new ResourceBadRequestException("Syllabus with ID '" + id + "' is not activated");
+                    }
+                    return s;
+                })
                 .toList();
         program.setSyllabuses(syllabuses);
         // Save program
@@ -101,7 +116,7 @@ public class ProgramService {
         List<ProgramDto> programDtos = new ArrayList<>(programMapper.toDtos(programs));
 
         // Sort the list
-        String[] a = sort.split(",");
+        String[] a = sort.split(","); 
         if (a.length != 2) {
             throw new ResourceBadRequestException("Invalid parameter for sort");
         }
@@ -192,9 +207,15 @@ public class ProgramService {
                     continue;
                 }
                 List<Syllabus> syllabuses = Arrays.stream(syllabusCodes.split(","))
-                        .map(code -> syllabusRepository
-                                .findByCode(code)
-                                .orElseThrow(() -> new ResourceNotFoundException("Syllabus with code '" + code + "' not found")))
+                        .map(code -> {
+                            Syllabus s = syllabusRepository
+                                    .findByCode(code)
+                                    .orElseThrow(() -> new ResourceNotFoundException("Syllabus with code '" + code + "' not found"));
+                            if (s.getStatus() != SyllabusStatus.ACTIVATED) {
+                                throw new ResourceBadRequestException("Syllabus with code '" + code + "' is not activated");
+                            }
+                            return s;
+                        })
                         .toList();
                 program.setSyllabuses(syllabuses);
                 program.setActivated(row.getCell(3).getBooleanCellValue());
@@ -250,7 +271,7 @@ public class ProgramService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
         program.setActivated(true);
-        programRepository.saveAndFlush(program);
+        programRepository.save(program);
         return programMapper.toDto(program);
     }
 
@@ -273,6 +294,7 @@ public class ProgramService {
         if(!isDeactivatable(id))
             throw new ResourceBadRequestException("Cannot deactivate this training program because there are on-going classes depend on this program");
         program.setActivated(false);
+        programRepository.save(program);
         return program;
     }
 
@@ -281,12 +303,18 @@ public class ProgramService {
         p.setName(programVM.name());
         List<Syllabus> syllabuses = new ArrayList<>(programVM.syllabusIds()
                 .stream()
-                .map(syllabusId -> syllabusRepository
-                        .findById(syllabusId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + syllabusId + " not found")))
+                .map(syllabusId -> {
+                    Syllabus s = syllabusRepository
+                            .findById(syllabusId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID '" + syllabusId + "' not found"));
+                    if (s.getStatus() != SyllabusStatus.ACTIVATED) {
+                        throw new ResourceBadRequestException("Syllabus with ID '" + syllabusId + "' is not activated");
+                    }
+                    return s;
+                })
                 .toList());
         p.setSyllabuses(syllabuses);
-        programRepository.saveAndFlush(p);
+        programRepository.save(p);
         return programMapper.toDto(p);
     }
 

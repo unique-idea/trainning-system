@@ -1,14 +1,11 @@
 package com.fptacademy.training.service.dto;
+import java.io.Serializable;
+import java.time.Instant;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.io.Serializable;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.util.Date;
 
 
 @Getter
@@ -32,6 +29,7 @@ public class ClassDto implements Serializable{
     public static class Creator {
         private Long id;
         private String name;
+        private String code;
     }
 
     @Getter

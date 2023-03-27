@@ -1,15 +1,15 @@
 package com.fptacademy.training.service.mapper;
 
-import com.fptacademy.training.domain.Class;
-import com.fptacademy.training.domain.ClassDetail;
-import com.fptacademy.training.repository.SyllabusRepository;
-import com.fptacademy.training.service.dto.ClassDto;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fptacademy.training.domain.Class;
+import com.fptacademy.training.domain.ClassDetail;
+import com.fptacademy.training.service.dto.ClassDto;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
@@ -26,8 +26,12 @@ public class ClassMapper {
 
         dto.setStatus(classes.getClassDetail().getStatus());
         dto.setCreated_by(classes.getCreatedBy() == null? null :
-                new ClassDto.Creator(classes.getCreatedBy().getId(),
-                        classes.getCreatedBy().getFullName()));
+                new ClassDto.Creator(
+                        classes.getCreatedBy().getId(),
+                        classes.getCreatedBy().getFullName(),
+                        classes.getCreatedBy().getCode()
+                )
+        );
 
         if(classes.getClassDetail() != null){
 
