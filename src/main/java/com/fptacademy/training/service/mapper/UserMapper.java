@@ -1,18 +1,22 @@
 package com.fptacademy.training.service.mapper;
 
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.RoleService;
+import com.fptacademy.training.service.dto.ListUsersDto;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.UserVM;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
@@ -51,4 +55,16 @@ public class UserMapper {
         return users.stream().map(this::toDto).toList();
     }
 
+    public ListUsersDto toListUsersDto(Page<User> users){
+        ListUsersDto listUsersDto = new ListUsersDto();
+
+        listUsersDto.setTotalPages(users.getTotalPages());
+        listUsersDto.setTotalElements(users.getTotalElements());
+        listUsersDto.setSize(users.getSize());
+        listUsersDto.setPage(users.getNumber());
+
+        listUsersDto.setUsers(toDtos(users.toList()));
+
+        return listUsersDto;
+    }
 }
