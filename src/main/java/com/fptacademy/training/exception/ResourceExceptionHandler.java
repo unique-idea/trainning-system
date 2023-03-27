@@ -1,5 +1,6 @@
 package com.fptacademy.training.exception;
 
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -14,6 +15,7 @@ import org.zalando.problem.spring.web.advice.ProblemHandling;
 import java.time.Instant;
 
 @RestControllerAdvice
+@SuppressWarnings("unused")
 public class ResourceExceptionHandler implements ProblemHandling {
     @ExceptionHandler
     public ResponseEntity<Problem> handleAuthenticationException(AuthenticationException e, NativeWebRequest request) {
@@ -25,6 +27,7 @@ public class ResourceExceptionHandler implements ProblemHandling {
                 .build();
         return create(problem, request);
     }
+
     @ExceptionHandler
     public ResponseEntity<Problem> handleAccessDeniedException(AccessDeniedException e, NativeWebRequest request) {
         ThrowableProblem problem = Problem.builder()
@@ -46,6 +49,7 @@ public class ResourceExceptionHandler implements ProblemHandling {
                 .build();
         return create(problem, request);
     }
+
     @ExceptionHandler
     public ResponseEntity<Problem> handleResourceAlreadyExistsException(ResourceAlreadyExistsException e, NativeWebRequest request) {
         ThrowableProblem problem = Problem.builder()
@@ -63,6 +67,17 @@ public class ResourceExceptionHandler implements ProblemHandling {
                 .with("timestamp", Instant.now())
                 .with("error", Status.BAD_REQUEST.getReasonPhrase())
                 .withStatus(Status.BAD_REQUEST)
+                .withDetail(e.getMessage())
+                .build();
+        return create(problem, request);
+    }
+
+    @ExceptionHandler({FileSizeLimitExceededException.class})
+    public ResponseEntity<Problem> handleFileSizeLimitExceededException(Exception e, NativeWebRequest request) {
+        ThrowableProblem problem = Problem.builder()
+                .with("timestamp", Instant.now())
+                .with("error", Status.BANDWIDTH_LIMIT_EXCEEDED.getReasonPhrase())
+                .withStatus(Status.BANDWIDTH_LIMIT_EXCEEDED)
                 .withDetail(e.getMessage())
                 .build();
         return create(problem, request);
