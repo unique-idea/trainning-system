@@ -22,8 +22,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -58,7 +57,7 @@ class ClassScheduleServiceTest {
         //given
         List<ClassSchedule> classScheduleList = new ArrayList<>();
         classScheduleList.add(classSchedule);
-        given(classScheduleRepository.findActiveClassByStudyDate(any(LocalDate.class), any(ClassStatus.class)))
+        given(classScheduleRepository.findActiveClassByStudyDate(any(LocalDate.class), anyString()))
                 .willReturn(classScheduleList);
         //when
         List<ClassSchedule> result = classScheduleService
@@ -68,7 +67,7 @@ class ClassScheduleServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
 
-        verify(classScheduleRepository).findActiveClassByStudyDate(any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository).findActiveClassByStudyDate(any(LocalDate.class), anyString());
     }
 
     @Test
@@ -84,7 +83,7 @@ class ClassScheduleServiceTest {
                 .isInstanceOf(ResourceBadRequestException.class)
         ;
 
-        verify(classScheduleRepository, never()).findActiveClassByStudyDate(any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository, never()).findActiveClassByStudyDate(any(LocalDate.class), anyString());
     }
 
     @Test
@@ -92,7 +91,7 @@ class ClassScheduleServiceTest {
     void getClassScheduleByDateShouldThrowException2() {
         //given
         List<ClassSchedule> classScheduleList = new ArrayList<>();
-        given(classScheduleRepository.findActiveClassByStudyDate(LocalDate.of(2023, 3, 10), ClassStatus.OPENNING))
+        given(classScheduleRepository.findActiveClassByStudyDate(LocalDate.of(2023, 3, 10), ClassStatus.OPENNING.toString()))
                 .willReturn(classScheduleList);
         //when
         //then
@@ -102,7 +101,7 @@ class ClassScheduleServiceTest {
                 .hasMessage("There are no class at date " + LocalDate.of(2023, 3, 10))
                 .isInstanceOf(ResourceNotFoundException.class)
         ;
-        verify(classScheduleRepository).findActiveClassByStudyDate(any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository).findActiveClassByStudyDate(any(LocalDate.class), anyString());
     }
 
     @Test
@@ -159,14 +158,14 @@ class ClassScheduleServiceTest {
         //given
         List<ClassSchedule> classSchedules = new ArrayList<>();
         classSchedules.add(classSchedule);
-        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), any(ClassStatus.class)))
+        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
                 .willReturn(classSchedules);
         //when
         List<ClassSchedule> result = classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), 1L);
         //then
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), any(ClassStatus.class))
+        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
         ;
     }
 
@@ -175,7 +174,7 @@ class ClassScheduleServiceTest {
     void getClassScheduleOfAUserByDateShouldThrowException1() {
         //given
         List<ClassSchedule> classSchedules = new ArrayList<>();
-        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), any(ClassStatus.class)))
+        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
                 .willReturn(classSchedules);
         //when
         //then
@@ -185,7 +184,7 @@ class ClassScheduleServiceTest {
                 .hasMessage("There are no class at date " + LocalDate.of(2022, 3, 3)
                         + " of user 1")
                 .isInstanceOf(ResourceNotFoundException.class);
-        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), any(ClassStatus.class))
+        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
         ;
     }
 
@@ -206,7 +205,7 @@ class ClassScheduleServiceTest {
                 .hasMessage("Bad request for date and userId value")
                 .isInstanceOf(ResourceBadRequestException.class);
 
-        verify(classScheduleRepository, never()).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository, never()).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString());
     }
 
     @Test
@@ -216,7 +215,7 @@ class ClassScheduleServiceTest {
         List<ClassSchedule> classSchedules = new ArrayList<>();
         classSchedules.add(classSchedule);
         given(classScheduleRepository
-                .findActiveClassByUserIdAndStudyDateBetween(anyLong(), any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class)))
+                .findActiveClassByUserIdAndStudyDateBetween(anyLong(), any(LocalDate.class), any(LocalDate.class), anyString()))
                 .willReturn(classSchedules);
         //when
         List<ClassSchedule> result = classScheduleService.getClassScheduleOfAUserByDateBetween(
@@ -230,7 +229,7 @@ class ClassScheduleServiceTest {
                 anyLong(),
                 any(LocalDate.class),
                 any(LocalDate.class),
-                any(ClassStatus.class)
+                anyString()
         );
     }
 
@@ -240,7 +239,7 @@ class ClassScheduleServiceTest {
         //given
         List<ClassSchedule> classSchedules = new ArrayList<>();
         given(classScheduleRepository
-                .findActiveClassByUserIdAndStudyDateBetween(anyLong(), any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class)))
+                .findActiveClassByUserIdAndStudyDateBetween(anyLong(), any(LocalDate.class), any(LocalDate.class), anyString()))
                 .willReturn(classSchedules);
         //when
         //then
@@ -260,7 +259,7 @@ class ClassScheduleServiceTest {
                 anyLong(),
                 any(LocalDate.class),
                 any(LocalDate.class),
-                any(ClassStatus.class)
+                anyString()
         );
     }
 
@@ -283,7 +282,7 @@ class ClassScheduleServiceTest {
                 anyLong(),
                 any(LocalDate.class),
                 any(LocalDate.class),
-                any(ClassStatus.class)
+                anyString()
         );
     }
 
@@ -293,7 +292,7 @@ class ClassScheduleServiceTest {
         //given
         List<ClassSchedule> classSchedules = new ArrayList<>();
         classSchedules.add(classSchedule);
-        given(classScheduleRepository.findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class)))
+        given(classScheduleRepository.findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString()))
                 .willReturn(classSchedules);
         //when
         List<ClassSchedule> result = classScheduleService.getClassScheduleByDateBetween(
@@ -303,7 +302,7 @@ class ClassScheduleServiceTest {
         //then
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(classScheduleRepository).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString());
     }
 
     @Test
@@ -311,7 +310,7 @@ class ClassScheduleServiceTest {
     void getClassScheduleByDateBetweenShouldThrowException1() {
         //given
         List<ClassSchedule> classSchedules = new ArrayList<>();
-        given(classScheduleRepository.findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class)))
+        given(classScheduleRepository.findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString()))
                 .willReturn(classSchedules);
         //when
         //then
@@ -325,7 +324,7 @@ class ClassScheduleServiceTest {
                         + LocalDate.of(2023, 3, 10) + " and "
                         + LocalDate.of(2023, 3, 15))
                 .isInstanceOf(ResourceNotFoundException.class);
-        verify(classScheduleRepository).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString());
     }
 
     @Test
@@ -342,7 +341,7 @@ class ClassScheduleServiceTest {
         )
                 .hasMessage("Bad request")
                 .isInstanceOf(ResourceBadRequestException.class);
-        verify(classScheduleRepository, never()).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), any(ClassStatus.class));
+        verify(classScheduleRepository, never()).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString());
     }
 
     @Test
