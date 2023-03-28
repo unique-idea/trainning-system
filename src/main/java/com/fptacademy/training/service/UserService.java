@@ -183,7 +183,7 @@ public class UserService {
                 localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             } catch (Exception e) {
                 throw new ResourceBadRequestException(
-                        date + ": Date formatD is wrong. Please use yyyy-MM-dd format");
+                        date + ": Date format is wrong. Please use yyyy-MM-dd format");
             }
         return localDate;
     }

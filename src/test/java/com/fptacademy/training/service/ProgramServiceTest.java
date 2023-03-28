@@ -66,8 +66,8 @@ class ProgramServiceTest {
     }
     @Test
     void testCreateProgram() {
-        List<Syllabus> syllabuses = List.of(SyllabusFactory.createDummySyllabus(),
-                SyllabusFactory.createDummySyllabus());
+        List<Syllabus> syllabuses = List.of(SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, syllabuses.stream().map(Syllabus::getId).toList());
         ProgramDto programDTO = programService.createProgram(programVM);
