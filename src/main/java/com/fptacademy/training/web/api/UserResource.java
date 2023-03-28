@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fptacademy.training.service.dto.UserDto;
-import com.fptacademy.training.service.dto.ListUsersDto;
+import com.fptacademy.training.service.dto.ReturnPageDto;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
 
@@ -59,7 +59,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ListUsersDto> getUsers(
+    ResponseEntity<ReturnPageDto<List<UserDto>>> getUsers(
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "name", required = false) String fullName,
             @RequestParam(name = "code", required = false) String code,
