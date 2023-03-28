@@ -244,6 +244,7 @@ public class ProgramService {
                                 continue row_loop;
                             }
                             case "allow" -> {
+                                program.setId(null);
                                 newPrograms.add(program);
                                 continue row_loop;
                             }
