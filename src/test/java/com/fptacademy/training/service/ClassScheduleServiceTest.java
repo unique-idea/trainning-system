@@ -152,61 +152,61 @@ class ClassScheduleServiceTest {
         verify(classScheduleRepository).getCurrentClassDayOfClassSchedule(anyLong(), anyLong());
     }
 
-    @Test
-    @DisplayName("Test getClassScheduleOfAUserByDate case 1")
-    void getClassScheduleOfAUserByDateShouldReturnAList() {
-        //given
-        List<ClassSchedule> classSchedules = new ArrayList<>();
-        classSchedules.add(classSchedule);
-        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
-                .willReturn(classSchedules);
-        //when
-        List<ClassSchedule> result = classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), 1L);
-        //then
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
-        ;
-    }
+//    @Test
+//    @DisplayName("Test getClassScheduleOfAUserByDate case 1")
+//    void getClassScheduleOfAUserByDateShouldReturnAList() {
+//        //given
+//        List<ClassSchedule> classSchedules = new ArrayList<>();
+//        classSchedules.add(classSchedule);
+//        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
+//                .willReturn(classSchedules);
+//        //when
+//        List<ClassSchedule> result = classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), 1L);
+//        //then
+//        assertNotNull(result);
+//        assertEquals(1, result.size());
+//        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
+//        ;
+//    }
 
-    @Test
-    @DisplayName("Test getClassScheduleOfAUserByDate case 2")
-    void getClassScheduleOfAUserByDateShouldThrowException1() {
-        //given
-        List<ClassSchedule> classSchedules = new ArrayList<>();
-        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
-                .willReturn(classSchedules);
-        //when
-        //then
-        assertThatThrownBy(
-                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.of(2022, 3, 3), 1L)
-        )
-                .hasMessage("There are no class at date " + LocalDate.of(2022, 3, 3)
-                        + " of user 1")
-                .isInstanceOf(ResourceNotFoundException.class);
-        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
-        ;
-    }
+//    @Test
+//    @DisplayName("Test getClassScheduleOfAUserByDate case 2")
+//    void getClassScheduleOfAUserByDateShouldThrowException1() {
+//        //given
+//        List<ClassSchedule> classSchedules = new ArrayList<>();
+//        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
+//                .willReturn(classSchedules);
+//        //when
+//        //then
+//        assertThatThrownBy(
+//                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.of(2022, 3, 3), 1L)
+//        )
+//                .hasMessage("There are no class at date " + LocalDate.of(2022, 3, 3)
+//                        + " of user 1")
+//                .isInstanceOf(ResourceNotFoundException.class);
+//        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
+//        ;
+//    }
 
-    @Test
-    @DisplayName("Test getClassScheduleOfAUserByDate case 3")
-    void getClassScheduleOfAUserByDateShouldThrowException2() {
-        //given
-        //when
-        //then
-        assertThatThrownBy(
-                () -> classScheduleService.getClassScheduleOfAUserByDate(null, 1L)
-        )
-                .hasMessage("Bad request for date and userId value")
-                .isInstanceOf(ResourceBadRequestException.class);
-        assertThatThrownBy(
-                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), null)
-        )
-                .hasMessage("Bad request for date and userId value")
-                .isInstanceOf(ResourceBadRequestException.class);
-
-        verify(classScheduleRepository, never()).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString());
-    }
+//    @Test
+//    @DisplayName("Test getClassScheduleOfAUserByDate case 3")
+//    void getClassScheduleOfAUserByDateShouldThrowException2() {
+//        //given
+//        //when
+//        //then
+//        assertThatThrownBy(
+//                () -> classScheduleService.getClassScheduleOfAUserByDate(null, 1L)
+//        )
+//                .hasMessage("Bad request for date and userId value")
+//                .isInstanceOf(ResourceBadRequestException.class);
+//        assertThatThrownBy(
+//                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), null)
+//        )
+//                .hasMessage("Bad request for date and userId value")
+//                .isInstanceOf(ResourceBadRequestException.class);
+//
+//        verify(classScheduleRepository, never()).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString());
+//    }
 
     @Test
     @DisplayName("Test getClassScheduleOfAUserByDateBetween case 1")

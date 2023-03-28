@@ -78,9 +78,7 @@ public class ClassScheduleMapper {
     }
 
     public List<ReturnClassScheduleDto> toListReturnClassScheduleDto(List<ClassSchedule> classSchedules) {
-        if (classSchedules == null || classSchedules.isEmpty()) {
-            return null;
-        }
+
         List<ReturnClassScheduleDto> result = new ArrayList<>();
         classSchedules.forEach(
                 classScheduleTmp -> {
@@ -105,9 +103,6 @@ public class ClassScheduleMapper {
     }
 
     public List<ReturnUserDto> toListReturnUserDto(List<User> users) {
-        if (users == null) {
-            return null;
-        }
         List<ReturnUserDto> result = new ArrayList<>();
         users.forEach(
                 user -> {

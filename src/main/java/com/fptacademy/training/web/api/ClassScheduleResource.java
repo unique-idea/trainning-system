@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,8 +26,8 @@ public interface ClassScheduleResource {
 
     @Operation(
             summary = "Get all opening class schedule by date",
-            description = "Get class schedule by date",
-            tags = "class schedule",
+            description = "User that has role Class_FullAccess can view all opening class schedule by date",
+            tags = "Class Schedule",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
@@ -38,13 +39,18 @@ public interface ClassScheduleResource {
     })
     @PreAuthorize("hasAuthority('Class_FullAccess')")
     @GetMapping(value = "/admin/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassSchedule(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByDate(
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) String className,
+            @RequestParam(required = false) String classCode,
+            @RequestParam(required = false) String city
+    );
 
 
     @Operation(
             summary = "Get all opening class schedule by week",
-            description = "Get class schedule of user by date",
-            tags = "class schedule",
+            description = "User that has role Class_FullAccess can view all opening class schedule in a week by entering a date in this week",
+            tags = "Class Schedule",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
@@ -56,12 +62,17 @@ public interface ClassScheduleResource {
     })
     @PreAuthorize("hasAuthority('Class_FullAccess')")
     @GetMapping(value = "/admin/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) String className,
+            @RequestParam(required = false) String classCode,
+            @RequestParam(required = false) String city
+    );
 
     @Operation(
             summary = "Get all opening class schedule of user by date",
-            description = "Get class schedule of user by date",
-            tags = "class schedule",
+            description = "Login user can view their opening class schedule by date",
+            tags = "Class Schedule",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
@@ -73,12 +84,17 @@ public interface ClassScheduleResource {
     })
     @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) String className,
+            @RequestParam(required = false) String classCode,
+            @RequestParam(required = false) String city
+    );
 
     @Operation(
             summary = "Get all opening class schedule of user by week",
-            description = "Get class schedule of user by date",
-            tags = "class schedule",
+            description = "Login user can view all their opening class schedule in a week by entering a date in this week.",
+            tags = "Class Schedule",
             security = @SecurityRequirement(name = "token_auth")
     )
     @ApiResponses(value = {
@@ -90,5 +106,10 @@ public interface ClassScheduleResource {
     })
     @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(@PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date);
+    ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(
+            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) String className,
+            @RequestParam(required = false) String classCode,
+            @RequestParam(required = false) String city
+    );
 }
