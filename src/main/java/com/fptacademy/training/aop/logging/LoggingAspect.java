@@ -19,6 +19,11 @@ import java.util.Arrays;
 public class LoggingAspect {
     private final Environment env;
 
+    @Pointcut("within(@org.springframework.stereotype.Repository *)" +
+            " || within(@org.springframework.stereotype.Service *)" +
+            " || within(@org.springframework.web.bind.annotation.RestController *)")
+    public void springBeanPointcut() {}
+
     @Pointcut("within(com.fptacademy.training.repository..*)" +
             " || within(com.fptacademy.training.service..*)" +
             " || within(com.fptacademy.training.web..*)")
@@ -28,7 +33,7 @@ public class LoggingAspect {
         return LoggerFactory.getLogger(joinPoint.getSignature().getDeclaringTypeName());
     }
 
-    @AfterThrowing(pointcut = "applicationPackagePointcut()", throwing = "e")
+    @AfterThrowing(pointcut = "applicationPackagePointcut() && springBeanPointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
         if (env.acceptsProfiles(Profiles.of("dev"))) {
             logger(joinPoint)
