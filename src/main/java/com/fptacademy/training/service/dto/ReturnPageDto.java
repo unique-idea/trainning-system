@@ -1,7 +1,5 @@
 package com.fptacademy.training.service.dto;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -13,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListUsersDto {
+public class ReturnPageDto<T> {
     private Integer totalPages;
 
     private Long totalElements;
@@ -22,5 +20,5 @@ public class ListUsersDto {
 
     private Integer page;
 
-    private List<UserDto> users;
+    private T contents;
 }

@@ -36,7 +36,7 @@ import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
-import com.fptacademy.training.service.dto.ListUsersDto;
+import com.fptacademy.training.service.dto.ReturnPageDto;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelExportUtils;
@@ -188,7 +188,7 @@ public class UserService {
         return localDate;
     }
 
-    public ListUsersDto getUsersByFilters(String email, String fullName, String code,
+    public ReturnPageDto<List<UserDto>> getUsersByFilters(String email, String fullName, String code,
             String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo,
             String status, String sort, Integer pageNumber, Integer pageSize) {
         LocalDate birthdayFromDate = parseDate(birthdayFrom);
@@ -222,19 +222,19 @@ public class UserService {
         Page<User> page = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated,
                 birthdayFromDate, birthdayToDate, status, pageable);
 
-        return userMapper.toListUsersDto(page);
+        return userMapper.toPageUserDto(page);
     }
 
     public List<UserDto> importUsersToDB(MultipartFile file) {
         List<User> users = null;
-            try {
-                if (ExcelUploadService.isValidExcelFile(file)) {
-                     users = excelUploadService.getUserDataFromExcel(file.getInputStream());
-                    this.userRepository.saveAll(users);
-                }
-            } catch (IOException e) {
-                throw new IllegalArgumentException("The file is not a valid excel file");
+        try {
+            if (ExcelUploadService.isValidExcelFile(file)) {
+                users = excelUploadService.getUserDataFromExcel(file.getInputStream());
+                this.userRepository.saveAll(users);
             }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("The file is not a valid excel file");
+        }
         return userMapper.toDtos(users);
     }
 
