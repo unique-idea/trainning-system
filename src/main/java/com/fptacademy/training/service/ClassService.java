@@ -172,9 +172,11 @@ public class ClassService {
 //            throw new ResourceAlreadyExistsException("Class name already exists");
         Program program = programRepository.findById(classVM.programId())
                 .orElseThrow(() -> new ResourceNotFoundException("Program ID not found"));
+//        int totalStudyDates = program.getSyllabuses().stream()
+//                .mapToInt(s -> s.getSessions().size())
+//                .sum();
         int totalStudyDates = program.getSyllabuses().stream()
-                .mapToInt(s -> s.getSessions().size())
-                .sum();
+                .flatMap(s -> s.getSessions().stream()).collect(Collectors.toSet()).size();
         if (classVM.studyDates().size() != totalStudyDates)
             throw new ResourceBadRequestException("Class have to last exactly for " + totalStudyDates + " dates");
         classVM.studyDates().sort(null);
@@ -219,6 +221,8 @@ public class ClassService {
 
         List<Session> sessionList = program.getSyllabuses().stream()
                 .flatMap(s -> s.getSessions().stream())
+                .collect(Collectors.toSet())
+                .stream()
                 .toList();
         for (int i = 0; i < sessionList.size(); i++) {
             ClassSchedule classSchedule = new ClassSchedule();
@@ -298,9 +302,11 @@ public class ClassService {
         else {
             program = programRepository.findById(classVM.programId())
                     .orElseThrow(() -> new ResourceNotFoundException("Program ID not found"));
+//            totalStudyDates = program.getSyllabuses().stream()
+//                    .mapToInt(s -> s.getSessions().size())
+//                    .sum();
             totalStudyDates = program.getSyllabuses().stream()
-                    .mapToInt(s -> s.getSessions().size())
-                    .sum();
+                    .flatMap(s -> s.getSessions().stream()).collect(Collectors.toSet()).size();
         }
         if (classVM.studyDates().size() != totalStudyDates)
             throw new ResourceBadRequestException("Class have to last exactly for " + totalStudyDates + " dates");
@@ -351,6 +357,8 @@ public class ClassService {
             currentClassDetail.getSchedules().clear();
             List<Session> sessionList = program.getSyllabuses().stream()
                     .flatMap(s -> s.getSessions().stream())
+                    .collect(Collectors.toSet())
+                    .stream()
                     .toList();
             for (int i = 0; i < sessionList.size(); i++) {
                 ClassSchedule classSchedule = new ClassSchedule();
