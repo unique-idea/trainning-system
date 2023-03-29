@@ -2,10 +2,12 @@ package com.fptacademy.training.service.mapper;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.*;
-import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.domain.enumeration.RoleName;
 import com.fptacademy.training.service.ClassScheduleService;
+import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.ReturnClassScheduleDto;
 import com.fptacademy.training.service.dto.ReturnUnitDto;
+import com.fptacademy.training.service.dto.ReturnUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,12 @@ import java.util.List;
 @Slf4j
 public class ClassScheduleMapper {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     private final ClassScheduleService classScheduleService;
 
     private final UnitMapper unitMapper;
 
-    //new version
     public ReturnClassScheduleDto toReturnClassScheduleDto(ClassSchedule classSchedule) {
         ReturnClassScheduleDto result = new ReturnClassScheduleDto();
         try {
@@ -64,6 +65,10 @@ public class ClassScheduleMapper {
             result.setDate(classSchedule.getStudyDate());
             result.setStartAt(classDetail.getStartAt());
             result.setFinishAt(classDetail.getFinishAt());
+            List<User> trainers = userService.getMemberOfClassByRole(classDetail.getId(), RoleName.TRAINER);
+            List<User> admins = userService.getMemberOfClassByRole(classDetail.getId(), RoleName.CLASS_ADMIN);
+            result.setTrainers(toListReturnUserDto(trainers));
+            result.setClassAdmins(toListReturnUserDto(admins));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -73,9 +78,7 @@ public class ClassScheduleMapper {
     }
 
     public List<ReturnClassScheduleDto> toListReturnClassScheduleDto(List<ClassSchedule> classSchedules) {
-        if (classSchedules == null || classSchedules.isEmpty()) {
-            return null;
-        }
+
         List<ReturnClassScheduleDto> result = new ArrayList<>();
         classSchedules.forEach(
                 classScheduleTmp -> {
@@ -84,6 +87,27 @@ public class ClassScheduleMapper {
                     if (tmp != null) {
                         log.debug("Adding ClassScheduleDTO to result list.......");
                         result.add(tmp);
+                    }
+                }
+        );
+        return result;
+    }
+
+    public ReturnUserDto toReturnUserDto(User user) {
+        if (user == null)
+            return null;
+        ReturnUserDto returnUserDto = new ReturnUserDto();
+        returnUserDto.setId(user.getId());
+        returnUserDto.setName(user.getFullName());
+        return returnUserDto;
+    }
+
+    public List<ReturnUserDto> toListReturnUserDto(List<User> users) {
+        List<ReturnUserDto> result = new ArrayList<>();
+        users.forEach(
+                user -> {
+                    if (user != null) {
+                        result.add(toReturnUserDto(user));
                     }
                 }
         );

@@ -12,7 +12,7 @@ import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.service.LevelService;
 import com.fptacademy.training.service.RoleService;
-import com.fptacademy.training.service.dto.ListUsersDto;
+import com.fptacademy.training.service.dto.ReturnPageDto;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.UserVM;
 
@@ -55,16 +55,16 @@ public class UserMapper {
         return users.stream().map(this::toDto).toList();
     }
 
-    public ListUsersDto toListUsersDto(Page<User> users){
-        ListUsersDto listUsersDto = new ListUsersDto();
+    public ReturnPageDto<List<UserDto>> toPageUserDto(Page<User> users){
+        ReturnPageDto<List<UserDto>> pageUserDto = new ReturnPageDto<>();
 
-        listUsersDto.setTotalPages(users.getTotalPages());
-        listUsersDto.setTotalElements(users.getTotalElements());
-        listUsersDto.setSize(users.getSize());
-        listUsersDto.setPage(users.getNumber());
+        pageUserDto.setTotalPages(users.getTotalPages());
+        pageUserDto.setTotalElements(users.getTotalElements());
+        pageUserDto.setSize(users.getSize());
+        pageUserDto.setPage(users.getNumber());
 
-        listUsersDto.setUsers(toDtos(users.toList()));
+        pageUserDto.setContents(toDtos(users.toList()));
 
-        return listUsersDto;
+        return pageUserDto;
     }
 }

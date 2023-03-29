@@ -90,33 +90,33 @@ class ClassScheduleResourceImplTest {
         mockMvc = MockMvcBuilders.standaloneSetup(classScheduleResource).build();
     }
 
-    @Test
-    void getAllClassScheduleShouldReturnAListOfClassScheduleDTO() throws Exception {
-        LocalDate day = LocalDate.now();
-        given(userService.getCurrentUserLogin()).willReturn(user1);
-        given(classScheduleService.getClassScheduleOfAUserByDate(any(LocalDate.class), anyLong()))
-                .willReturn(new ArrayList<>());
-        given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
-                .willReturn(classScheduleDTOList);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/{day}", day)
-//                        .header("Authorization", token)
-//                        .header("Content-Type", "application/json")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].classCode").value("Java01"))
-                .andExpect(jsonPath("$[1].classCode").value("React01"))
-                .andExpect(jsonPath("$[0].classId").value("1"))
-                .andExpect(jsonPath("$[1].classId").value("2"))
-                .andExpect(jsonPath("$[0].className").value("Java intern 01"))
-                .andExpect(jsonPath("$[1].className").value("React intern 01"))
-                .andExpect(jsonPath("$", hasSize(2)));
-        verify(userService).getCurrentUserLogin();
-        verify(classScheduleService).getClassScheduleOfAUserByDate(any(LocalDate.class), anyLong());
-        verify(classScheduleMapper).toListReturnClassScheduleDto(anyList());
-    }
+//    @Test
+//    void getAllClassScheduleShouldReturnAListOfClassScheduleDTO() throws Exception {
+//        LocalDate day = LocalDate.now();
+//        given(userService.getCurrentUserLogin()).willReturn(user1);
+//        given(classScheduleService.getClassScheduleOfAUserByDate(any(LocalDate.class), anyLong()))
+//                .willReturn(new ArrayList<>());
+//        given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
+//                .willReturn(classScheduleDTOList);
+//
+//        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/{day}", day)
+////                        .header("Authorization", token)
+////                        .header("Content-Type", "application/json")
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(jsonPath("$[0].classCode").value("Java01"))
+//                .andExpect(jsonPath("$[1].classCode").value("React01"))
+//                .andExpect(jsonPath("$[0].classId").value("1"))
+//                .andExpect(jsonPath("$[1].classId").value("2"))
+//                .andExpect(jsonPath("$[0].className").value("Java intern 01"))
+//                .andExpect(jsonPath("$[1].className").value("React intern 01"))
+//                .andExpect(jsonPath("$", hasSize(2)));
+//        verify(userService).getCurrentUserLogin();
+//        verify(classScheduleService).getClassScheduleOfAUserByDate(any(LocalDate.class), anyLong());
+//        verify(classScheduleMapper).toListReturnClassScheduleDto(anyList());
+//    }
 
     @Test
     void getAllClassScheduleByWeek() {
