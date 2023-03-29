@@ -17,26 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ClassScheduleService {
+
     private final ClassScheduleRepository classScheduleRepository;
     private final UserService userService;
-
-    public List<ClassSchedule> getClassScheduleByDate(
-            LocalDate date,
-            String className,
-            String classCode,
-            String city
-    ) {
-        if (className == null && classCode == null && city == null)
-            return getClassScheduleByDate(date);
-        return getFilterClassScheduleByDate(date, className, classCode, city);
-    }
-
-    public List<ClassSchedule> getClassScheduleByDate(LocalDate date) {
-        if (date == null) {
-            throw new ResourceBadRequestException("Bad request: Date is null");
-        }
-        return classScheduleRepository.findActiveClassByStudyDate(date, ClassStatus.OPENNING.toString());
-    }
 
     public List<ClassSchedule> getFilterClassScheduleByDate(
             LocalDate date,
@@ -57,26 +40,6 @@ public class ClassScheduleService {
         );
     }
 
-    public List<ClassSchedule> getClassScheduleOfCurrentUserByDate(
-            LocalDate date,
-            String className,
-            String classCode,
-            String city
-    ) {
-        if (className == null && classCode == null && city == null)
-            return getClassScheduleOfCurrentUserByDate(date);
-        return getFilterClassScheduleOfCurrentUserByDate(date, className, classCode, city);
-    }
-
-    public List<ClassSchedule> getClassScheduleOfCurrentUserByDate(LocalDate date) {
-
-        if (date == null) {
-            throw new ResourceBadRequestException("Bad request for date and userId value");
-        }
-        User user = userService.getCurrentUserLogin();
-        return classScheduleRepository.findActiveClassByUserIdAndStudyDate(user.getId(), date, ClassStatus.OPENNING.toString());
-    }
-
     public List<ClassSchedule> getFilterClassScheduleOfCurrentUserByDate(
             LocalDate date,
             String className,
@@ -95,27 +58,6 @@ public class ClassScheduleService {
                 classCode,
                 city
         );
-    }
-
-    public List<ClassSchedule> getClassScheduleOfCurrentUserInAWeek(
-            LocalDate date,
-            String className,
-            String classCode,
-            String city
-    ) {
-        if (className == null && classCode == null && city == null)
-            return getClassScheduleOfCurrentUserInAWeek(date);
-        return getFilterClassScheduleOfCurrentUserInAWeek(date, className, classCode, city);
-    }
-
-    public List<ClassSchedule> getClassScheduleOfCurrentUserInAWeek(LocalDate date) {
-        if (date == null) {
-            throw new ResourceBadRequestException("Bad request: date is null.");
-        }
-        LocalDate firstDate = DateTimeUtil.getFirstDateOfCurrentWeek(date);
-        LocalDate lastDate = DateTimeUtil.getLastDateOfCurrentWeek(date);
-        User user = userService.getCurrentUserLogin();
-        return getClassScheduleOfAUserByDateBetween(user.getId(), firstDate, lastDate);
     }
 
     public List<ClassSchedule> getFilterClassScheduleOfCurrentUserInAWeek(
@@ -141,28 +83,6 @@ public class ClassScheduleService {
         );
     }
 
-    public List<ClassSchedule> getClassScheduleInAWeek(
-            LocalDate date,
-            String className,
-            String classCode,
-            String city
-    ) {
-        if (className == null && classCode == null && city == null)
-            return getClassScheduleInAWeek(date);
-        return getFilterClassScheduleInAWeek(date, className, classCode, city);
-    }
-
-    public List<ClassSchedule> getClassScheduleInAWeek(LocalDate date) {
-
-        if (date == null) {
-            throw new ResourceBadRequestException("Bad request: date is null.");
-        }
-        LocalDate firstDate = DateTimeUtil.getFirstDateOfCurrentWeek(date);
-        LocalDate lastDate = DateTimeUtil.getLastDateOfCurrentWeek(date);
-
-        return getClassScheduleByDateBetween(firstDate, lastDate);
-    }
-
     public List<ClassSchedule> getFilterClassScheduleInAWeek(
             LocalDate date,
             String className,
@@ -184,26 +104,6 @@ public class ClassScheduleService {
                 classCode,
                 city
         );
-    }
-
-    public List<ClassSchedule> getClassScheduleOfAUserByDateBetween(
-            Long userId,
-            LocalDate startDate,
-            LocalDate endDate
-    ) {
-
-        if (userId == null || startDate == null || endDate == null) {
-            throw new ResourceBadRequestException("Bad request");
-        }
-        return classScheduleRepository
-                .findActiveClassByUserIdAndStudyDateBetween(userId, startDate, endDate, ClassStatus.OPENNING.toString());
-    }
-
-    public List<ClassSchedule> getClassScheduleByDateBetween(LocalDate startDate, LocalDate endDate) {
-        if (startDate == null || endDate == null) {
-            throw new ResourceBadRequestException("Bad request");
-        }
-        return classScheduleRepository.findActiveClassByStudyDateBetween(startDate, endDate, ClassStatus.OPENNING.toString());
     }
 
     public int getCurrentClassDay(Long classId, Long classScheduleId) {
