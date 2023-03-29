@@ -14,7 +14,7 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
-import com.fptacademy.training.web.TestUtil;
+import com.fptacademy.training.service.util.TestUtil;
 import com.fptacademy.training.web.vm.ProgramVM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,8 +66,8 @@ class ProgramServiceTest {
     }
     @Test
     void testCreateProgram() {
-        List<Syllabus> syllabuses = List.of(SyllabusFactory.createDummySyllabus(),
-                SyllabusFactory.createDummySyllabus());
+        List<Syllabus> syllabuses = List.of(SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
         ProgramVM programVM = new ProgramVM(DEFAULT_PROGRAM_NAME, syllabuses.stream().map(Syllabus::getId).toList());
         ProgramDto programDTO = programService.createProgram(programVM);

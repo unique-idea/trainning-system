@@ -42,8 +42,7 @@ public class RoleService {
         for (int i = 0; i < role.size(); i++) {
             if (role.get(i).permissions().size() == 5) {
                 if (role.get(i).name().equalsIgnoreCase(RoleName.SUPER_ADMIN.toString())) {
-                    List<String> listPermission = role.get(i).permissions().stream().toList();
-                    updatePermission(RoleName.SUPER_ADMIN.toString(), listPermission);
+                    throw new ResourceBadRequestException("Don't allow to update permissions of Super Admin");
                 } else if (role.get(i).name().equalsIgnoreCase(RoleName.CLASS_ADMIN.toString())) {
                     List<String> listPermission = role.get(i).permissions().stream().toList();
                     updatePermission(RoleName.CLASS_ADMIN.toString(), listPermission);

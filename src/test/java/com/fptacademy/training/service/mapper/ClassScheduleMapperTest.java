@@ -2,8 +2,10 @@ package com.fptacademy.training.service.mapper;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.*;
+import com.fptacademy.training.domain.enumeration.RoleName;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.ClassScheduleService;
+import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.ReturnClassScheduleDto;
 import com.fptacademy.training.service.dto.ReturnUnitDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,9 @@ class ClassScheduleMapperTest {
     private UnitMapper unitMapper;
     @Mock
     private ClassScheduleService classScheduleService;
+
+    @Mock
+    private UserService userService;
     @InjectMocks
     private ClassScheduleMapper classScheduleMapper;
 
@@ -117,6 +122,7 @@ class ClassScheduleMapperTest {
         given(classDetailMock.getFinishAt()).willReturn(LocalTime.of(10, 0, 0));
         given(classScheduleService.getCurrentClassDay(anyLong(), anyLong()))
                 .willReturn(4);
+        given(userService.getMemberOfClassByRole(anyLong(), any(RoleName.class))).willReturn(new ArrayList<>());
         //when
         ReturnClassScheduleDto result = classScheduleMapper.toReturnClassScheduleDto(classScheduleMock);
         //then
@@ -225,6 +231,7 @@ class ClassScheduleMapperTest {
         given(classDetailMock.getFinishAt()).willReturn(LocalTime.of(10, 0, 0));
         given(classScheduleService.getCurrentClassDay(anyLong(), anyLong()))
                 .willReturn(4);
+        given(userService.getMemberOfClassByRole(anyLong(), any(RoleName.class))).willReturn(new ArrayList<>());
         //when
         List<ClassSchedule> input = new ArrayList<>();
         input.add(classScheduleMock);

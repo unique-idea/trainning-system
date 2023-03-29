@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fptacademy.training.exception.ResourceBadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fptacademy.training.service.ClassService;
@@ -58,6 +60,11 @@ public class ClassResourceImpl implements ClassResource {
                                                       String trainerCode,
                                                       String sort,
                                                       int page, int size) {
+        if (page <= 0)
+            throw new ResourceBadRequestException("Page must not <= 0");
+        if (size <= 0)
+            throw new ResourceBadRequestException("Size of page must not <= 0");
+
         List<ClassDto> classDtos = classService.filterClass(
                 keywords, from, to,
                 cities,
@@ -70,6 +77,7 @@ public class ClassResourceImpl implements ClassResource {
         List<ClassDto> result;
         int totalElements = classDtos.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
+
         // Apply pagination
         int start = (page - 1) * size;
         int end = Math.min(start + size, classDtos.size());
@@ -141,6 +149,13 @@ public class ClassResourceImpl implements ClassResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(classService.getAllLocations());
+    }
+
+    @Override
+    public ResponseEntity<List<ClassDetailDto>> getAllClassesDetailsByStudyDate(LocalDate date){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(classService.getDetailsByStudyDate(date));
     }
 
     @Override
