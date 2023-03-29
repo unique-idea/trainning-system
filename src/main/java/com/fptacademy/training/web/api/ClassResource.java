@@ -2,11 +2,15 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.domain.Class;
 import com.fptacademy.training.domain.ClassDetail;
+import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.service.dto.*;
+import com.fptacademy.training.web.vm.ClassListResponseVM;
 import com.fptacademy.training.web.vm.ClassVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -65,8 +69,9 @@ public interface ClassResource {
             @ApiResponse(responseCode = "200", description = "Find list of class successfully"),
     })
     @GetMapping
-    public ResponseEntity<List<ClassDto>> filterClass(
-            @RequestParam(value = "q", required = false) List<String> keywords,
+    public ResponseEntity<ClassListResponseVM> filterClass(
+            @Parameter(description = "Input any keywords for searching the list of classes")
+            @RequestParam(value = "keywords", required = false) List<String> keywords,
             @RequestParam(name = "from", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(name = "to", required = false)
@@ -77,6 +82,13 @@ public interface ClassResource {
             @RequestParam(name = "attendee", required = false) List<String> attendeeTypes,
             @RequestParam(name = "fsu", required = false) String fsu,
             @RequestParam(name = "trainer", required = false) String trainerCode,
+            @Parameter(
+                    description = "Sort string in the format: property,(asc|desc), can just sort with one " +
+                    "criteria. " +
+                    "Property in sort string includes: \"id\", \"name\", \"code\", \"createdOn\", \"createdBy\", " +
+                    "\"duration\", \"attendee\", \"location\", \"fsu\""
+            )
+            @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     );
@@ -197,6 +209,22 @@ public interface ClassResource {
     })
     @GetMapping("/locations")
     public ResponseEntity<List<LocationDto>> getAllLocations();
+
+    @Operation(
+            summary = "Get list of class details by date",
+            description = "Get list of class details by date",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find list of class details by study date successfully")
+    })
+    @GetMapping("/details")
+    public ResponseEntity<List<ClassDetailDto>> getAllClassesDetailsByStudyDate (
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(name = "studyDate", required = true) LocalDate date);
 
     @Operation(
             summary = "Update an existing class",

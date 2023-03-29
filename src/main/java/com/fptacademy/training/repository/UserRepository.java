@@ -3,7 +3,6 @@ package com.fptacademy.training.repository;
 import com.fptacademy.training.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.fptacademy.training.service.dto.UserDto;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +14,8 @@ import java.util.Optional;
 
 
 public interface UserRepository extends JpaRepository<User, Long> {
-  @EntityGraph(attributePaths = {"role"})
-  Optional<User> findByEmail(String email);
+    @EntityGraph(attributePaths = {"role"})
+    Optional<User> findByEmail(String email);
 
     @Query("Select c from User c where c.role.name = 'Trainer'")
     List<User> findAllTrainers();
@@ -49,4 +48,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
                              @Param("roleNameParam") String roleName, @Param("activatedParam") Boolean activated,
                              @Param("birthdayFromParam") LocalDate birthdayFrom, @Param("birthdayToParam") LocalDate birthdayTo,
                              @Param("statusParam") String status, Pageable pageable);
+
+    @Query("SELECT u FROM ClassDetail cd " +
+            " JOIN cd.users u " +
+            " WHERE cd.id = :classDetailId " +
+            " AND u.role.name = :roleName")
+    List<User> findMemberOfClassByRole(@Param("classDetailId") Long classDetailId,
+                                       @Param("roleName") String roleName);
 }

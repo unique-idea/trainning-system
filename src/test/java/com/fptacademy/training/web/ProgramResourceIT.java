@@ -42,6 +42,12 @@ import java.util.stream.Collectors;
 @AutoConfigureMockMvc
 @IntegrationTest
 public class ProgramResourceIT {
+    private String accessToken;
+    private final String DEFAULT_PROGRAM_NAME = "Test Program";
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+    @Autowired
+    private MockMvc mockMvc;
     @Autowired
     private SyllabusRepository syllabusRepository;
     @Autowired
@@ -52,12 +58,6 @@ public class ProgramResourceIT {
     private RoleRepository roleRepository;
     @Autowired
     private ClassRepository classRepository;
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-    @Autowired
-    private MockMvc mockMvc;
-    private String accessToken;
-    private final String DEFAULT_PROGRAM_NAME = "Test Program";
 
     @BeforeEach
     void setup() {
@@ -78,11 +78,12 @@ public class ProgramResourceIT {
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
+
     @Test
     void testCreateProgram() throws Exception {
         List<Syllabus> syllabuses = List.of(
-                SyllabusFactory.createDummySyllabus(),
-                SyllabusFactory.createDummySyllabus());
+                SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
         SecurityContextHolder.clearContext();
         List<Long> syllabusIds = syllabuses.stream().mapToLong(Syllabus::getId).boxed().toList();
@@ -125,6 +126,9 @@ public class ProgramResourceIT {
         List<Program> programs = new ArrayList<>();
         for (int i = 0; i < 20; ++i) {
             Program program = ProgramFactory.createDummyProgram();
+            if (i == 10) {
+                program.setActivated(true);
+            }
             syllabusRepository.saveAllAndFlush(program.getSyllabuses());
             programRepository.saveAndFlush(program);
             programs.add(program);
@@ -152,6 +156,15 @@ public class ProgramResourceIT {
                 .andExpect(jsonPath("$.programs").isArray())
                 .andExpect(jsonPath("$.programs", Matchers.hasSize(10)))
                 .andExpect(jsonPath("$.programs[0].id").value(programs.get(9).getId()));
+
+        mockMvc
+                .perform(get("/api/programs")
+                        .param("activated", "true")
+                        .param("page", "2")
+                        .param("size", "10")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1));
     }
 
     @Test
@@ -168,7 +181,8 @@ public class ProgramResourceIT {
 
     @Test
     void testCreateProgramsByImportingExcel() throws Exception {
-        List<Syllabus> syllabuses = List.of(SyllabusFactory.createDummySyllabus(), SyllabusFactory.createDummySyllabus());
+        List<Syllabus> syllabuses = List.of(SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabuses);
         SecurityContextHolder.clearContext();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -266,6 +280,28 @@ public class ProgramResourceIT {
     }
 
     @Test
+    public void testDeleteProgramBadRequest() throws Exception {
+        Program program = ProgramFactory.createDummyProgram();
+        syllabusRepository.saveAllAndFlush(program.getSyllabuses());
+        programRepository.saveAndFlush(program);
+        Class c = Class.builder()
+                .name("className")
+                .code("abc")
+                .program(program)
+                .build();
+        ClassDetail classDetail = ClassDetail.builder()
+                .classField(c)
+                .status(ClassStatus.OPENNING.name())
+                .build();
+        c.setClassDetail(classDetail);
+        classRepository.saveAndFlush(c);
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(delete("/api/programs/{id}", program.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testGetSyllabusesByProgramId() throws Exception {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
@@ -336,8 +372,8 @@ public class ProgramResourceIT {
         Program program = ProgramFactory.createDummyProgram();
         syllabusRepository.saveAllAndFlush(program.getSyllabuses());
         programRepository.saveAndFlush(program);
-        List<Syllabus> syllabusList = List.of(SyllabusFactory.createDummySyllabus(),
-                SyllabusFactory.createDummySyllabus());
+        List<Syllabus> syllabusList = List.of(SyllabusFactory.createActivatedDummySyllabus(),
+                SyllabusFactory.createActivatedDummySyllabus());
         syllabusRepository.saveAllAndFlush(syllabusList);
         SecurityContextHolder.clearContext();
         List<Long> syllabusIds = syllabusList.stream().mapToLong(Syllabus::getId).boxed().toList();
@@ -399,5 +435,4 @@ public class ProgramResourceIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
-
 }

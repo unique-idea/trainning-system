@@ -26,8 +26,12 @@ public class ClassMapper {
 
         dto.setStatus(classes.getClassDetail().getStatus());
         dto.setCreated_by(classes.getCreatedBy() == null? null :
-                new ClassDto.Creator(classes.getCreatedBy().getId(),
-                        classes.getCreatedBy().getFullName()));
+                new ClassDto.Creator(
+                        classes.getCreatedBy().getId(),
+                        classes.getCreatedBy().getFullName(),
+                        classes.getCreatedBy().getCode()
+                )
+        );
 
         if(classes.getClassDetail() != null){
 

@@ -13,10 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Component
 public class JwtTokenProvider {
@@ -44,31 +41,34 @@ public class JwtTokenProvider {
                 .setSigningKey(refreshKey).build();
     }
 
-    public String generateAccessToken(Authentication authentication) {
-        String email = authentication.getName();
-        String authorities = authentication.getAuthorities()
-                .stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+    private String getAccessToken(String email, String role, Collection<? extends GrantedAuthority> authorities) {
         Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * accessExpireTimeInMinutes);
+        Map<String, Object> claims = new HashMap<>();
+        Map<String, String> auth = new HashMap<>();
+        authorities.stream().map(GrantedAuthority::getAuthority).forEach(permission -> {
+            String[] s = permission.split("_");
+            auth.put(s[0], s[1]);
+        });
+        claims.put("role", role);
+        claims.put("permissions", auth);
         return accessJwtBuilder
                 .setSubject(email)
-                .claim("auth", authorities)
+                .addClaims(claims)
                 .setExpiration(expiredTime)
                 .compact();
     }
 
+    public String generateAccessToken(Authentication authentication) {
+        String email = authentication.getName();
+        String role = userService.getUserRoleByEmail(email).getName();
+        return getAccessToken(email, role, authentication.getAuthorities());
+    }
+
     public String generateAccessToken(String refreshToken) {
-        Claims claims = refreshJwtParser.parseClaimsJws(refreshToken).getBody();
-        String email = claims.getSubject();
-        String authorities = userService.getUserPermissionsByEmail(email)
-                .stream().map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-        Date expiredTime = new Date((new Date()).getTime() + 1000 * 60 * accessExpireTimeInMinutes);
-        return accessJwtBuilder
-                .setSubject(email)
-                .claim("auth", authorities)
-                .setExpiration(expiredTime)
-                .compact();
+        Claims refreshClaims = refreshJwtParser.parseClaimsJws(refreshToken).getBody();
+        String email = refreshClaims.getSubject();
+        String role = userService.getUserRoleByEmail(email).getName();
+        return getAccessToken(email, role, userService.getUserPermissionsByEmail(email));
     }
 
     public String generateRefreshToken(String email) {
@@ -82,10 +82,11 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String accessToken) {
         Claims claims = accessJwtParser.parseClaimsJws(accessToken).getBody();
         String email = claims.getSubject();
-        Collection<? extends GrantedAuthority> authorities = Arrays.
-                stream(claims.get("auth").toString().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        Map<String, String> auth = (Map<String, String>) claims.get("permissions");
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        auth.forEach((role, permission) -> {
+            authorities.add(new SimpleGrantedAuthority(role + "_" + permission));
+        });
         User user = userService.getUserByEmail(email);
         return new UsernamePasswordAuthenticationToken(user, accessToken, authorities);
     }

@@ -1,37 +1,27 @@
 package com.fptacademy.training.service;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
+import com.fptacademy.training.domain.enumeration.RoleName;
 import com.fptacademy.training.domain.enumeration.UserStatus;
 import com.fptacademy.training.exception.ResourceAlreadyExistsException;
 import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
+import com.fptacademy.training.service.dto.ReturnPageDto;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelExportUtils;
 import com.fptacademy.training.service.util.ExcelUploadService;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,37 +30,35 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 @Transactional
+@SuppressWarnings("unused")
 public class UserService {
-
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final RoleService roleService;
-
-    @Autowired
     private final LevelService levelService;
-    @Autowired
     private final UserMapper userMapper;
-
-    @Autowired
     private final ExcelUploadService excelUploadService;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize maxFileSize;
 
-    private String[] userProperties = { "id", "email", "fullName", "code", "level", "role", "activated", "birthday",
-            "status" };
+    private String[] userProperties = {"id", "email", "fullName", "code", "level", "role", "activated", "birthday",
+            "status"};
 
     public UserDto createUser(UserVM userVM) {
         if (userRepository.existsByEmail(userVM.email())) {
@@ -160,13 +148,12 @@ public class UserService {
         user.get().setRole(role);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User getCurrentUserLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof User) {
-                return (User) authentication.getPrincipal();
+                return (User) principal;
             }
         }
         throw new UsernameNotFoundException("Something went wrong, can not get current logged in user");
@@ -199,9 +186,9 @@ public class UserService {
         return localDate;
     }
 
-    public List<UserDto> getUsersByFilters(String email, String fullName, String code,
-            String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo,
-            String status, String sort, Integer pageNumber, Integer pageSize) {
+    public ReturnPageDto<List<UserDto>> getUsersByFilters(String email, String fullName, String code,
+                                                          String levelName, String roleName, Boolean activated, String birthdayFrom, String birthdayTo,
+                                                          String status, String sort, Integer pageNumber, Integer pageSize) {
         LocalDate birthdayFromDate = parseDate(birthdayFrom);
         if (birthdayFromDate == null)
             birthdayFromDate = LocalDate.of(0, 1, 1);
@@ -232,19 +219,20 @@ public class UserService {
 
         Page<User> page = userRepository.findByFilters(email, fullName, code, levelName, roleName, activated,
                 birthdayFromDate, birthdayToDate, status, pageable);
-        return userMapper.toDtos(page.getContent());
+
+        return userMapper.toPageUserDto(page);
     }
 
     public List<UserDto> importUsersToDB(MultipartFile file) {
         List<User> users = null;
-            try {
-                if (ExcelUploadService.isValidExcelFile(file)) {
-                     users = excelUploadService.getUserDataFromExcel(file.getInputStream());
-                    this.userRepository.saveAll(users);
-                }
-            } catch (IOException e) {
-                throw new IllegalArgumentException("The file is not a valid excel file");
+        try {
+            if (ExcelUploadService.isValidExcelFile(file)) {
+                users = excelUploadService.getUserDataFromExcel(file.getInputStream());
+                this.userRepository.saveAll(users);
             }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("The file is not a valid excel file");
+        }
         return userMapper.toDtos(users);
     }
 
@@ -268,7 +256,7 @@ public class UserService {
                             if (noNullRequiredUserVM.password() != null) {
                                 existUser.setPassword(noNullRequiredUserVM.password());
                             }
-                            if (noNullRequiredUserVM.activated() != null) {
+                            if (noNullRequiredUserVM.email() != null) {
                                 existUser.setEmail(noNullRequiredUserVM.email());
                             }
                             if (noNullRequiredUserVM.birthday() != null) {
@@ -322,4 +310,11 @@ public class UserService {
         excelExport.exportDataToExcel(response);
     }
 
+    public Role getUserRoleByEmail(String email) {
+        return getUserByEmail(email).getRole();
+    }
+
+    public List<User> getMemberOfClassByRole(Long classDetailId, RoleName roleName) {
+        return userRepository.findMemberOfClassByRole(classDetailId, roleName.toString());
+    }
 }

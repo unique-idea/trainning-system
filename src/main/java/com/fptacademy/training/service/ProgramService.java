@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.repository.ClassRepository;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -40,11 +41,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional
 public class ProgramService {
+    private final SyllabusMapper syllabusMapper;
+    private final ProgramMapper programMapper;
     private final ProgramRepository programRepository;
     private final SyllabusRepository syllabusRepository;
-    private final ProgramMapper programMapper;
     private final ClassRepository classRepository;
-    private final SyllabusMapper syllabusMapper;
 
     public ProgramDto createProgram(ProgramVM programVM) {
         // Check if program name already existed or not
@@ -54,12 +55,18 @@ public class ProgramService {
         // Create new program
         Program program = new Program();
         program.setName(programVM.name());
-        // Add list of syllabuses to program
+        // Add list of syllabuses to program (only activated syllabuses)
         List<Syllabus> syllabuses = programVM.syllabusIds()
                 .stream()
-                .map(id -> syllabusRepository
-                        .findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found")))
+                .map(id -> {
+                    Syllabus s = syllabusRepository
+                            .findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + id + " not found"));
+                    if (s.getStatus() != SyllabusStatus.ACTIVATED) {
+                        throw new ResourceBadRequestException("Syllabus with ID '" + id + "' is not activated");
+                    }
+                    return s;
+                })
                 .toList();
         program.setSyllabuses(syllabuses);
         // Save program
@@ -77,12 +84,16 @@ public class ProgramService {
             Permissions.PROGRAM_CREATE + "', '" +
             Permissions.PROGRAM_MODIFY + "', '" +
             Permissions.PROGRAM_FULL_ACCESS + "'))")
-    public List<ProgramDto> getPrograms(List<String> keywords, String sort) {
+    public List<ProgramDto> getPrograms(List<String> keywords, Boolean activated, String sort) {
         // Get training programs based on keywords or get all if there's no keyword
         List<Program> programs;
         if (keywords != null) {
-            List<Program> firstFilteredPrograms = programRepository
-                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
+            List<Program> firstFilteredPrograms =
+                    activated != null ?
+                            programRepository
+                                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCaseAndActivated(keywords.get(0), keywords.get(0), activated) :
+                            programRepository
+                                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(keywords.get(0), keywords.get(0));
             if (keywords.size() > 1) {
                 programs = firstFilteredPrograms
                         .stream()
@@ -96,7 +107,9 @@ public class ProgramService {
                 programs = firstFilteredPrograms;
             }
         } else {
-            programs = programRepository.findAll();
+            programs = activated != null ?
+                    programRepository.findByActivated(activated) :
+                    programRepository.findAll();
         }
 
         // Convert list of program entities to list of program DTOs
@@ -194,9 +207,15 @@ public class ProgramService {
                     continue;
                 }
                 List<Syllabus> syllabuses = Arrays.stream(syllabusCodes.split(","))
-                        .map(code -> syllabusRepository
-                                .findByCode(code)
-                                .orElseThrow(() -> new ResourceNotFoundException("Syllabus with code '" + code + "' not found")))
+                        .map(code -> {
+                            Syllabus s = syllabusRepository
+                                    .findByCode(code)
+                                    .orElseThrow(() -> new ResourceNotFoundException("Syllabus with code '" + code + "' not found"));
+                            if (s.getStatus() != SyllabusStatus.ACTIVATED) {
+                                throw new ResourceBadRequestException("Syllabus with code '" + code + "' is not activated");
+                            }
+                            return s;
+                        })
                         .toList();
                 program.setSyllabuses(syllabuses);
                 program.setActivated(row.getCell(3).getBooleanCellValue());
@@ -225,6 +244,7 @@ public class ProgramService {
                                 continue row_loop;
                             }
                             case "allow" -> {
+                                program.setId(null);
                                 newPrograms.add(program);
                                 continue row_loop;
                             }
@@ -252,7 +272,7 @@ public class ProgramService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
         program.setActivated(true);
-        programRepository.saveAndFlush(program);
+        programRepository.save(program);
         return programMapper.toDto(program);
     }
 
@@ -275,6 +295,7 @@ public class ProgramService {
         if(!isDeactivatable(id))
             throw new ResourceBadRequestException("Cannot deactivate this training program because there are on-going classes depend on this program");
         program.setActivated(false);
+        programRepository.save(program);
         return program;
     }
 
@@ -283,12 +304,18 @@ public class ProgramService {
         p.setName(programVM.name());
         List<Syllabus> syllabuses = new ArrayList<>(programVM.syllabusIds()
                 .stream()
-                .map(syllabusId -> syllabusRepository
-                        .findById(syllabusId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID " + syllabusId + " not found")))
+                .map(syllabusId -> {
+                    Syllabus s = syllabusRepository
+                            .findById(syllabusId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Syllabus with ID '" + syllabusId + "' not found"));
+                    if (s.getStatus() != SyllabusStatus.ACTIVATED) {
+                        throw new ResourceBadRequestException("Syllabus with ID '" + syllabusId + "' is not activated");
+                    }
+                    return s;
+                })
                 .toList());
         p.setSyllabuses(syllabuses);
-        programRepository.saveAndFlush(p);
+        programRepository.save(p);
         return programMapper.toDto(p);
     }
 

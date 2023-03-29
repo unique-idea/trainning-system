@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,28 +55,34 @@ public class ClassService {
                             List<String> statuses,
                             List<String> attendeeTypes,
                             String fsu,
-                            String trainerCode) {
+                            String trainerCode,
+                            String sort) {
+        //search by keyword
         List<Class> classes;
         if (keywords != null) {
-            List<Class> firstFilteredClasses = classRepository
-                    .findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(
-                            keywords.get(0),
-                            keywords.get(0)
-                    );
-            if (keywords.size() > 1) {
+            List<Class> firstFilteredClasses = classRepository.findAll();
+            if (keywords.size() >= 1) {
                 classes = firstFilteredClasses
                         .stream()
-                        .skip(1)
                         .filter(c -> keywords
                                 .stream()
                                 .allMatch(e -> c.getName().toLowerCase().contains(e.toLowerCase()) ||
-                                        c.getCreatedBy().getCode().toLowerCase().contains(e.toLowerCase())))
+                                        c.getCode().toLowerCase().contains(e.toLowerCase()) ||
+                                        c.getCreatedAt().toString().toLowerCase().contains(e.toLowerCase()) ||
+                                        c.getCreatedBy().getCode().toLowerCase().contains(e.toLowerCase()) ||
+                                        String.valueOf(c.getDuration()).equals(e.toLowerCase()) ||
+                                        c.getClassDetail().getAttendee().getType().toLowerCase().contains(e.toLowerCase()) ||
+                                        c.getClassDetail().getLocation().getCity().toLowerCase().contains(e.toLowerCase()) ||
+                                        c.getClassDetail().getLocation().getFsu().toLowerCase().contains(e.toLowerCase())
+                                        ))
                         .toList();
             } else {
                 classes = firstFilteredClasses;
             }
         }
         else classes = classRepository.findAll();
+
+        //apply filter
         classes = classes.stream()
                 .filter(c -> !c.getClassDetail().getStatus().equals("DELETED"))
                 .filter(c -> {
@@ -110,17 +117,66 @@ public class ClassService {
                         .anyMatch(tr -> tr.getCode().equalsIgnoreCase(trainerCode)))
                 .collect(Collectors.toList());
         List<ClassDto> classDtos = new ArrayList<>(classMapper.toDtos(classes));
+
+        // Sort the list
+        String[] sorts = sort.split(",");
+        if (sorts.length != 2) {
+            throw new ResourceBadRequestException("Invalid parameter for sort");
+        }
+        String property = sorts[0];
+        String direction = sorts[1];
+        if (!direction.equals("asc") && !direction.equals("desc")) {
+            throw new ResourceBadRequestException("Invalid parameter for sort, cannot find sort direction (asc or desc)");
+        }
+        Comparator<ClassDto> comparator;
+        switch (property) {
+            case "id" -> comparator = direction.equals("asc") ?
+                    Comparator.comparing(ClassDto::getId) :
+                    Comparator.comparing(ClassDto::getId).reversed();
+            case "name" -> comparator = direction.equals("asc") ?
+                    Comparator.comparing(ClassDto::getName) :
+                    Comparator.comparing(ClassDto::getName).reversed();
+            case "code" -> comparator = direction.equals("asc") ?
+                    Comparator.comparing(ClassDto::getCode) :
+                    Comparator.comparing(ClassDto::getCode).reversed();
+            case "createdOn" -> comparator = direction.equals("asc") ?
+                    Comparator.comparing(ClassDto::getCreated_at) :
+                    Comparator.comparing(ClassDto::getCreated_at).reversed();
+            case "createdBy" -> {
+                comparator = Comparator.comparing(c -> c.getCreated_by().getCode());
+                if (direction.equals("desc")) comparator = comparator.reversed();
+            }
+            case "duration" -> comparator = direction.equals("asc") ?
+                    Comparator.comparing(ClassDto::getDuration) :
+                    Comparator.comparing(ClassDto::getDuration).reversed();
+            case "attendee" -> {
+                comparator = Comparator.comparing(c -> c.getAttendee().getName());
+                if (direction.equals("desc")) comparator = comparator.reversed();
+            }
+            case "location" -> {
+                comparator = Comparator.comparing(c -> c.getLocation_id().getCity());
+                if (direction.equals("desc")) comparator = comparator.reversed();
+            }
+            case "fsu" -> {
+                comparator = Comparator.comparing(c -> c.getLocation_id().getFsu());
+                if (direction.equals("desc")) comparator = comparator.reversed();
+            }
+            default -> throw new ResourceBadRequestException("Invalid parameter for sort, there's no such property");
+        }
+        classDtos.sort(comparator);
         return classDtos;
     }
 
     public ClassDetailDto createClass(ClassVM classVM) {
 //        if (classRepository.existsByName(classVM.name()))
 //            throw new ResourceAlreadyExistsException("Class name already exists");
-        Program program = programRepository.findById(classVM.programId())
+        Program program = programRepository.findByIdForClass(classVM.programId())
                 .orElseThrow(() -> new ResourceNotFoundException("Program ID not found"));
         int totalStudyDates = program.getSyllabuses().stream()
                 .mapToInt(s -> s.getSessions().size())
                 .sum();
+//        int totalStudyDates = program.getSyllabuses().stream()
+//                .flatMap(s -> s.getSessions().stream()).collect(Collectors.toSet()).size();
         if (classVM.studyDates().size() != totalStudyDates)
             throw new ResourceBadRequestException("Class have to last exactly for " + totalStudyDates + " dates");
         classVM.studyDates().sort(null);
@@ -165,6 +221,8 @@ public class ClassService {
 
         List<Session> sessionList = program.getSyllabuses().stream()
                 .flatMap(s -> s.getSessions().stream())
+//                .collect(Collectors.toSet())
+//                .stream()
                 .toList();
         for (int i = 0; i < sessionList.size(); i++) {
             ClassSchedule classSchedule = new ClassSchedule();
@@ -186,6 +244,11 @@ public class ClassService {
         ClassDetail findingClassDetail = classDetailRepository.findDetailsByClass_IdAndStatusNotDeleted(classId)
                 .orElseThrow(() -> new ResourceNotFoundException("Class ID " + classId + " not found"));
         return classDetailMapper.toDto(findingClassDetail);
+    }
+
+    public List<ClassDetailDto> getDetailsByStudyDate(LocalDate date) {
+        List<ClassDetail> classDetailList = classDetailRepository.findActiveClassByStudyDateAndStatus(date);
+        return classDetailMapper.toDtos(classDetailList);
     }
 
     public void deleteClass(Long id) {
@@ -237,11 +300,13 @@ public class ClassService {
             totalStudyDates = currentClass.getClassDetail().getSchedules().size();
         }
         else {
-            program = programRepository.findById(classVM.programId())
+            program = programRepository.findByIdForClass(classVM.programId())
                     .orElseThrow(() -> new ResourceNotFoundException("Program ID not found"));
             totalStudyDates = program.getSyllabuses().stream()
                     .mapToInt(s -> s.getSessions().size())
                     .sum();
+//            totalStudyDates = program.getSyllabuses().stream()
+//                    .flatMap(s -> s.getSessions().stream()).collect(Collectors.toSet()).size();
         }
         if (classVM.studyDates().size() != totalStudyDates)
             throw new ResourceBadRequestException("Class have to last exactly for " + totalStudyDates + " dates");
@@ -292,6 +357,8 @@ public class ClassService {
             currentClassDetail.getSchedules().clear();
             List<Session> sessionList = program.getSyllabuses().stream()
                     .flatMap(s -> s.getSessions().stream())
+//                    .collect(Collectors.toSet())
+//                    .stream()
                     .toList();
             for (int i = 0; i < sessionList.size(); i++) {
                 ClassSchedule classSchedule = new ClassSchedule();

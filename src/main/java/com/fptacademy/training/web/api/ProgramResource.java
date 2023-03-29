@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RequestMapping("/api")
@@ -68,6 +67,7 @@ public interface ProgramResource {
     @GetMapping(value = "/programs", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ProgramListResponseVM> getPrograms(
             @RequestParam(value = "q", required = false) List<String> keywords,
+            @RequestParam(value = "activated", required = false) Boolean activated,
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size);
