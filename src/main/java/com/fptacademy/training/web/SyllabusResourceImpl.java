@@ -520,6 +520,7 @@ public class SyllabusResourceImpl {
     );
   }
 
+
   @Operation(
     summary = "Show syllabus by id",
     description = "Syllabus Input: id(long)",

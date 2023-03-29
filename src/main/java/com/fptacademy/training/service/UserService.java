@@ -284,7 +284,7 @@ public class UserService {
                                 existUser.setCode(noNullRequiredUserVM.code());
                             }
                             if (noNullRequiredUserVM.gender() != null) {
-                                Boolean gender = true;
+                                boolean gender = true;
                                 if (noNullRequiredUserVM.gender().equalsIgnoreCase("female")) {
                                     gender = false;
                                 }
@@ -295,7 +295,7 @@ public class UserService {
                                         .replace(" ", "_").toUpperCase(Locale.ROOT)));
                             }
                             if (noNullRequiredUserVM.activated() != null) {
-                                Boolean activated = true;
+                                boolean activated = true;
                                 if (noNullRequiredUserVM.activated().equalsIgnoreCase("false")) {
                                     activated = false;
                                 }
