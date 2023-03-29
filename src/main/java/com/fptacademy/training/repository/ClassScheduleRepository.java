@@ -45,7 +45,8 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " AND (:userId IS NULL OR u.id = :userId) " +
             " AND (:className IS NULL OR cd.classField.name = :className) " +
             " AND (:classCode IS NULL OR cd.classField.code = :classCode) " +
-            " AND (:city IS NULL OR cd.location.city = :city) ")
+            " AND (:city IS NULL OR cd.location.city = :city) " +
+            " ORDER BY cs.studyDate ")
     List<ClassSchedule> findFilterActiveClassByStudyDateBetween(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
