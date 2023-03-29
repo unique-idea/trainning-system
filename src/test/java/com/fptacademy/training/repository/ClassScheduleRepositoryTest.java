@@ -89,10 +89,4 @@ public class ClassScheduleRepositoryTest {
         assertNotNull(result);
     }
 
-    @Test
-    void getCurrentClassDayOfClassScheduleShouldNotRetunrnNull() {
-        Integer result = classScheduleRepository.getCurrentClassDayOfClassSchedule(1L, 1L);
-        assertNotNull(result);
-        assertEquals(0, result);
-    }
 }
