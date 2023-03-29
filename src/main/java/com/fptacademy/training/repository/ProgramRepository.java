@@ -13,7 +13,7 @@ import java.util.Optional;
 @SuppressWarnings("NullableProblems")
 public interface ProgramRepository extends JpaRepository<Program, Long> {
     @Override
-    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses.createdBy", "syllabuses.sessions.units"})
+    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses.createdBy"})
     Optional<Program> findById(Long id);
 
     @Override
@@ -25,8 +25,8 @@ public interface ProgramRepository extends JpaRepository<Program, Long> {
 
     boolean existsByName(String name);
 
-    @EntityGraph(value = "graph.Program.syllabus.session")
-    List<Program> findByName(String name);
+//    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses.createdBy", "syllabuses.sessions.units"})
+    Optional<Program> findByName(String name);
 
     @EntityGraph(value = "graph.Program.syllabus.session")
     List<Program> findByNameContainsIgnoreCaseOrCreatedBy_FullNameContainsIgnoreCase(String name, String fullName);
