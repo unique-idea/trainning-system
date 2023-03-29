@@ -38,7 +38,7 @@ public class RoleService {
         return roleMapper.toDtos(roleRepository.findAll());
     }
 
-    public List<Role> updatePermission(List<RoleVM> role) {
+    public List<RoleDto> updatePermission(List<RoleVM> role) {
         for (int i = 0; i < role.size(); i++) {
             if (role.get(i).permissions().size() == 5) {
                 if (role.get(i).name().equalsIgnoreCase(RoleName.SUPER_ADMIN.toString())) {
@@ -55,11 +55,11 @@ public class RoleService {
                 } else {
                     throw new ResourceNotFoundException("Do no have this role: " + role.get(i).name());
                 }
-            } else {
-                throw new ResourceBadRequestException("Permission must have value of Syllabus, Program, Class, Material, User");
+//            } else {
+//                throw new ResourceBadRequestException("Permission must have value of Syllabus, Program, Class, Material, User");
             }
         }
-        return roleRepository.findAll();
+        return roleMapper.toDtos(roleRepository.findAll());
     }
 
     public void updatePermission(String role, List<String> permissions) {
