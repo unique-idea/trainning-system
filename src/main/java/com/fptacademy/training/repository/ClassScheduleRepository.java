@@ -19,9 +19,9 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " WHERE cd.status = :status " +
             " AND cs.studyDate = :date " +
             " AND (:userId IS NULL OR u.id = :userId) " +
-            " AND (:className IS NULL OR cd.classField.name = :className) " +
-            " AND (:classCode IS NULL OR cd.classField.code = :classCode) " +
-            " AND (:city IS NULL OR cd.location.city = :city) ")
+            " AND (:className IS NULL OR cd.classField.name LIKE CONCAT('%', :className, '%') ) " +
+            " AND (:classCode IS NULL OR cd.classField.code LIKE CONCAT('%', :classCode, '%') ) " +
+            " AND (:city IS NULL OR cd.location.city LIKE CONCAT('%', :city, '%') ) ")
     List<ClassSchedule> findFilterActiveClassByStudyDate(
             @Param("date") LocalDate date,
             @Param("status") String status,
@@ -37,9 +37,9 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " WHERE cd.status = :status " +
             " AND cs.studyDate BETWEEN :startDate AND :endDate " +
             " AND (:userId IS NULL OR u.id = :userId) " +
-            " AND (:className IS NULL OR cd.classField.name = :className) " +
-            " AND (:classCode IS NULL OR cd.classField.code = :classCode) " +
-            " AND (:city IS NULL OR cd.location.city = :city) " +
+            " AND (:className IS NULL OR cd.classField.name LIKE CONCAT('%', :className, '%') ) " +
+            " AND (:classCode IS NULL OR cd.classField.code LIKE CONCAT('%', :classCode, '%') ) " +
+            " AND (:city IS NULL OR cd.location.city LIKE CONCAT('%', :city, '%') ) " +
             " ORDER BY cs.studyDate ")
     List<ClassSchedule> findFilterActiveClassByStudyDateBetween(
             @Param("startDate") LocalDate startDate,
