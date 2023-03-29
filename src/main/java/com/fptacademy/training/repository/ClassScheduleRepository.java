@@ -13,7 +13,7 @@ import java.util.List;
 public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Long> {
     /*Team 3*/
 
-    @Query(value = " SELECT cs FROM ClassDetail cd " +
+    @Query(value = " SELECT DISTINCT cs FROM ClassDetail cd " +
             " JOIN cd.schedules cs " +
             " JOIN cd.users u " +
             " WHERE cd.status = :status " +
@@ -31,7 +31,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             @Param("city") String city
     );
 
-    @Query(value = " SELECT cs FROM ClassDetail cd " +
+    @Query(value = " SELECT DISTINCT cs FROM ClassDetail cd " +
             " JOIN cd.schedules cs " +
             " JOIN cd.users u " +
             " WHERE cd.status = :status " +
