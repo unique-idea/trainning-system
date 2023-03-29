@@ -4,10 +4,10 @@ import com.fptacademy.training.domain.ClassSchedule;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.ClassStatus;
 import com.fptacademy.training.exception.ResourceBadRequestException;
-import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.ClassScheduleRepository;
+import com.fptacademy.training.service.util.DateTimeUtil;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,85 +24,291 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ClassScheduleServiceTest {
 
     @Mock
     private ClassScheduleRepository classScheduleRepository;
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private ClassScheduleService classScheduleService;
-
-    private ClassSchedule classSchedule;
+    private List<ClassSchedule> classSchedules;
+    private User currentUser;
 
     @BeforeEach
     void setUp() {
+        currentUser = new User();
+        currentUser.setId(1L);
+        currentUser.setFullName("Im current user");
+
         User trainer;
         trainer = new User();
         trainer.setFullName("Dao Minh Tri");
         trainer.setId(1L);
 
-        classSchedule = new ClassSchedule();
-        classSchedule.setId(1L);
-        classSchedule.setStudyDate(LocalDate.of(2023, 3, 17));
-        classSchedule.setTrainer(trainer);
+        ClassSchedule classSchedule1, classSchedule2;
+
+        classSchedule1 = new ClassSchedule();
+        classSchedule1.setId(1L);
+        classSchedule1.setStudyDate(LocalDate.of(2023, 3, 17));
+        classSchedule1.setTrainer(trainer);
+
+        classSchedule2 = new ClassSchedule();
+        classSchedule2.setId(1L);
+        classSchedule2.setStudyDate(LocalDate.of(2023, 3, 17));
+        classSchedule2.setTrainer(trainer);
+
+        classSchedules = new ArrayList<>();
+        classSchedules.add(classSchedule1);
+        classSchedules.add(classSchedule2);
     }
 
-//    @Test
-//    @DisplayName("Test getClassScheduleByDate case 1")
-//    void getClassScheduleByDateShouldReturnAList() {
-//        //given
-//        List<ClassSchedule> classScheduleList = new ArrayList<>();
-//        classScheduleList.add(classSchedule);
-//        given(classScheduleRepository.findActiveClassByStudyDate(any(LocalDate.class), anyString()))
-//                .willReturn(classScheduleList);
-//        //when
-//        List<ClassSchedule> result = classScheduleService
-//                .getClassScheduleByDate(LocalDate.of(2013, 3, 1));
-//
-//        //then
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//
-//        verify(classScheduleRepository).findActiveClassByStudyDate(any(LocalDate.class), anyString());
-//    }
+    @Test
+    void testGetFilterClassScheduleByDateShouldReturnAList() {
+        //given
+        LocalDate date = LocalDate.of(2023, 3, 27);
+        given(classScheduleRepository.findFilterActiveClassByStudyDate(
+                any(LocalDate.class),
+                eq(ClassStatus.OPENNING.toString()),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)))
+                .willReturn(classSchedules);
+        //when
+        List<ClassSchedule> result = classScheduleService.getFilterClassScheduleByDate(
+                date,
+                null,
+                null,
+                null
+        );
+        //then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(classScheduleRepository, times(1)).findFilterActiveClassByStudyDate(
+                date,
+                ClassStatus.OPENNING.toString(),
+                null,
+                null,
+                null,
+                null
+        );
+    }
 
-//    @Test
-//    @DisplayName("Test getClassScheduleByDate case 2")
-//    void getClassScheduleByDateShouldThrowException1() {
-//        //given
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleByDate(null)
-//        )
-//                .hasMessage("date is null")
-//                .isInstanceOf(ResourceBadRequestException.class)
-//        ;
-//
-//        verify(classScheduleRepository, never()).findActiveClassByStudyDate(any(LocalDate.class), anyString());
-//    }
+    @Test
+    void testGetFilterClassScheduleByDateShouldThrowException() {
+        //given
+        //when
+        //then
+        Assertions.assertThatThrownBy(
+                        () -> classScheduleService.getFilterClassScheduleByDate(
+                                null,
+                                null,
+                                null,
+                                null
+                        )
+                )
+                .hasMessage("Bad request: date is null")
+                .isInstanceOf(ResourceBadRequestException.class);
 
-//    @Test
-//    @DisplayName("Test getClassScheduleByDate case 3")
-//    void getClassScheduleByDateShouldThrowException2() {
-//        //given
-//        List<ClassSchedule> classScheduleList = new ArrayList<>();
-//        given(classScheduleRepository.findActiveClassByStudyDate(LocalDate.of(2023, 3, 10), ClassStatus.OPENNING.toString()))
-//                .willReturn(classScheduleList);
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleByDate(LocalDate.of(2023, 3, 10))
-//        )
-//                .hasMessage("There are no class at date " + LocalDate.of(2023, 3, 10))
-//                .isInstanceOf(ResourceNotFoundException.class)
-//        ;
-//        verify(classScheduleRepository).findActiveClassByStudyDate(any(LocalDate.class), anyString());
-//    }
+        verify(classScheduleRepository, never()).findFilterActiveClassByStudyDate(
+                null,
+                ClassStatus.OPENNING.toString(),
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Test
+    void testGetFilterClassScheduleOfCurrentUserByDateShouldReturnAList() {
+        //given
+        LocalDate date = LocalDate.of(2023, 3, 29);
+        given(userService.getCurrentUserLogin()).willReturn(currentUser);
+        given(classScheduleRepository.findFilterActiveClassByStudyDate(
+                any(LocalDate.class),
+                eq(ClassStatus.OPENNING.toString()),
+                anyLong(),
+                eq(null),
+                eq(null),
+                eq(null)
+        )).willReturn(classSchedules);
+        //when
+        List<ClassSchedule> result = classScheduleService.getFilterClassScheduleOfCurrentUserByDate(
+                date,
+                null,
+                null,
+                null
+        );
+        //then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(classScheduleRepository).findFilterActiveClassByStudyDate(
+                date,
+                ClassStatus.OPENNING.toString(),
+                1L,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Test
+    void testGetFilterClassScheduleOfCurrentUserByDateShouldThrowException() {
+        //given
+        //when
+        //then
+        Assertions.assertThatThrownBy(
+                        () -> classScheduleService.getFilterClassScheduleOfCurrentUserByDate(
+                                null,
+                                null,
+                                null,
+                                null
+                        )
+                )
+                .hasMessage("Bad request: date is null")
+                .isInstanceOf(ResourceBadRequestException.class);
+
+        verify(userService, never()).getCurrentUserLogin();
+        verify(classScheduleRepository, never()).findFilterActiveClassByStudyDate(
+                null,
+                ClassStatus.OPENNING.toString(),
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+
+    @Test
+    void testGetFilterClassScheduleOfCurrentUserInAWeekShouldReturnAList() {
+        //given
+        LocalDate date = LocalDate.of(2023, 3, 29);
+        given(userService.getCurrentUserLogin()).willReturn(currentUser);
+        given(classScheduleRepository.findFilterActiveClassByStudyDateBetween(
+                any(LocalDate.class),
+                any(LocalDate.class),
+                eq(ClassStatus.OPENNING.toString()),
+                anyLong(),
+                eq(null),
+                eq(null),
+                eq(null)
+        )).willReturn(classSchedules);
+        //when
+        List<ClassSchedule> result = classScheduleService.getFilterClassScheduleOfCurrentUserInAWeek(
+                date,
+                null,
+                null,
+                null
+        );
+        //then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(classScheduleRepository).findFilterActiveClassByStudyDateBetween(
+                LocalDate.of(2023, 3, 27),
+                LocalDate.of(2023, 4, 2),
+                ClassStatus.OPENNING.toString(),
+                1L,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Test
+    void testGetFilterClassScheduleOfCurrentUserInAWeekShouldThrowException() {
+        //given
+        //when
+        //then
+        Assertions.assertThatThrownBy(
+                        () -> classScheduleService.getFilterClassScheduleOfCurrentUserInAWeek(
+                                null,
+                                null,
+                                null,
+                                null
+                        )
+                )
+                .hasMessage("Bad request: date is null")
+                .isInstanceOf(ResourceBadRequestException.class);
+        verify(userService, never()).getCurrentUserLogin();
+        verify(classScheduleRepository, never()).findFilterActiveClassByStudyDateBetween(
+                any(LocalDate.class),
+                any(LocalDate.class),
+                anyString(),
+                anyLong(),
+                eq(null),
+                eq(null),
+                eq(null)
+        );
+    }
+
+    @Test
+    void testGetFilterClassScheduleInAWeekShouldReturnAList() {
+        //given
+        LocalDate date = LocalDate.of(2023, 3, 29);
+        LocalDate firstDate = DateTimeUtil.getFirstDateOfCurrentWeek(date);
+        LocalDate lastDate = DateTimeUtil.getLastDateOfCurrentWeek(date);
+        given(classScheduleRepository.findFilterActiveClassByStudyDateBetween(
+                any(LocalDate.class),
+                any(LocalDate.class),
+                eq(ClassStatus.OPENNING.toString()),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)
+        )).willReturn(classSchedules);
+        //when
+        List<ClassSchedule> result = classScheduleService.getFilterClassScheduleInAWeek(
+                date,
+                null,
+                null,
+                null
+        );
+        //then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(classScheduleRepository).findFilterActiveClassByStudyDateBetween(
+                firstDate,
+                lastDate,
+                ClassStatus.OPENNING.toString(),
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Test
+    void testGetFilterClassScheduleInAWeekShouldThrowException() {
+        //given
+        //when
+        //then
+        Assertions.assertThatThrownBy(
+                        () -> classScheduleService.getFilterClassScheduleInAWeek(
+                                null,
+                                null,
+                                null,
+                                null
+                        )
+                )
+                .hasMessage("Bad request: date is null.")
+                .isInstanceOf(ResourceBadRequestException.class);
+        verify(classScheduleRepository, never()).findFilterActiveClassByStudyDateBetween(
+                any(LocalDate.class),
+                any(LocalDate.class),
+                anyString(),
+                eq(null),
+                eq(null),
+                eq(null),
+                eq(null)
+        );
+    }
 
     @Test
     @DisplayName("Test getCurrentClassDay case 1")
@@ -150,207 +356,5 @@ class ClassScheduleServiceTest {
         assertEquals(-1, result);
 
         verify(classScheduleRepository).getCurrentClassDayOfClassSchedule(anyLong(), anyLong());
-    }
-
-//    @Test
-//    @DisplayName("Test getClassScheduleOfAUserByDate case 1")
-//    void getClassScheduleOfAUserByDateShouldReturnAList() {
-//        //given
-//        List<ClassSchedule> classSchedules = new ArrayList<>();
-//        classSchedules.add(classSchedule);
-//        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
-//                .willReturn(classSchedules);
-//        //when
-//        List<ClassSchedule> result = classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), 1L);
-//        //then
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
-//        ;
-//    }
-
-//    @Test
-//    @DisplayName("Test getClassScheduleOfAUserByDate case 2")
-//    void getClassScheduleOfAUserByDateShouldThrowException1() {
-//        //given
-//        List<ClassSchedule> classSchedules = new ArrayList<>();
-//        given(classScheduleRepository.findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString()))
-//                .willReturn(classSchedules);
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.of(2022, 3, 3), 1L)
-//        )
-//                .hasMessage("There are no class at date " + LocalDate.of(2022, 3, 3)
-//                        + " of user 1")
-//                .isInstanceOf(ResourceNotFoundException.class);
-//        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString())
-//        ;
-//    }
-
-//    @Test
-//    @DisplayName("Test getClassScheduleOfAUserByDate case 3")
-//    void getClassScheduleOfAUserByDateShouldThrowException2() {
-//        //given
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleOfAUserByDate(null, 1L)
-//        )
-//                .hasMessage("Bad request for date and userId value")
-//                .isInstanceOf(ResourceBadRequestException.class);
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleOfAUserByDate(LocalDate.now(), null)
-//        )
-//                .hasMessage("Bad request for date and userId value")
-//                .isInstanceOf(ResourceBadRequestException.class);
-//
-//        verify(classScheduleRepository, never()).findActiveClassByUserIdAndStudyDate(any(Long.class), any(LocalDate.class), anyString());
-//    }
-
-//    @Test
-//    @DisplayName("Test getClassScheduleOfAUserByDateBetween case 1")
-//    void getClassScheduleOfAUserByDateBetweenShouldReturnAList() {
-//        //given
-//        List<ClassSchedule> classSchedules = new ArrayList<>();
-//        classSchedules.add(classSchedule);
-//        given(classScheduleRepository
-//                .findActiveClassByUserIdAndStudyDateBetween(anyLong(), any(LocalDate.class), any(LocalDate.class), anyString()))
-//                .willReturn(classSchedules);
-//        //when
-//        List<ClassSchedule> result = classScheduleService.getClassScheduleOfAUserByDateBetween(
-//                1L,
-//                LocalDate.of(2023, 3, 10),
-//                LocalDate.of(2023, 3, 15));
-//        //then
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDateBetween(
-//                anyLong(),
-//                any(LocalDate.class),
-//                any(LocalDate.class),
-//                anyString()
-//        );
-//    }
-
-//    @Test
-//    @DisplayName("Test getClassScheduleOfAUserByDateBetween case 2")
-//    void getClassScheduleOfAUserByDateBetweenShouldThrowException1() {
-//        //given
-//        List<ClassSchedule> classSchedules = new ArrayList<>();
-//        given(classScheduleRepository
-//                .findActiveClassByUserIdAndStudyDateBetween(anyLong(), any(LocalDate.class), any(LocalDate.class), anyString()))
-//                .willReturn(classSchedules);
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleOfAUserByDateBetween(
-//                        1L,
-//                        LocalDate.of(2023, 3, 10),
-//                        LocalDate.of(2023, 3, 15))
-//        )
-//                .hasMessage("There are no class between "
-//                        + LocalDate.of(2023, 3, 10) + " and "
-//                        + LocalDate.of(2023, 3, 15)
-//                        + " of user 1")
-//                .isInstanceOf(ResourceNotFoundException.class);
-//
-//        verify(classScheduleRepository).findActiveClassByUserIdAndStudyDateBetween(
-//                anyLong(),
-//                any(LocalDate.class),
-//                any(LocalDate.class),
-//                anyString()
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("Test getClassScheduleOfAUserByDateBetween case 3")
-//    void getClassScheduleOfAUserByDateBetweenShouldThrowException2() {
-//        //given
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleOfAUserByDateBetween(
-//                        null,
-//                        LocalDate.of(2023, 3, 10),
-//                        LocalDate.of(2023, 3, 15))
-//        )
-//                .hasMessage("Bad request")
-//                .isInstanceOf(ResourceBadRequestException.class);
-//
-//        verify(classScheduleRepository, never()).findActiveClassByUserIdAndStudyDateBetween(
-//                anyLong(),
-//                any(LocalDate.class),
-//                any(LocalDate.class),
-//                anyString()
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("Test getClassScheduleByDateBetween case 1")
-//    void getClassScheduleByDateBetweenShouldReturnAList() {
-//        //given
-//        List<ClassSchedule> classSchedules = new ArrayList<>();
-//        classSchedules.add(classSchedule);
-//        given(classScheduleRepository.findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString()))
-//                .willReturn(classSchedules);
-//        //when
-//        List<ClassSchedule> result = classScheduleService.getClassScheduleByDateBetween(
-//                LocalDate.of(2023, 3, 10),
-//                LocalDate.of(2023, 3, 15)
-//        );
-//        //then
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(classScheduleRepository).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString());
-//    }
-
-//    @Test
-//    @DisplayName("Test getClassScheduleByDateBetween case 2")
-//    void getClassScheduleByDateBetweenShouldThrowException1() {
-//        //given
-//        List<ClassSchedule> classSchedules = new ArrayList<>();
-//        given(classScheduleRepository.findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString()))
-//                .willReturn(classSchedules);
-//        //when
-//        //then
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleByDateBetween(
-//                        LocalDate.of(2023, 3, 10),
-//                        LocalDate.of(2023, 3, 15)
-//                )
-//        )
-//                .hasMessage("There are no class between "
-//                        + LocalDate.of(2023, 3, 10) + " and "
-//                        + LocalDate.of(2023, 3, 15))
-//                .isInstanceOf(ResourceNotFoundException.class);
-//        verify(classScheduleRepository).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString());
-//    }
-//
-//    @Test
-//    @DisplayName("Test getClassScheduleByDateBetween case 3")
-//    void getClassScheduleByDateBetweenShouldThrowException2() {
-//        //given
-//        //when
-//        //then
-//
-//        assertThatThrownBy(
-//                () -> classScheduleService.getClassScheduleByDateBetween(
-//                        null, null
-//                )
-//        )
-//                .hasMessage("Bad request")
-//                .isInstanceOf(ResourceBadRequestException.class);
-//        verify(classScheduleRepository, never()).findActiveClassByStudyDateBetween(any(LocalDate.class), any(LocalDate.class), anyString());
-//    }
-
-    @Test
-    @Disabled
-    void getClassScheduleOfAUserInAWeek() {
-    }
-
-    @Test
-    @Disabled
-    void getClassScheduleInAWeek() {
     }
 }

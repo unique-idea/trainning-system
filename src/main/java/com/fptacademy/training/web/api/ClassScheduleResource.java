@@ -38,7 +38,7 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "/admin/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByDate(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
             @RequestParam(required = false) String className,
@@ -60,7 +60,7 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "/admin/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/calendar/week/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
             @RequestParam(required = false) String className,
@@ -82,7 +82,7 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "user/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
             @RequestParam(required = false) String className,
@@ -104,7 +104,7 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "/week/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "user/calendar/week/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(
             @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
             @RequestParam(required = false) String className,

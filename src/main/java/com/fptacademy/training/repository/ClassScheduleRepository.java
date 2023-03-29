@@ -13,7 +13,7 @@ import java.util.List;
 public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Long> {
     /*Team 3*/
 
-    @Query(value = " SELECT cs FROM ClassDetail cd " +
+    @Query(value = " SELECT DISTINCT cs FROM ClassDetail cd " +
             " JOIN cd.schedules cs " +
             " JOIN cd.users u " +
             " WHERE cd.status = :status " +
@@ -31,7 +31,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             @Param("city") String city
     );
 
-    @Query(value = " SELECT cs FROM ClassDetail cd " +
+    @Query(value = " SELECT DISTINCT cs FROM ClassDetail cd " +
             " JOIN cd.schedules cs " +
             " JOIN cd.users u " +
             " WHERE cd.status = :status " +
@@ -51,7 +51,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             @Param("city") String city
     );
 
-    @Query(value = "SELECT COALESCE(MAX(row_num), 0) " +
+    @Query(value = "SELECT COALESCE(row_num, 0) " +
             " FROM ( " +
             "    SELECT *, ROW_NUMBER() OVER (ORDER BY study_date) as row_num " +
             "    FROM class_schedules " +
