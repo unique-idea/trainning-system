@@ -4,25 +4,19 @@ import com.fptacademy.training.domain.ClassSchedule;
 import com.fptacademy.training.domain.enumeration.ClassStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
+@DataJpaTest
 public class ClassScheduleRepositoryTest {
 
     @Autowired
     private ClassScheduleRepository classScheduleRepository;
-
-    @Test
-    void findActiveClassByStudyDateShouldWork() {
-        LocalDate date = LocalDate.now();
-        List<ClassSchedule> result = classScheduleRepository.findActiveClassByStudyDate(date, ClassStatus.OPENNING.toString());
-        assertNotNull(result);
-    }
 
     @Test
     void findFilterActiveClassByStudyDateShouldWork() {
@@ -41,6 +35,20 @@ public class ClassScheduleRepositoryTest {
     }
 
     @Test
+    void findFilterActiveClassByStudyDateShouldNotReturnNull() {
+        List<ClassSchedule> classSchedules = classScheduleRepository.findFilterActiveClassByStudyDate(
+                null,
+                ClassStatus.OPENNING.toString(),
+                null,
+                null,
+                "abc",
+                null
+        );
+        assertNotNull(classSchedules);
+        assertEquals(0, classSchedules.size());
+    }
+
+    @Test
     void findFilterActiveClassByStudyDateBetweenShouldWork() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = LocalDate.now();
@@ -54,39 +62,25 @@ public class ClassScheduleRepositoryTest {
                 "abc",
                 "Ho Chi Minh"
         );
-
         assertNotNull(classSchedules);
     }
 
     @Test
-    void findActiveClassByUserIdAndStudyDateShouldWork() {
-        LocalDate date = LocalDate.now();
-        List<ClassSchedule> result = classScheduleRepository
-                .findActiveClassByUserIdAndStudyDate(1L, date, ClassStatus.OPENNING.toString());
-        assertNotNull(result);
+    void findFilterActiveClassByStudyDateBetweenShouldNotReturnNull() {
+        LocalDate startDate = LocalDate.of(2023, 3, 20);
+        LocalDate endDate = LocalDate.of(2023, 3, 12);
+
+        List<ClassSchedule> classSchedules = classScheduleRepository.findFilterActiveClassByStudyDateBetween(
+                startDate,
+                endDate,
+                ClassStatus.OPENNING.toString(),
+                null,
+                null,
+                "abc",
+                "Ho Chi Minh"
+        );
+        assertNotNull(classSchedules);
+        assertEquals(0, classSchedules.size());
     }
 
-    @Test
-    void findActiveClassByUserIdAndStudyDateBetweenShouldWork() {
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(6);
-        List<ClassSchedule> result = classScheduleRepository
-                .findActiveClassByUserIdAndStudyDateBetween(1L, startDate, endDate, ClassStatus.OPENNING.toString());
-        assertNotNull(result);
-    }
-
-    @Test
-    void findActiveClassByStudyDateBetween() {
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(6);
-        List<ClassSchedule> result = classScheduleRepository
-                .findActiveClassByStudyDateBetween(startDate, endDate, ClassStatus.OPENNING.toString());
-        assertNotNull(result);
-    }
-
-    @Test
-    void getCurrentClassDayOfClassSchedule() {
-        Integer result = classScheduleRepository.getCurrentClassDayOfClassSchedule(1L, 1L);
-        assertNotNull(result);
-    }
 }

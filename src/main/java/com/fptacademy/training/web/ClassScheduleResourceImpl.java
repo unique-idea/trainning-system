@@ -29,7 +29,7 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
             String classCode,
             String city
     ) {
-        List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleByDate(date, className, classCode, city);
+        List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleByDate(date, className, classCode, city);
         List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -43,7 +43,7 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
             String city
     ) {
 
-        List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleInAWeek(date, className, classCode, city);
+        List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleInAWeek(date, className, classCode, city);
         List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -57,7 +57,7 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
             String city
     ) {
 
-        List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleOfCurrentUserByDate(date, className, classCode, city);
+        List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleOfCurrentUserByDate(date, className, classCode, city);
         List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -71,7 +71,7 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
             String city
     ) {
 
-        List<ClassSchedule> classSchedules = classScheduleService.getClassScheduleOfCurrentUserInAWeek(date, className, classCode, city);
+        List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleOfCurrentUserInAWeek(date, className, classCode, city);
         List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
