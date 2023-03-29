@@ -88,7 +88,7 @@ class ClassScheduleResourceImplTest {
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/admin/calendar/{day}", date)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/{day}", date)
 //                        .header("Authorization", token)
 //                        .header("Content-Type", "application/json")
                         .accept(MediaType.APPLICATION_JSON))
@@ -114,7 +114,7 @@ class ClassScheduleResourceImplTest {
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/admin/week/calendar/{day}", date)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/week/{day}", date)
 //                        .header("Authorization", token)
 //                        .header("Content-Type", "application/json")
                         .accept(MediaType.APPLICATION_JSON))
@@ -140,7 +140,7 @@ class ClassScheduleResourceImplTest {
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/{day}", date)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/calendar/{day}", date)
 //                        .header("Authorization", token)
 //                        .header("Content-Type", "application/json")
                         .accept(MediaType.APPLICATION_JSON))
@@ -166,7 +166,7 @@ class ClassScheduleResourceImplTest {
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/week/calendar/{day}", date)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/calendar/week/{day}", date)
 //                        .header("Authorization", token)
 //                        .header("Content-Type", "application/json")
                         .accept(MediaType.APPLICATION_JSON))

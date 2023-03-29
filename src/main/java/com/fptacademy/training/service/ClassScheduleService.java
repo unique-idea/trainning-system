@@ -47,7 +47,7 @@ public class ClassScheduleService {
             String city
     ) {
         if (date == null) {
-            throw new ResourceBadRequestException("Bad request for date and userId value");
+            throw new ResourceBadRequestException("Bad request: date is null");
         }
         User user = userService.getCurrentUserLogin();
         return classScheduleRepository.findFilterActiveClassByStudyDate(
@@ -60,6 +60,7 @@ public class ClassScheduleService {
         );
     }
 
+    //testing here
     public List<ClassSchedule> getFilterClassScheduleOfCurrentUserInAWeek(
             LocalDate date,
             String className,
@@ -67,7 +68,7 @@ public class ClassScheduleService {
             String city
     ) {
         if (date == null) {
-            throw new ResourceBadRequestException("Bad request");
+            throw new ResourceBadRequestException("Bad request: date is null");
         }
         LocalDate firstDate = DateTimeUtil.getFirstDateOfCurrentWeek(date);
         LocalDate lastDate = DateTimeUtil.getLastDateOfCurrentWeek(date);
