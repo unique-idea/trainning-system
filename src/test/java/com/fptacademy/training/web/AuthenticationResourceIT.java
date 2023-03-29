@@ -9,6 +9,7 @@ import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
+import com.fptacademy.training.service.util.TestUtil;
 import com.fptacademy.training.web.vm.LoginVM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

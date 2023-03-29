@@ -14,7 +14,7 @@ import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
-import com.fptacademy.training.web.TestUtil;
+import com.fptacademy.training.service.util.TestUtil;
 import com.fptacademy.training.web.vm.ProgramVM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

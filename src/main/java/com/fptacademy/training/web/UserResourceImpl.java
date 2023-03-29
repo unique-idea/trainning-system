@@ -110,7 +110,7 @@ public class UserResourceImpl implements UserResource {
 
     @Override
     public ResponseEntity<?> exportUsersToExcel(HttpServletResponse response) {
-        response.setContentType(String.valueOf(MediaType.APPLICATION_OCTET_STREAM));
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String headerKey = HttpHeaders.CONTENT_DISPOSITION;
         String headerValue = "attachment;filename=User_Export.xlsx";
         response.setHeader(headerKey, headerValue);
