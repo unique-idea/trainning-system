@@ -5,6 +5,7 @@ import static com.fptacademy.training.service.util.RandomUtil.randomDate;
 import static com.fptacademy.training.service.util.RandomUtil.randomInt;
 import static com.fptacademy.training.service.util.RandomUtil.randomString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fptacademy.training.domain.enumeration.RoleName;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -45,7 +47,7 @@ public class UserRepositoryTest {
 
     private Direction direction = Direction.DESC;
     private String sortBy = "role";
-    private final Pageable pageable = PageRequest.of(0, 500, direction, sortBy);
+    private final Pageable pageable = PageRequest.of(0, 10, direction, sortBy);
 
     private class UserIdComparator implements Comparator<User> {
         @Override
@@ -259,5 +261,11 @@ public class UserRepositoryTest {
         assertThat(usersFullFilters.getContent())
                 .usingElementComparator(new UserIdComparator())
                 .containsExactlyInAnyOrderElementsOf(actualResult);
+    }
+
+    @Test
+    void findMemberOfClassByRoleShouldWork(){
+        List<User> user = userRepository.findMemberOfClassByRole(1L, RoleName.CLASS_ADMIN.toString());
+        assertNotNull(user);
     }
 }
