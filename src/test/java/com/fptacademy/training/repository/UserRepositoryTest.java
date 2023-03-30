@@ -45,7 +45,7 @@ public class UserRepositoryTest {
 
     private Direction direction = Direction.DESC;
     private String sortBy = "role";
-    private final Pageable pageable = PageRequest.of(0, 500, direction, sortBy);
+    private final Pageable pageable = PageRequest.of(0, 10, direction, sortBy);
 
     private class UserIdComparator implements Comparator<User> {
         @Override
@@ -108,7 +108,7 @@ public class UserRepositoryTest {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        for (int i = 0; i < pageable.getPageSize(); i++) {
+        for (int i = 0; i < 10; i++) {
             User user = new User();
             user.setCode(randomString(6, false));
             user.setFullName(randomString(randomInt(10, 20), true));

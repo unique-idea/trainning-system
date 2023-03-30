@@ -35,10 +35,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByFullNameContaining(String keyword);
 
     @Query("SELECT u FROM User u " +
+            "LEFT JOIN u.level l " +
             "WHERE (:emailParam IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :emailParam, '%'))) " +
             "AND (:fullNameParam IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :fullNameParam, '%'))) " +
             "AND (:codeParam IS NULL OR LOWER(u.code) LIKE LOWER(CONCAT('%', :codeParam, '%'))) " +
-            "AND (:levelNameParam IS NULL OR LOWER(u.level.name) LIKE LOWER(CONCAT('%', :levelNameParam, '%'))) " +
+            "AND (:levelNameParam IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :levelNameParam, '%'))) " +
             "AND (:roleNameParam IS NULL OR LOWER(u.role.name) LIKE LOWER(CONCAT('%', :roleNameParam, '%'))) " +
             "AND (:activatedParam IS NULL OR u.activated = :activatedParam) " +
             "AND (:birthdayFromParam IS NULL OR :birthdayToParam IS NULL OR (:birthdayFromParam <= u.birthday AND u.birthday <= :birthdayToParam)) " +
