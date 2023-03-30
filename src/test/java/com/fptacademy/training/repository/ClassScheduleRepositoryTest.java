@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,9 +28,9 @@ public class ClassScheduleRepositoryTest {
                 date,
                 ClassStatus.OPENNING.toString(),
                 null,
-                null,
-                "abc",
-                "Ho Chi Minh"
+                Arrays.asList("abc", "xyz", "123"),
+                Arrays.asList("className1", "className2"),
+                Arrays.asList("Ho Chi Minh", "Ha Noi")
         );
 
         assertNotNull(classSchedules);
@@ -40,9 +42,9 @@ public class ClassScheduleRepositoryTest {
                 null,
                 ClassStatus.OPENNING.toString(),
                 null,
-                null,
-                "abc",
-                null
+                Arrays.asList("abc", "xyz", "123"),
+                Arrays.asList("className1", "className2"),
+                Arrays.asList("Ho Chi Minh", "Ha Noi")
         );
         assertNotNull(classSchedules);
         assertEquals(0, classSchedules.size());
@@ -53,14 +55,24 @@ public class ClassScheduleRepositoryTest {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = LocalDate.now();
 
+        List<String> className = new ArrayList<>();
+        className.add("className1");
+        className.add("className3");
+        List<String> classCode = new ArrayList<>();
+        classCode.add("classCode1");
+        classCode.add("classCode2");
+        List<String> city = new ArrayList<>();
+        city.add("city1");
+        city.add("city2");
+
         List<ClassSchedule> classSchedules = classScheduleRepository.findFilterActiveClassByStudyDateBetween(
                 startDate,
                 endDate,
                 ClassStatus.OPENNING.toString(),
                 null,
-                null,
-                "abc",
-                "Ho Chi Minh"
+                className,
+                classCode,
+                city
         );
         assertNotNull(classSchedules);
     }
@@ -76,8 +88,8 @@ public class ClassScheduleRepositoryTest {
                 ClassStatus.OPENNING.toString(),
                 null,
                 null,
-                "abc",
-                "Ho Chi Minh"
+                Arrays.asList("className1", "className2"),
+                Arrays.asList("Ho Chi Minh", "Ha Noi")
         );
         assertNotNull(classSchedules);
         assertEquals(0, classSchedules.size());
