@@ -23,9 +23,9 @@ public class ClassScheduleService {
 
     public List<ClassSchedule> getFilterClassScheduleByDate(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
         if (date == null) {
             throw new ResourceBadRequestException("Bad request: date is null");
@@ -42,9 +42,9 @@ public class ClassScheduleService {
 
     public List<ClassSchedule> getFilterClassScheduleOfCurrentUserByDate(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
         if (date == null) {
             throw new ResourceBadRequestException("Bad request: date is null");
@@ -63,9 +63,9 @@ public class ClassScheduleService {
     //testing here
     public List<ClassSchedule> getFilterClassScheduleOfCurrentUserInAWeek(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
         if (date == null) {
             throw new ResourceBadRequestException("Bad request: date is null");
@@ -73,6 +73,7 @@ public class ClassScheduleService {
         LocalDate firstDate = DateTimeUtil.getFirstDateOfCurrentWeek(date);
         LocalDate lastDate = DateTimeUtil.getLastDateOfCurrentWeek(date);
         User user = userService.getCurrentUserLogin();
+
         return classScheduleRepository.findFilterActiveClassByStudyDateBetween(
                 firstDate,
                 lastDate,
@@ -86,9 +87,9 @@ public class ClassScheduleService {
 
     public List<ClassSchedule> getFilterClassScheduleInAWeek(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
         if (date == null) {
             throw new ResourceBadRequestException("Bad request: date is null.");

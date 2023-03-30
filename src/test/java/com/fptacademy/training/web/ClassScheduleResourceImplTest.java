@@ -82,13 +82,12 @@ class ClassScheduleResourceImplTest {
 
     @Test
     void getAllClassScheduleShouldReturnAListOfClassScheduleDTO() throws Exception {
-        LocalDate date = LocalDate.of(2023, 3, 28);
         given(classScheduleService.getFilterClassScheduleByDate(any(LocalDate.class), eq(null), eq(null), eq(null)))
                 .willReturn(new ArrayList<>());
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/{day}", date)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar?date=2023-03-27")
 //                        .header("Authorization", token)
 //                        .header("Content-Type", "application/json")
                         .accept(MediaType.APPLICATION_JSON))
@@ -108,15 +107,12 @@ class ClassScheduleResourceImplTest {
 
     @Test
     void getAllClassScheduleByWeekShouldReturnAList() throws Exception {
-        LocalDate date = LocalDate.of(2023, 3, 28);
         given(classScheduleService.getFilterClassScheduleInAWeek(any(LocalDate.class), eq(null), eq(null), eq(null)))
                 .willReturn(new ArrayList<>());
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/week/{day}", date)
-//                        .header("Authorization", token)
-//                        .header("Content-Type", "application/json")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/calendar/week?date=2023-03-27")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -134,15 +130,12 @@ class ClassScheduleResourceImplTest {
 
     @Test
     void getAllClassScheduleOfCurrentUserShouldReturnAList() throws Exception {
-        LocalDate date = LocalDate.of(2023, 3, 28);
         given(classScheduleService.getFilterClassScheduleOfCurrentUserByDate(any(LocalDate.class), eq(null), eq(null), eq(null)))
                 .willReturn(new ArrayList<>());
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/calendar/{day}", date)
-//                        .header("Authorization", token)
-//                        .header("Content-Type", "application/json")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/calendar?date=2023-03-27")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -160,15 +153,12 @@ class ClassScheduleResourceImplTest {
 
     @Test
     void getAllClassScheduleOfCurrentUserByWeekShouldReturnAList() throws Exception {
-        LocalDate date = LocalDate.of(2023, 3, 28);
         given(classScheduleService.getFilterClassScheduleOfCurrentUserInAWeek(any(LocalDate.class), eq(null), eq(null), eq(null)))
                 .willReturn(new ArrayList<>());
         given(classScheduleMapper.toListReturnClassScheduleDto(anyList()))
                 .willReturn(classScheduleDTOList);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/calendar/week/{day}", date)
-//                        .header("Authorization", token)
-//                        .header("Content-Type", "application/json")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/calendar/week?date=2023-03-27")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
