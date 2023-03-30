@@ -16,7 +16,8 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     @Query(value = " SELECT DISTINCT cs FROM ClassDetail cd " +
             " JOIN cd.schedules cs " +
             " JOIN cd.users u " +
-            " WHERE cd.status = :status " +
+            " WHERE u.activated = true " +
+            " AND cd.status = :status " +
             " AND cs.studyDate = :date " +
             " AND (:userId IS NULL OR u.id = :userId) " +
             " AND (:className IS NULL OR cd.classField.name LIKE CONCAT('%', :className, '%') ) " +
@@ -34,7 +35,8 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     @Query(value = " SELECT DISTINCT cs FROM ClassDetail cd " +
             " JOIN cd.schedules cs " +
             " JOIN cd.users u " +
-            " WHERE cd.status = :status " +
+            " WHERE u.activated = true " +
+            " AND cd.status = :status " +
             " AND cs.studyDate BETWEEN :startDate AND :endDate " +
             " AND (:userId IS NULL OR u.id = :userId) " +
             " AND (:className IS NULL OR cd.classField.name LIKE CONCAT('%', :className, '%') ) " +

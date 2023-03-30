@@ -52,7 +52,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM ClassDetail cd " +
             " JOIN cd.users u " +
-            " WHERE cd.id = :classDetailId " +
+            " WHERE u.activated = true " +
+            " AND cd.id = :classDetailId " +
             " AND u.role.name = :roleName")
     List<User> findMemberOfClassByRole(@Param("classDetailId") Long classDetailId,
                                        @Param("roleName") String roleName);
