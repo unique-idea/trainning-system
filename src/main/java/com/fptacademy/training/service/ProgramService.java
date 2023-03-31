@@ -6,6 +6,7 @@ import java.util.*;
 
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.repository.ClassRepository;
+import com.fptacademy.training.web.vm.ProgramExcelImportResponseVM;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -171,7 +172,7 @@ public class ProgramService {
         }
         to.setActivated(from.getActivated());
     }
-    public List<ProgramDto> importProgramFromExcel(MultipartFile file, String[] properties, String handler) {
+    public ProgramExcelImportResponseVM importProgramFromExcel(MultipartFile file, String[] properties, String handler) {
         if (properties == null || properties.length == 0) {
             throw new ResourceBadRequestException("Properties cannot be empty");
         }
@@ -184,6 +185,7 @@ public class ProgramService {
             throw new ResourceBadRequestException("Invalid handler: " + handler);
         }
         Set<Program> programs = new HashSet<>();
+        List<String> duplicateProgramNames = new ArrayList<>();
 
         try (InputStream inputStream = file.getInputStream(); Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -248,6 +250,7 @@ public class ProgramService {
                             if (!programRepository.existsById(id)) {
                                 throw new ResourceNotFoundException("Program with ID '" + id + "' not found");
                             } else {
+                                duplicateProgramNames.add(program.getName());
                                 continue;
                             }
                         }
@@ -267,6 +270,7 @@ public class ProgramService {
                         if (!programRepository.existsByName(name)) {
                             programRepository.saveAndFlush(program);
                         } else {
+                            duplicateProgramNames.add(program.getName());
                             continue;
                         }
                         programs.add(program);
@@ -295,12 +299,14 @@ public class ProgramService {
                             if (!programRepository.existsById(id)) {
                                 throw new ResourceNotFoundException("Program with ID '" + id + "' not found");
                             } else {
+                                duplicateProgramNames.add(program.getName());
                                 continue;
                             }
                         } else {
                             if (!programRepository.existsByName(name)) {
                                 programRepository.saveAndFlush(program);
                             } else {
+                                duplicateProgramNames.add(program.getName());
                                 continue;
                             }
                         }
@@ -314,7 +320,7 @@ public class ProgramService {
             throw new RuntimeException("Cannot read excel file", e);
         }
 
-        return programMapper.toDtos(programs.stream().toList());
+        return new ProgramExcelImportResponseVM(duplicateProgramNames, programMapper.toDtos(programs.stream().toList()));
     }
 
     public ProgramDto activateProgram(Long id) {

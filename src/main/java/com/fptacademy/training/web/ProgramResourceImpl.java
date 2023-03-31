@@ -6,6 +6,7 @@ import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.mapper.ProgramMapper;
 import com.fptacademy.training.web.api.ProgramResource;
+import com.fptacademy.training.web.vm.ProgramExcelImportResponseVM;
 import com.fptacademy.training.web.vm.ProgramListResponseVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import lombok.RequiredArgsConstructor;
@@ -109,7 +110,7 @@ public class ProgramResourceImpl implements ProgramResource {
     }
 
     @Override
-    public ResponseEntity<List<ProgramDto>> importProgramsFromExcel(MultipartFile file, String[] properties, String handler) {
+    public ResponseEntity<ProgramExcelImportResponseVM> importProgramsFromExcel(MultipartFile file, String[] properties, String handler) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(programService.importProgramFromExcel(file, properties, handler));
