@@ -93,6 +93,9 @@ public class UserService {
         User user = optionalUser.get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        if (user.getRole().getName().equals("Super Admin"))
+            throw new ResourceBadRequestException("SUPER ADMIN cannot delete");
+
         if (email.equals(user.getEmail())) {
             throw new ResourceBadRequestException("You cannot delete your own account");
         }
@@ -111,13 +114,16 @@ public class UserService {
         User user = optionalUser.get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        if (user.getRole().getName().equals("Super Admin"))
+            throw new ResourceBadRequestException("SUPER ADMIN cannot de-active");
+
         if (email.equals(user.getEmail()))
             throw new ResourceBadRequestException("You cannot de-active your own account");
 
         if (user.getStatus() == null)
             user.setStatus(UserStatus.INACTIVE);
         else if (user.getStatus() == UserStatus.INACTIVE) {
-            if (user.getRole().equals("Class Admin") || user.getRole().equals("Super Admin"))
+            if (user.getRole().getName().equals("Class Admin"))
                 user.setStatus(UserStatus.ACTIVE);
             else
                 user.setStatus(UserStatus.ON_BOARDING);
