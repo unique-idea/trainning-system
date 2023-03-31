@@ -45,6 +45,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "409", description = "Conflict user name", content = @Content)
     })
+    @PreAuthorize("hasAnyAuthority('Permissions.USER_FULL_ACCESS')")
     @PostMapping(value = "/user", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> createUser(@RequestBody @Valid UserVM userVM);
 
@@ -81,7 +82,7 @@ public interface UserResource {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/users/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
+    @PreAuthorize("hasAnyAuthority('Permissions.USER_FULL_ACCESS')")
     ResponseEntity<Optional<UserDto>> getUserByEmail(@PathVariable String email);
 
     @Operation(summary = "Import users from excel", description = "Import users from excel", tags = "user", security = @SecurityRequirement(name = "token_auth"))
@@ -126,7 +127,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
     })
-    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
+    @PreAuthorize("hasAnyAuthority('Permissions.USER_FULL_ACCESS')")
     @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> deleteUser(@PathVariable("id") Long id);
 
@@ -138,7 +139,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "404", description = "User doesn't exist", content = @Content),
     })
-    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
+    @PreAuthorize("hasAnyAuthority('Permissions.USER_FULL_ACCESS')")
     @PutMapping(value = "/users/{id}/deActive", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> deActive(@PathVariable("id") Long id);
 
