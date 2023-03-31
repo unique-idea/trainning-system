@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ProgramRepository extends JpaRepository<Program, Long> {
     @Override
 //    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses.createdBy"})
-    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses", "syllabuses.sessions", "syllabuses.sessions.units"})
+//    @EntityGraph(attributePaths = {"createdBy", "lastModifiedBy", "syllabuses", "syllabuses.sessions", "syllabuses.sessions.units"})
     //@Query("SELECT DISTINCT p FROM Program p JOIN FETCH p.syllabuses s JOIN FETCH s.sessions ss JOIN FETCH ss.units WHERE p.id = :id")
     Optional<Program> findById(@Param("id") Long id);
 
