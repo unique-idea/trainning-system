@@ -25,5 +25,7 @@ public class ReturnClassScheduleDto {
     private LocalTime startAt;
     private LocalTime finishAt;
     private List<ReturnUnitDto> units;
+    private List<ReturnUserDto> trainers;
+    private List<ReturnUserDto> classAdmins;
 
 }

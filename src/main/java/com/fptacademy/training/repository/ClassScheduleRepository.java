@@ -1,98 +1,25 @@
 package com.fptacademy.training.repository;
 
+import com.fptacademy.training.domain.ClassDetail;
 import com.fptacademy.training.domain.ClassSchedule;
+import com.fptacademy.training.domain.User;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Long> {
-    /*Team 3*/
-    @Query(value = " SELECT cs.* FROM class_schedules cs " +
-            " INNER JOIN class_details cd " +
-            " ON cs.class_detail_id = cd.id " +
-            " AND cd.status = ?2 " +
-            " AND cs.study_date = ?1 ", nativeQuery = true)
-    List<ClassSchedule> findActiveClassByStudyDate(LocalDate date, String status);
+public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Long>, JpaSpecificationExecutor<ClassSchedule> {
 
-//    @Query(value = " SELECT cs FROM ClassSchedule cs " +
-//            " JOIN ClassDetail cd " +
-//            " WHERE cd.status = :status " +
-//            " AND cs.studyDate = :date ")
-//    List<ClassSchedule> findActiveClassByStudyDate1(
-//            @Param("date") LocalDate date,
-//            @Param("status") String status);
-
-    @Query(value = " SELECT cs.* FROM class_schedules cs " +
-            " INNER JOIN " +
-            " (SELECT ucd.class_detail_id as `class_detail_id`, ucd.user_id as `user_id` " +
-            " FROM user_class_detail ucd " +
-            " INNER JOIN class_details cd " +
-            " ON ucd.class_detail_id = cd.id " +
-            " AND cd.status = ?3) as t " +
-            " ON cs.class_detail_id = t.class_detail_id " +
-            " AND t.user_id = ?1 " +
-            " AND cs.study_date = ?2 ", nativeQuery = true)
-    List<ClassSchedule> findActiveClassByUserIdAndStudyDate(Long user_id, LocalDate studyDate, String status);
-
-//    @Query(value = " SELECT cs FROM ClassSchedule cs " +
-//            " JOIN (SELECT cd FROM ClassDetail cd " +
-//            " JOIN User u " +
-//            " WHERE cd.status = :status " +
-//            " AND u.id = :userId) " +
-//            " WHERE cs.studyDate = :studyDate")
-//    List<ClassSchedule> findActiveClassByUserIdAndStudyDate1(@Param("userId") Long user_id,
-//                                                             @Param("studyDate") LocalDate studyDate,
-//                                                             @Param("status") String status);
-
-    @Query(value = " SELECT cs.* FROM class_schedules cs " +
-            " INNER JOIN " +
-            " (SELECT ucd.class_detail_id as `class_detail_id`, ucd.user_id as `user_id` " +
-            " FROM user_class_detail ucd " +
-            " INNER JOIN class_details cd " +
-            " ON ucd.class_detail_id = cd.id " +
-            " AND cd.status = ?4) as t " +
-            " ON cs.class_detail_id = t.class_detail_id " +
-            " AND t.user_id = ?1 " +
-            " AND (cs.study_date BETWEEN ?2 AND ?3) " +
-            " ORDER BY cs.study_date", nativeQuery = true)
-    List<ClassSchedule> findActiveClassByUserIdAndStudyDateBetween(Long user_id, LocalDate startDate, LocalDate endDate, String status);
-
-//    @Query(value = " SELECT cs FROM ClassSchedule cs " +
-//            " JOIN (SELECT cd FROM ClassDetail cd " +
-//            " JOIN User u " +
-//            " WHERE cd.status = :status " +
-//            " AND u.id = :userId) " +
-//            " WHERE (cs.studyDate BETWEEN :startDate AND :endDate) " +
-//            " ORDER BY cs.studyDate")
-//    List<ClassSchedule> findActiveClassByUserIdAndStudyDateBetween1(
-//            @Param("userId") Long user_id,
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate,
-//            @Param("status") String status);
-
-    @Query(value = " SELECT cs.* FROM class_schedules cs " +
-            " INNER JOIN class_details cd " +
-            " ON cs.class_detail_id = cd.id " +
-            " AND cd.status = ?3 " +
-            " AND (cs.study_date BETWEEN ?1 AND ?2) " +
-            " ORDER BY cs.study_date", nativeQuery = true)
-    List<ClassSchedule> findActiveClassByStudyDateBetween(LocalDate startDate, LocalDate endDate, String status);
-
-//    @Query(value = " SELECT cs FROM ClassSchedule cs " +
-//            " JOIN ClassDetail cd " +
-//            " WHERE cd.status = :status " +
-//            " AND (cs.studyDate BETWEEN :startDate AND :endDate) " +
-//            " ORDER BY cs.studyDate")
-//    List<ClassSchedule> findActiveClassByStudyDateBetween1(
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate,
-//            @Param("status") String status);
-
-    @Query(value = "SELECT row_num " +
+    @Query(value = "SELECT COALESCE(row_num, 0) " +
             " FROM ( " +
             "    SELECT *, ROW_NUMBER() OVER (ORDER BY study_date) as row_num " +
             "    FROM class_schedules " +
@@ -102,5 +29,96 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             " WHERE t.id = ?2 ", nativeQuery = true)
     Integer getCurrentClassDayOfClassSchedule(Long classDetailId, Long classScheduleId);
 
-    /*Team 3*/
+    default List<ClassSchedule> findFilterActiveClassByStudyDateBetween(LocalDate startDate, LocalDate endDate, String status, Long userId, List<String> className, List<String> classCode, List<String> city) {
+        Specification<ClassSchedule> spec = Specification.where((root, query, criteriaBuilder) -> {
+            query.distinct(true);
+            Join<ClassSchedule, ClassDetail> classDetailJoin = root.join("classDetail");
+            Join<ClassDetail, ClassSchedule> scheduleJoin = classDetailJoin.join("schedules");
+            Join<ClassDetail, User> userJoin = classDetailJoin.join("users");
+
+            Predicate activatedUserPredicate = criteriaBuilder.isTrue(userJoin.get("activated"));
+            Predicate statusPredicate = criteriaBuilder.equal(classDetailJoin.get("status"), status);
+            Predicate studyDatePredicate = criteriaBuilder.between(scheduleJoin.get("studyDate"), startDate, endDate);
+            Predicate userIdPredicate = userId != null ? criteriaBuilder.equal(userJoin.get("id"), userId) : criteriaBuilder.conjunction();
+
+            Predicate classNamePredicate = criteriaBuilder.conjunction();
+            if (className != null) {
+                List<Predicate> classNamePredicates = new ArrayList<>();
+                for (String name : className) {
+                    classNamePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("name"), "%" + name + "%"));
+                }
+                classNamePredicate = criteriaBuilder.or(classNamePredicates.toArray(new Predicate[0]));
+            }
+
+            Predicate classCodePredicate = criteriaBuilder.conjunction();
+            if (classCode != null) {
+                List<Predicate> classCodePredicates = new ArrayList<>();
+                for (String code : classCode) {
+                    classCodePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("code"), "%" + code + "%"));
+                }
+                classCodePredicate = criteriaBuilder.or(classCodePredicates.toArray(new Predicate[0]));
+            }
+
+            Predicate cityPredicate = criteriaBuilder.conjunction();
+            if (city != null) {
+                List<Predicate> cityPredicates = new ArrayList<>();
+                for (String c : city) {
+                    cityPredicates.add(criteriaBuilder.like(classDetailJoin.get("location").get("city"), "%" + c + "%"));
+                }
+                cityPredicate = criteriaBuilder.or(cityPredicates.toArray(new Predicate[0]));
+            }
+
+            return criteriaBuilder.and(activatedUserPredicate, statusPredicate, studyDatePredicate, userIdPredicate, classNamePredicate, classCodePredicate, cityPredicate);
+        });
+
+        return this.findAll(spec, Sort.by("studyDate"));
+    }
+
+    default List<ClassSchedule> findFilterActiveClassByStudyDate(LocalDate date, String status, Long userId, List<String> className, List<String> classCode, List<String> city) {
+        Specification<ClassSchedule> spec = Specification.where((root, query, criteriaBuilder) -> {
+            query.distinct(true);
+            Join<ClassSchedule, ClassDetail> classDetailJoin = root.join("classDetail");
+            Join<ClassDetail, ClassSchedule> scheduleJoin = classDetailJoin.join("schedules");
+            Join<ClassDetail, User> userJoin = classDetailJoin.join("users");
+
+            Predicate activatedUserPredicate = criteriaBuilder.isTrue(userJoin.get("activated"));
+            Predicate statusPredicate = criteriaBuilder.equal(classDetailJoin.get("status"), status);
+            Predicate studyDatePredicate = criteriaBuilder.equal(scheduleJoin.get("studyDate"), date);
+            Predicate userIdPredicate = userId != null ? criteriaBuilder.equal(userJoin.get("id"), userId) : criteriaBuilder.conjunction();
+
+            Predicate classNamePredicate = criteriaBuilder.conjunction();
+            if (className != null) {
+                List<Predicate> classNamePredicates = new ArrayList<>();
+                for (String name : className) {
+                    classNamePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("name"), "%" + name + "%"));
+                }
+                classNamePredicate = criteriaBuilder.or(classNamePredicates.toArray(new Predicate[0]));
+            }
+
+            Predicate classCodePredicate = criteriaBuilder.conjunction();
+            if (classCode != null) {
+                List<Predicate> classCodePredicates = new ArrayList<>();
+                for (String code : classCode) {
+                    classCodePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("code"), "%" + code + "%"));
+                }
+                classCodePredicate = criteriaBuilder.or(classCodePredicates.toArray(new Predicate[0]));
+            }
+
+            Predicate cityPredicate = criteriaBuilder.conjunction();
+            if (city != null) {
+                List<Predicate> cityPredicates = new ArrayList<>();
+                for (String c : city) {
+                    cityPredicates.add(criteriaBuilder.like(classDetailJoin.get("location").get("city"), "%" + c + "%"));
+                }
+                cityPredicate = criteriaBuilder.or(cityPredicates.toArray(new Predicate[0]));
+            }
+
+            return criteriaBuilder.and(activatedUserPredicate, statusPredicate, studyDatePredicate, userIdPredicate, classNamePredicate, classCodePredicate, cityPredicate);
+
+        });
+
+        return this.findAll(spec, Sort.by("studyDate"));
+    }
+
+
 }

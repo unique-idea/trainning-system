@@ -14,6 +14,7 @@ import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.*;
 import com.fptacademy.training.security.Permissions;
 import com.fptacademy.training.security.jwt.JwtTokenProvider;
+import com.fptacademy.training.service.util.TestUtil;
 import com.fptacademy.training.web.vm.ProgramVM;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -211,8 +212,13 @@ public class ProgramResourceIT {
         }
         mockMvc
                 .perform(multipart("/api/programs/import").file("file", outputStream.toByteArray())
+                        .param("duplicate", "id")
+                        .param("handle", "skip")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.duplicateProgramNames.length()").value(0))
+                .andExpect(jsonPath("$.programs.length()").value(1))
+                .andExpect(jsonPath("$.programs[0].name").value("Example Program Name"));
     }
 
     @Test

@@ -2,13 +2,11 @@ package com.fptacademy.training.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.repository.ClassRepository;
+import com.fptacademy.training.web.vm.ProgramExcelImportResponseVM;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -164,33 +162,35 @@ public class ProgramService {
 
     //tai nguyen
 
-    private Program replaceProgram(Program from, Program to) {
+    private void replaceProgram(Program from, Program to) {
         to.setName(from.getName());
-        to.setSyllabuses(from.getSyllabuses());
+        List<Syllabus> syllabuses = new ArrayList<>(from.getSyllabuses());
+        to.setSyllabuses(syllabuses);
         if (!isDeactivatable(to.getId())) {
             throw new ResourceBadRequestException("Cannot deactivate training program with ID '" + to.getId() +
                     "' because there are on-going classes depend on this program");
         }
         to.setActivated(from.getActivated());
-        return to;
     }
-
-    private List<Program> replaceAllProgramsHaveName(String name, Program from) {
-        List<Program> programs = programRepository.findByName(name);
-        programs.forEach(p -> replaceProgram(from, p));
-        return programs;
-    }
-
-    public List<ProgramDto> importProgramFromExcel(MultipartFile file, String[] properties, String handler) {
-        List<Program> newPrograms = new ArrayList<>();
-        List<Program> updatePrograms = new ArrayList<>();
+    public ProgramExcelImportResponseVM importProgramFromExcel(MultipartFile file, String[] properties, String handler) {
+        if (properties == null || properties.length == 0) {
+            throw new ResourceBadRequestException("Properties cannot be empty");
+        }
+        for (String property : properties) {
+            if (!property.equals("id") && !property.equals("name")) {
+                throw new ResourceBadRequestException("Invalid property: " + property);
+            }
+        }
+        if (!handler.equals("replace") && !handler.equals("skip")) {
+            throw new ResourceBadRequestException("Invalid handler: " + handler);
+        }
+        Set<Program> programs = new HashSet<>();
+        List<String> duplicateProgramNames = new ArrayList<>();
 
         try (InputStream inputStream = file.getInputStream(); Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
-            row_loop:
             for (int i = 1; i <= sheet.getLastRowNum(); ++i) {
                 Row row = sheet.getRow(i);
-                // Create a program object with the information from Excel file
                 Program program = new Program();
                 if (row.getCell(0) != null && row.getCell(0).getCellType() == CellType.NUMERIC) {
                     Long id = (long)row.getCell(0).getNumericCellValue();
@@ -201,9 +201,14 @@ public class ProgramService {
                     throw new ResourceBadRequestException("Excel file wrong format at Program ID column, make sure to specify right ID format. " +
                             "If not specify ID, please make sure ID cell is empty");
                 }
+                if (!Arrays.asList(properties).contains("id") && program.getId() != null) {
+                    throw new ResourceBadRequestException("ID column in excel file should be empty since there's no handler for ID");
+                }
+                Long id = program.getId();
                 program.setName(row.getCell(1).getStringCellValue().trim());
+                String name = program.getName();
                 String syllabusCodes = row.getCell(2).getStringCellValue().trim();
-                if (!StringUtils.hasText(program.getName()) || !StringUtils.hasText(syllabusCodes)) {
+                if (!StringUtils.hasText(name) || !StringUtils.hasText(syllabusCodes)) {
                     continue;
                 }
                 List<Syllabus> syllabuses = Arrays.stream(syllabusCodes.split(","))
@@ -219,42 +224,95 @@ public class ProgramService {
                         .toList();
                 program.setSyllabuses(syllabuses);
                 program.setActivated(row.getCell(3).getBooleanCellValue());
-
-                for (String p : properties) {
-                    if (p.equals("id") && program.getId() != null) {
-                        Program existingProgram = programRepository
-                                .findById(program.getId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + program.getId() + "' not found"));
-                        switch (handler) {
-                            case "replace" -> {
-                                updatePrograms.add(replaceProgram(program, existingProgram));
-                                continue row_loop;
+                if (properties.length == 1 && properties[0].equals("id")) {
+                    if (handler.equals("replace")) {
+                        if (id == null) {
+                            if (programRepository.existsByName(name)) {
+                                throw new ResourceAlreadyExistsException("Program with name '" + name + "' already existed");
+                            } else {
+                                programRepository.saveAndFlush(program);
                             }
-                            case "skip", "allow" -> {
-                                continue row_loop;
+                        } else {
+                            Program existingProgram = programRepository.findById(id)
+                                    .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
+                            replaceProgram(program, existingProgram);
+                            program = programRepository.saveAndFlush(existingProgram);
+                        }
+                        programs.add(program);
+                    } else {
+                        if (id == null) {
+                            if (programRepository.existsByName(name)) {
+                                throw new ResourceAlreadyExistsException("Program with name '" + name + "' already existed");
+                            } else {
+                                programRepository.saveAndFlush(program);
+                            }
+                        } else {
+                            if (!programRepository.existsById(id)) {
+                                throw new ResourceNotFoundException("Program with ID '" + id + "' not found");
+                            } else {
+                                duplicateProgramNames.add(program.getName());
+                                continue;
                             }
                         }
-                    } else if (p.equals("name") && programRepository.existsByName(program.getName())) {
-                        switch (handler) {
-                            case "replace" -> {
-                                updatePrograms.addAll(replaceAllProgramsHaveName(program.getName(), program));
-                                continue row_loop;
+                        programs.add(program);
+                    }
+                } else if (properties.length == 1 && properties[0].equals("name")) {
+                    if (handler.equals("replace")) {
+                        if (programRepository.existsByName(name)) {
+                            Program existingProgram = programRepository.findByName(name).get();
+                            replaceProgram(program, existingProgram);
+                            program = programRepository.saveAndFlush(existingProgram);
+                        } else {
+                            programRepository.saveAndFlush(program);
+                        }
+                        programs.add(program);
+                    } else {
+                        if (!programRepository.existsByName(name)) {
+                            programRepository.saveAndFlush(program);
+                        } else {
+                            duplicateProgramNames.add(program.getName());
+                            continue;
+                        }
+                        programs.add(program);
+                    }
+                } else if (properties.length == 2) {
+                    if (handler.equals("replace")) {
+                        if (id != null) {
+                            if (programRepository.existsById(id)) {
+                                Program existingProgram = programRepository.findById(id)
+                                        .orElseThrow(() -> new ResourceNotFoundException("Program with ID '" + id + "' not found"));
+                                replaceProgram(program, existingProgram);
+                                program = programRepository.saveAndFlush(existingProgram);
                             }
-                            case "skip" -> {
-                                continue row_loop;
-                            }
-                            case "allow" -> {
-                                program.setId(null);
-                                newPrograms.add(program);
-                                continue row_loop;
+                        } else {
+                            if (programRepository.existsByName(name)) {
+                                Program existingProgram = programRepository.findByName(name).get();
+                                replaceProgram(program, existingProgram);
+                                program = programRepository.saveAndFlush(existingProgram);
+                            } else {
+                                programRepository.saveAndFlush(program);
                             }
                         }
+                        programs.add(program);
+                    } else {
+                        if (id != null) {
+                            if (!programRepository.existsById(id)) {
+                                throw new ResourceNotFoundException("Program with ID '" + id + "' not found");
+                            } else {
+                                duplicateProgramNames.add(program.getName());
+                                continue;
+                            }
+                        } else {
+                            if (!programRepository.existsByName(name)) {
+                                programRepository.saveAndFlush(program);
+                            } else {
+                                duplicateProgramNames.add(program.getName());
+                                continue;
+                            }
+                        }
+                        programs.add(program);
                     }
                 }
-                if (programRepository.existsByName(program.getName())) {
-                    throw new ResourceAlreadyExistsException("Program with name '" + program.getName() + "' already existed");
-                }
-                newPrograms.add(program);
             }
         } catch (NumberFormatException e) {
             throw new ResourceBadRequestException("Invalid ID format", e);
@@ -262,9 +320,7 @@ public class ProgramService {
             throw new RuntimeException("Cannot read excel file", e);
         }
 
-        List<Program> programs = new ArrayList<>(programRepository.saveAll(newPrograms));
-        programs.addAll(updatePrograms);
-        return programMapper.toDtos(programs);
+        return new ProgramExcelImportResponseVM(duplicateProgramNames, programMapper.toDtos(programs.stream().toList()));
     }
 
     public ProgramDto activateProgram(Long id) {

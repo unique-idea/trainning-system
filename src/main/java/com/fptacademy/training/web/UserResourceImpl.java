@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.UserDto;
-import com.fptacademy.training.service.dto.ListUsersDto;
+import com.fptacademy.training.service.dto.ReturnPageDto;
 import com.fptacademy.training.web.api.UserResource;
 import com.fptacademy.training.web.vm.UserVM;
 
@@ -61,7 +61,7 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<ListUsersDto> getUsers(String email, String fullName, String code,
+    public ResponseEntity<ReturnPageDto<List<UserDto>>> getUsers(String email, String fullName, String code,
             String levelName, String roleName, String birthdayFrom, String birthdayTo,
             String status, String sort, Integer pageNumber, Integer pageSize) {
         return ResponseEntity
@@ -110,7 +110,7 @@ public class UserResourceImpl implements UserResource {
 
     @Override
     public ResponseEntity<?> exportUsersToExcel(HttpServletResponse response) {
-        response.setContentType(String.valueOf(MediaType.APPLICATION_OCTET_STREAM));
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String headerKey = HttpHeaders.CONTENT_DISPOSITION;
         String headerValue = "attachment;filename=User_Export.xlsx";
         response.setHeader(headerKey, headerValue);

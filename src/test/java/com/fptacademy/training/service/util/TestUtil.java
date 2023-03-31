@@ -1,4 +1,4 @@
-package com.fptacademy.training.web;
+package com.fptacademy.training.service.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
