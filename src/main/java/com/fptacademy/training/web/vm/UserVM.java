@@ -24,7 +24,7 @@ public record UserVM(
         @Schema(example = "male")
         String gender,
 
-        @NotBlank(message = "Status must be not empty")
+        @NotBlank(message = "Activated must be not empty")
         @Pattern(regexp = "^(true|false)$", message = "Activated must be 'true' or 'false'")
         @Schema(example = "true")
         String activated,

@@ -25,9 +25,9 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
     @Override
     public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByDate(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
         List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleByDate(date, className, classCode, city);
         List<ReturnClassScheduleDto> result = classScheduleMapper.toListReturnClassScheduleDto(classSchedules);
@@ -38,9 +38,9 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
     @Override
     public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
 
         List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleInAWeek(date, className, classCode, city);
@@ -52,9 +52,9 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
     @Override
     public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
 
         List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleOfCurrentUserByDate(date, className, classCode, city);
@@ -66,9 +66,9 @@ public class ClassScheduleResourceImpl implements ClassScheduleResource {
     @Override
     public ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(
             LocalDate date,
-            String className,
-            String classCode,
-            String city
+            List<String> className,
+            List<String> classCode,
+            List<String> city
     ) {
 
         List<ClassSchedule> classSchedules = classScheduleService.getFilterClassScheduleOfCurrentUserInAWeek(date, className, classCode, city);

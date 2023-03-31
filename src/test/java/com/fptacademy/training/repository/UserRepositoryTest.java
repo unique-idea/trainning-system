@@ -1,27 +1,25 @@
 package com.fptacademy.training.repository;
 
+import static com.fptacademy.training.service.util.RandomUtil.randomBoolean;
+import static com.fptacademy.training.service.util.RandomUtil.randomDate;
+import static com.fptacademy.training.service.util.RandomUtil.randomInt;
+import static com.fptacademy.training.service.util.RandomUtil.randomString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static com.fptacademy.training.repository.TestUtil.randomString;
-import static com.fptacademy.training.repository.TestUtil.randomInt;
-import static com.fptacademy.training.repository.TestUtil.randomBoolean;
-import static com.fptacademy.training.repository.TestUtil.randomDate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.poi.hpsf.Array;
+import com.fptacademy.training.domain.enumeration.RoleName;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +47,7 @@ public class UserRepositoryTest {
 
     private Direction direction = Direction.DESC;
     private String sortBy = "role";
-    private final Pageable pageable = PageRequest.of(0, 500, direction, sortBy);
+    private final Pageable pageable = PageRequest.of(0, 10, direction, sortBy);
 
     private class UserIdComparator implements Comparator<User> {
         @Override
@@ -107,12 +105,12 @@ public class UserRepositoryTest {
             roles.add(role);
         });
 
-        List<UserStatus> userStatuses = List.of(UserStatus.ACTIVE, UserStatus.INACTIVE, 
+        List<UserStatus> userStatuses = List.of(UserStatus.ACTIVE, UserStatus.INACTIVE,
                 UserStatus.IN_CLASS, UserStatus.OFF_CLASS, UserStatus.ON_BOARDING);
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        for (int i = 0; i < pageable.getPageSize(); i++) {
+        for (int i = 0; i < 10; i++) {
             User user = new User();
             user.setCode(randomString(6, false));
             user.setFullName(randomString(randomInt(10, 20), true));
@@ -159,7 +157,8 @@ public class UserRepositoryTest {
         return true;
     }
 
-    List<User> getFilteredUser(List<User> allUsers, String email, String fullName, String code, String levelName, String roleName,
+    List<User> getFilteredUser(List<User> allUsers, String email, String fullName, String code, String levelName,
+            String roleName,
             Boolean activated, LocalDate birthdayFrom, LocalDate birthdayTo, String status) {
         List<User> actualResult = allUsers.stream()
                 .filter(user -> isUserMatchFilters(user, email, fullName, code, levelName, roleName, activated,
@@ -175,7 +174,7 @@ public class UserRepositoryTest {
 
     @Test
     void performanceTestingBetweenQuerySQLAndJavaForLoop() {
-        final String email = randomBoolean() ? randomString(1, false) : null, 
+        final String email = randomBoolean() ? randomString(1, false) : null,
                 fullName = randomBoolean() ? randomString(1, false) : null,
                 code = randomBoolean() ? randomString(1, false) : null,
                 levelName = randomBoolean() ? randomString(1, false) : null,
@@ -189,9 +188,8 @@ public class UserRepositoryTest {
             dayBefore = dayAfter;
             dayAfter = temp;
         }
-        final LocalDate birthdayFrom = randomBoolean() ? dayBefore : null, 
+        final LocalDate birthdayFrom = randomBoolean() ? dayBefore : null,
                 birthdayTo = randomBoolean() ? dayAfter : null;
-
 
         Long start, finish, timeJava, timeSQL;
 
@@ -226,9 +224,9 @@ public class UserRepositoryTest {
 
     @Test
     void shouldReturnCorrectUsers_whenFindByAllFilters() {
-        final String email = randomString(1, false), 
-                fullName = randomString(1, false), 
-                code = randomString(1, false), 
+        final String email = randomString(1, false),
+                fullName = randomString(1, false),
+                code = randomString(1, false),
                 levelName = randomString(1, false),
                 roleName = randomString(1, false),
                 status = randomString(1, false);
@@ -249,7 +247,8 @@ public class UserRepositoryTest {
 
     @Test
     void shouldReturnCorrectUsers_whenFindByPartialFilters() {
-        final String email = randomString(1, false), fullName = null, code = null, levelName = null, roleName = randomString(1, false), status = null;
+        final String email = randomString(1, false), fullName = null, code = null, levelName = null,
+                roleName = randomString(1, false), status = null;
         final Boolean activated = true;
         final LocalDate birthdayFrom = null, birthdayTo = null;
 
@@ -262,5 +261,11 @@ public class UserRepositoryTest {
         assertThat(usersFullFilters.getContent())
                 .usingElementComparator(new UserIdComparator())
                 .containsExactlyInAnyOrderElementsOf(actualResult);
+    }
+
+    @Test
+    void findMemberOfClassByRoleShouldWork(){
+        List<User> user = userRepository.findMemberOfClassByRole(1L, RoleName.CLASS_ADMIN.toString());
+        assertNotNull(user);
     }
 }

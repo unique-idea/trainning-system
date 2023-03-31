@@ -27,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.dto.ReturnPageDto;
-import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +44,7 @@ public interface UserResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "409", description = "Conflict user name", content = @Content)
     })
+    @PreAuthorize("hasAnyAuthority('User_FullAccess')")
     @PostMapping(value = "/user", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> createUser(@RequestBody @Valid UserVM userVM);
 

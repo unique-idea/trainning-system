@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -38,12 +37,12 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/calendar", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByDate(
-            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-            @RequestParam(required = false) String className,
-            @RequestParam(required = false) String classCode,
-            @RequestParam(required = false) String city
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) List<String> className,
+            @RequestParam(required = false) List<String> classCode,
+            @RequestParam(required = false) List<String> city
     );
 
     @Operation(
@@ -60,12 +59,12 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "/calendar/week/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/calendar/week", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleByWeek(
-            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-            @RequestParam(required = false) String className,
-            @RequestParam(required = false) String classCode,
-            @RequestParam(required = false) String city
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) List<String> className,
+            @RequestParam(required = false) List<String> classCode,
+            @RequestParam(required = false) List<String> city
     );
 
     @Operation(
@@ -82,12 +81,12 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "user/calendar/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "user/calendar", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUser(
-            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-            @RequestParam(required = false) String className,
-            @RequestParam(required = false) String classCode,
-            @RequestParam(required = false) String city
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) List<String> className,
+            @RequestParam(required = false) List<String> classCode,
+            @RequestParam(required = false) List<String> city
     );
 
     @Operation(
@@ -104,11 +103,11 @@ public interface ClassScheduleResource {
             @ApiResponse(responseCode = "404", description = "Class schedule not found", content = @Content)
     })
     @PreAuthorize("isAuthenticated()")
-    @GetMapping(value = "user/calendar/week/{day}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "user/calendar/week", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<ReturnClassScheduleDto>> getAllClassScheduleOfCurrentUserByWeek(
-            @PathVariable("day") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-            @RequestParam(required = false) String className,
-            @RequestParam(required = false) String classCode,
-            @RequestParam(required = false) String city
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            @RequestParam(required = false) List<String> className,
+            @RequestParam(required = false) List<String> classCode,
+            @RequestParam(required = false) List<String> city
     );
 }

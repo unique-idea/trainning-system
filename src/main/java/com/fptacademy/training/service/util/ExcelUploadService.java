@@ -102,6 +102,7 @@ public class ExcelUploadService {
                                         Role role = roleService.getRoleByName(cell.getStringCellValue());
                                         if (role != null) {
                                             user.setRole(role);
+                                            break;
                                         }
                                     }
                                 }
@@ -159,15 +160,21 @@ public class ExcelUploadService {
                     }
                     cellIndex++;
                 }
-                if (isValidUser(user) && !userRepository.existsByCodeIgnoreCase(user.getCode())) {
-                    users.add(user);
+                if (isValidUser(user)) {
+                    if (!userRepository.existsByCodeIgnoreCase(user.getCode())) {
+                        users.add(user);
+                    }
+                } else {
+                    break;
                 }
             }
+            inputStream.close();
+            workbook.close();
         } catch (NullPointerException e) {
             throw new ResourceNotFoundException("Sheet 'User' does not exist");
         } catch (IOException e) {
             throw new ResourceNotFoundException("File must end with .xlsx and have same format with User Excel Template");
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new ResourceBadRequestException("File does not have correct format");
         }
 
@@ -175,6 +182,6 @@ public class ExcelUploadService {
     }
 
     public boolean isValidUser(User user) {
-        return user.getEmail() != null && user.getPassword() != null && user.getFullName() != null &&user.getCode() != null && user.getActivated() != null;
+        return user.getEmail() != null && user.getPassword() != null && user.getFullName() != null && user.getCode() != null && user.getActivated() != null;
     }
 }

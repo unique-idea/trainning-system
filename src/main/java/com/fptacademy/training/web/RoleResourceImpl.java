@@ -27,7 +27,7 @@ public class RoleResourceImpl implements RoleResource {
     }
 
     @Override
-    public ResponseEntity<List<Role>> updatePermission(List<RoleVM> role) {
+    public ResponseEntity<List<RoleDto>> updatePermission(List<RoleVM> role) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(roleService.updatePermission(role));

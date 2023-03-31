@@ -28,7 +28,7 @@ public class ProgramMapper {
                 .flatMap(s -> s.getSessions().stream())
                 .flatMap(s -> s.getUnits().stream())
                 .mapToDouble(Unit::getTotalDurationLesson)
-                .sum();
+                .sum() / 60.;
         dto.setCreatedBy(new ProgramDto.Creator(
                 program.getCreatedBy().getId(),
                 program.getCreatedBy().getFullName(),

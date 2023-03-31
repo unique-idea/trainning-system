@@ -59,8 +59,8 @@ public class UserResourceTest {
         MockMultipartFile file = new MockMultipartFile("file", "User-test.xlsx", MediaType.APPLICATION_OCTET_STREAM_VALUE, inputStream);
 
         User user = User.builder().
-                fullName("Nguyen Dinh Tien").
-                email("tienndse@fpt.edu.vn").
+                fullName("Nguyen Văn Tăng").
+                email("tangnv@fpt.edu.vn").
                 code("SE16000").
                 password("SE16000").
                 gender(Boolean.TRUE).

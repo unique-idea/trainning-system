@@ -9,7 +9,8 @@ import com.fptacademy.training.factory.UserFactory;
 import com.fptacademy.training.repository.RoleRepository;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.security.Permissions;
-import com.fptacademy.training.web.TestUtil;
+import com.fptacademy.training.service.util.TestUtil;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

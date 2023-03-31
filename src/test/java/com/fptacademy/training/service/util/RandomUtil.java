@@ -1,8 +1,8 @@
-package com.fptacademy.training.repository;
+package com.fptacademy.training.service.util;
 
 import java.time.LocalDate;
 
-public class TestUtil {
+public class RandomUtil {
     static public Integer randomInt(Integer min, Integer max) {
         return (int) (Math.random() * (max - min + 1) + min);
     }
