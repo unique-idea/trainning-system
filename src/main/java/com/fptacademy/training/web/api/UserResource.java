@@ -154,7 +154,7 @@ public interface UserResource {
     @GetMapping(value = "/user/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<UserDto> getUserById(@PathVariable(value = "id") Long id);
 
-    @Operation(summary = "Update user by id", description = "Update user field is changed with user id", tags = "user", security = @SecurityRequirement(name = "token_auth"))
+    @Operation(summary = "Update user", description = "Update user field is changed ", tags = "user", security = @SecurityRequirement(name = "token_auth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Update success"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters", content = @Content),
@@ -163,9 +163,8 @@ public interface UserResource {
             @ApiResponse(responseCode = "500", description = "Error occurred", content = @Content),
     })
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<UserDto> updateUser(@RequestBody @Valid NoNullRequiredUserVM noNullRequiredUserVM,
-            @PathVariable Long id);
+    @PatchMapping(value = "/users/update", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<UserDto> updateUser(@RequestBody @Valid NoNullRequiredUserVM noNullRequiredUserVM);
     
     @Operation(
             summary = "Export users to excel",

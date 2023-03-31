@@ -4,6 +4,7 @@ import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.UserStatus;
+import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.UserService;
 import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.service.mapper.UserMapper;
@@ -39,6 +40,8 @@ public class UserResourceTest {
 
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private UserRepository userRepository;
 
     //    @Spy
     @InjectMocks
@@ -110,6 +113,7 @@ public class UserResourceTest {
 
         UserDto userDto = userMapper.toDto(user);
         when(userService.getUserById(id)).thenReturn(userDto);
+
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/user/id/{id}", id)
