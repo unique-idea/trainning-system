@@ -26,7 +26,7 @@ public class SyllabusMapper {
         double hours = syllabus.getSessions().stream()
                 .flatMap(s -> s.getUnits().stream())
                 .mapToDouble(Unit::getTotalDurationLesson)
-                .sum();
+                .sum() / 60.;
         dto.setDuration(days);
         dto.setDurationInHours(hours);
         return dto;

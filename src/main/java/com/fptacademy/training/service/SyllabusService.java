@@ -99,7 +99,7 @@ public class SyllabusService {
         mapper.skip(Syllabus::setId);
         mapper.map(src -> 1.0, Syllabus::setVersion);
         mapper.map(src -> Long.toString(UUID.randomUUID().getMostSignificantBits() & 0xffffff, 36).toUpperCase(), Syllabus::setCode);
-        mapper.<SyllabusStatus>map(src -> SyllabusStatus.DRAFT, Syllabus::setStatus);
+        // mapper.<SyllabusStatus>map(src -> SyllabusStatus.DRAFT, Syllabus::setStatus);
         mapper.using((Converter<List<Session>, Integer>) ctx -> ctx.getSource().size()).map(SyllabusDetailDto::getSessions, Syllabus::setDuration);
       });
     map.createTypeMap(TrainingPrinciple.class, TrainingPrinciple.class).addMappings(mapper -> mapper.skip(TrainingPrinciple::setId));
@@ -110,7 +110,9 @@ public class SyllabusService {
       .addMappings(mapper -> {
         mapper.skip(Unit::setId);
         mapper
-          .using((Converter<List<Lesson>, Double>) ctx -> ctx.getSource().stream().mapToDouble(Lesson::getDuration).sum() / 60)
+          .using(
+            (Converter<List<Lesson>, Double>) ctx -> Math.round(ctx.getSource().stream().mapToDouble(Lesson::getDuration).sum() / 60 * 10.0) / 10.0
+          )
           .map(Unit::getLessons, Unit::setTotalDurationLesson);
       });
     map.createTypeMap(Lesson.class, Lesson.class).addMappings(mapper -> mapper.skip(Lesson::setId));
@@ -151,7 +153,7 @@ public class SyllabusService {
               .getUnits()
               .forEach(unit -> {
                 unit.setSession(session);
-                unit.setTotalDurationLesson(unit.getLessons().stream().mapToDouble(Lesson::getDuration).sum() / 60);
+                unit.setTotalDurationLesson(Math.round(unit.getLessons().stream().mapToDouble(Lesson::getDuration).sum() / 60 * 10.0) / 10.0);
                 unit
                   .getLessons()
                   .forEach(lesson -> {
@@ -193,14 +195,20 @@ public class SyllabusService {
         mapper
           .using(
             (Converter<List<Session>, Double>) ctx ->
-              ctx
-                .getSource()
-                .stream()
-                .flatMap(session -> session.getUnits().stream())
-                .flatMap(unit -> unit.getLessons().stream())
-                .mapToDouble(Lesson::getDuration)
-                .sum() /
-              60
+              Math.round(
+                (
+                  ctx
+                    .getSource()
+                    .stream()
+                    .flatMap(session -> session.getUnits().stream())
+                    .flatMap(unit -> unit.getLessons().stream())
+                    .mapToDouble(Lesson::getDuration)
+                    .sum() /
+                  60
+                ) *
+                1.0
+              ) /
+              1.0
           )
           .map(Syllabus::getSessions, SyllabusDetailDto::setDurationInHours);
         mapper
