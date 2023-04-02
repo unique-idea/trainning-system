@@ -26,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -93,6 +94,9 @@ public class UserService {
         User user = optionalUser.get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        if (user.getRole().getName().equals("Super Admin"))
+            throw new ResourceBadRequestException("SUPER ADMIN cannot delete");
+
         if (email.equals(user.getEmail())) {
             throw new ResourceBadRequestException("You cannot delete your own account");
         }
@@ -111,13 +115,16 @@ public class UserService {
         User user = optionalUser.get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        if (user.getRole().getName().equals("Super Admin"))
+            throw new ResourceBadRequestException("SUPER ADMIN cannot de-active");
+
         if (email.equals(user.getEmail()))
             throw new ResourceBadRequestException("You cannot de-active your own account");
 
         if (user.getStatus() == null)
             user.setStatus(UserStatus.INACTIVE);
         else if (user.getStatus() == UserStatus.INACTIVE) {
-            if (user.getRole().equals("Class Admin") || user.getRole().equals("Super Admin"))
+            if (user.getRole().getName().equals("Class Admin"))
                 user.setStatus(UserStatus.ACTIVE);
             else
                 user.setStatus(UserStatus.ON_BOARDING);
@@ -242,22 +249,29 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not existed!")));
     }
 
-    public UserDto updateUserById(NoNullRequiredUserVM noNullRequiredUserVM, Long id) {
+    public UserDto updateUser(NoNullRequiredUserVM noNullRequiredUserVM) {
+
+        User user = this.getCurrentUserLogin();
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         if (noNullRequiredUserVM == null) {
             throw new ResourceBadRequestException("Invalid params");
         }
+        if ((noNullRequiredUserVM.newPassword() != null && noNullRequiredUserVM.currentPassword() == null) || (noNullRequiredUserVM.newPassword() == null && noNullRequiredUserVM.currentPassword() != null)) {
+            throw new ResourceBadRequestException("To update password require current and new password");
+        }
         Optional<User> checkUser = userRepository
-                .findById(id)
+                .findByEmail(user.getEmail())
                 .map(
                         existUser -> {
                             if (noNullRequiredUserVM.fullName() != null) {
                                 existUser.setFullName(noNullRequiredUserVM.fullName());
                             }
-                            if (noNullRequiredUserVM.password() != null) {
-                                existUser.setPassword(noNullRequiredUserVM.password());
-                            }
-                            if (noNullRequiredUserVM.email() != null) {
-                                existUser.setEmail(noNullRequiredUserVM.email());
+                            if (noNullRequiredUserVM.newPassword() != null && noNullRequiredUserVM.currentPassword() != null) {
+                                if (!passwordEncoder.matches(noNullRequiredUserVM.currentPassword(), existUser.getPassword())) {
+                                    throw new ResourceBadRequestException("Incorrect current password");
+                                }
+                                existUser.setPassword(passwordEncoder.encode(noNullRequiredUserVM.newPassword()));
                             }
                             if (noNullRequiredUserVM.birthday() != null) {
                                 existUser.setBirthday(LocalDate.parse(noNullRequiredUserVM.birthday()));
@@ -265,36 +279,16 @@ public class UserService {
                             if (noNullRequiredUserVM.avatarUrl() != null) {
                                 existUser.setAvatarUrl(noNullRequiredUserVM.avatarUrl());
                             }
-                            if (noNullRequiredUserVM.level() != null) {
-                                existUser.setLevel(levelService.getLevelByName(noNullRequiredUserVM.level()));
-                            }
-                            if (noNullRequiredUserVM.code() != null) {
-                                existUser.setCode(noNullRequiredUserVM.code());
-                            }
                             if (noNullRequiredUserVM.gender() != null) {
-                                Boolean gender = true;
-                                if (noNullRequiredUserVM.gender().equalsIgnoreCase("female")) {
-                                    gender = false;
-                                }
+                                boolean gender = noNullRequiredUserVM.gender().equalsIgnoreCase("female") ? true : false;
                                 existUser.setGender(gender);
-                            }
-                            if (noNullRequiredUserVM.status() != null) {
-                                existUser.setStatus(UserStatus.valueOf(noNullRequiredUserVM.status()
-                                        .replace(" ", "_").toUpperCase(Locale.ROOT)));
-                            }
-                            if (noNullRequiredUserVM.activated() != null) {
-                                Boolean activated = true;
-                                if (noNullRequiredUserVM.activated().equalsIgnoreCase("false")) {
-                                    activated = false;
-                                }
-                                existUser.setActivated(activated);
                             }
                             return existUser;
                         })
                 .map(userRepository::save);
 
         return userMapper
-                .toDto(checkUser.orElseThrow(() -> new ResourceNotFoundException("Can't update not existed user!")));
+                .toDto(checkUser.orElseThrow());
     }
 
     public Collection<? extends GrantedAuthority> getUserPermissionsByEmail(String email) {

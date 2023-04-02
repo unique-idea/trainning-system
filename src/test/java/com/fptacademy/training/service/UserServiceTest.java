@@ -2,14 +2,13 @@ package com.fptacademy.training.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-import org.mockito.stubbing.Answer;
+import org.mockito.*;
+
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Random;
@@ -18,18 +17,12 @@ import com.fptacademy.training.domain.Level;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.exception.ResourceNotFoundException;
-import com.fptacademy.training.service.dto.UserDto;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +35,12 @@ import com.fptacademy.training.exception.ResourceBadRequestException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelUploadService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -63,6 +61,7 @@ public class UserServiceTest {
     @Mock
     private ExcelUploadService excelUploadService;
 
+    @InjectMocks
     private UserService userService;
 
     AutoCloseable autoClosable;
@@ -81,7 +80,7 @@ public class UserServiceTest {
     @Test
     void shouldCalledFindByFiltersCorrect_whenUseGetUsersByFiltersService() {
         Random rd = new Random();
-        
+
         // Declare 
         ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class),
                 fullNameCaptor = ArgumentCaptor.forClass(String.class),
@@ -126,7 +125,7 @@ public class UserServiceTest {
                 roleNameCaptor.capture(), activatedCaptor.capture(),
                 birthdayFromCaptor.capture(), birthdayToCaptor.capture(),
                 statusCaptor.capture(), pageableCaptor.capture());
-        
+
         assertEquals(email, emailCaptor.getValue());
         assertEquals(fullName, fullNameCaptor.getValue());
         assertEquals(code, codeCaptor.getValue());
@@ -169,72 +168,57 @@ public class UserServiceTest {
     }
 
     @Test
-    void whenCorrectInputIntoUpdateUserByIdInUserService_methodShouldFindByIdFirstThenSaveWithBothExactlyValueGiven() {
+    void whenCorrectInputIntoUpdateUserInUserService_methodShouldFindByEmailFirstThenSaveWithBothExactlyValueGiven() {
         //Declare
-        ArgumentCaptor<Long> idCapture = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<User> userCapture = ArgumentCaptor.forClass(User.class);
-
         InOrder inOrder = Mockito.inOrder(userRepository);
         Random rd = new Random();
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
         String fullName = rd.nextBoolean() ? "Tran Huu Tri1" : null,
-                email = rd.nextBoolean() ? "tri1@gmail.com" : null,
-                code = rd.nextBoolean() ? "12345" : null,
-                level = rd.nextBoolean() ? "Basic" : null,
                 avatarUrl = rd.nextBoolean() ? "http://image//img1" : null,
-                status = rd.nextBoolean() ? "active" : null,
                 birthDay = rd.nextBoolean() ? "2003-04-13" : null,
-                gender = rd.nextBoolean() ? "male" : null,
-                activated = rd.nextBoolean() ? "active" : null;
+                gender = rd.nextBoolean() ? "male" : null;
         //Value Given
         String fullNameGiven = fullName == null ? "Tran Huu Tri" : fullName,
-                emailGiven = email == null ? "tri@gmail.com" : email,
-                codeGiven = code == null ? "1234" : code,
                 avatarUrlGiven = avatarUrl == null ? "http://image" : avatarUrl,
-                passwordGiven = "12345";
+                passwordGiven = "Tri123@promax",
+                newPasswordGiven = "Tri123@promax",
+                emailGiven = "admin@gmail.com";
 
-        Boolean genderGiven = gender == null ? false : true,
-                activatedGiven = activated == null ? false : true;
-
-        Level levelGiven = level == null ? Level.builder().id(2L).name("Intermediate").build() : Level.builder().id(1L).name(level).build();
+        Boolean genderGiven = gender == null ? false : true;
         LocalDate birthDayGiven = birthDay == null ? LocalDate.parse("2002-04-13") : LocalDate.parse(birthDay);
-        Role roleGiven = Role.builder().id(2L).name("Class Admin").build();
-        UserStatus userStatusGiven = status == null ? UserStatus.INACTIVE : UserStatus.ACTIVE;
-        Long idGiven = 2L;
 
         User userGiven = User.builder().
-                id(idGiven).
-                code(codeGiven).
-                fullName(fullNameGiven).
+                id(2L).
                 email(emailGiven).
+                fullName(fullNameGiven).
                 password(bCryptPasswordEncoder.encode(passwordGiven)).
                 birthday(birthDayGiven).
                 gender(genderGiven).
-                activated(activatedGiven).
                 avatarUrl(avatarUrlGiven).
-                level(levelGiven).
-                role(roleGiven).
-                status(userStatusGiven).
                 build();
 
-        NoNullRequiredUserVM nUserVmGiven = new NoNullRequiredUserVM(fullName, email, birthDay, gender, activated,
-                level, null, status, avatarUrl, code);
+        NoNullRequiredUserVM nUserVmGiven = new NoNullRequiredUserVM(fullName, birthDay, gender,
+                passwordGiven, newPasswordGiven, avatarUrl);
 
         //Call
-        when(userRepository.findById(any())).thenReturn(Optional.of(userGiven));
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(userGiven));
         when(userRepository.save(any())).thenReturn(userGiven);
 
-        userService.updateUserById(nUserVmGiven, idGiven);
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userGiven);
+
+        userService.updateUser(nUserVmGiven);
         //Testing
-        verify(userRepository).findById(idCapture.capture());
         verify(userRepository).save(userCapture.capture());
 
-        inOrder.verify(userRepository).findById(any());
+        inOrder.verify(userRepository).findByEmail(any());
         inOrder.verify(userRepository).save(any());
 
-        assertEquals(idGiven, idCapture.getValue());
-        assertEquals(userGiven.getId(), idCapture.getValue());
         assertEquals(userGiven.getFullName(), userCapture.getValue().getFullName());
         assertEquals(userGiven.getActivated(), userCapture.getValue().getActivated());
         assertEquals(userGiven.getCode(), userCapture.getValue().getCode());
@@ -250,21 +234,40 @@ public class UserServiceTest {
 
     @Test
     void whenNullInputIntoUpdateUserInUserService_thenReturnExceptionRelatedToIt() {
-        NoNullRequiredUserVM nUserVm = new NoNullRequiredUserVM("value", null, null, null, null, null,
-                null, null, null, null);
-        Long id = 2L;
+        NoNullRequiredUserVM nvmWithCurrentPass = new NoNullRequiredUserVM(null, null, null, "value", null, null),
+                nvmWithNewPass = new NoNullRequiredUserVM(null, null, null, null, "value", null),
+                nvmWihAllPass = new NoNullRequiredUserVM(null, null, null, "incorrectValue", "value", null);
 
-        assertThatThrownBy(() -> userService.updateUserById(null, id))
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        User userGiven = User.builder()
+                .password(passwordEncoder.encode("value"))
+                .build();
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userGiven);
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(userGiven));
+
+        assertThatThrownBy(() -> userService.updateUser(null))
                 .isInstanceOf(ResourceBadRequestException.class)
                 .hasMessageContaining("Invalid params");
 
-        assertThatThrownBy(() -> userService.updateUserById(nUserVm, null))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Can't update not existed user!");
-
-        assertThatThrownBy(() -> userService.updateUserById(null, null))
+        assertThatThrownBy(() -> userService.updateUser(nvmWithCurrentPass))
                 .isInstanceOf(ResourceBadRequestException.class)
-                .hasMessageContaining("Invalid params");
+                .hasMessageContaining("To update password require current and new password");
+        assertThatThrownBy(() -> userService.updateUser(nvmWithNewPass))
+                .isInstanceOf(ResourceBadRequestException.class)
+                .hasMessageContaining("To update password require current and new password");
+
+        assertThatThrownBy(() -> userService.updateUser(nvmWihAllPass))
+                .isInstanceOf(ResourceBadRequestException.class)
+                .hasMessageContaining("Incorrect current password");
+
+        SecurityContextHolder.clearContext();
+        assertThatThrownBy(() -> userService.updateUser(nvmWihAllPass))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("Something went wrong, can not get current logged in user");
     }
 
     @Test
@@ -293,7 +296,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void whenNullOrIncorrectIdInputIntoGetUserByIdInUserService_thenReturnAnException(){
+    void whenNullOrIncorrectIdInputIntoGetUserByIdInUserService_thenReturnAnException() {
         Long overId = Long.MAX_VALUE;
         assertThatThrownBy(() -> userService.getUserById(null))
                 .isInstanceOf(ResourceNotFoundException.class)
