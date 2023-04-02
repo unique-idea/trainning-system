@@ -30,7 +30,7 @@ public class Level implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Schema(example = "1")
+  // @Schema(example = "1")
   private Long id;
 
   @Size(max = 50)
