@@ -212,8 +212,13 @@ public class ProgramResourceIT {
         }
         mockMvc
                 .perform(multipart("/api/programs/import").file("file", outputStream.toByteArray())
+                        .param("duplicate", "id")
+                        .param("handle", "skip")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.duplicateProgramNames.length()").value(0))
+                .andExpect(jsonPath("$.programs.length()").value(1))
+                .andExpect(jsonPath("$.programs[0].name").value("Example Program Name"));
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fptacademy.training.domain.User;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +34,7 @@ public class UserResourceImpl implements UserResource {
     private final UserService userService;
 
     private final ResourceLoader resourceLoader;
+
 
     @Override
     public ResponseEntity<UserDto> createUser(UserVM userVM) {
@@ -103,8 +106,8 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<UserDto> updateUser(NoNullRequiredUserVM noNullRequiredUserVM, Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUserById(noNullRequiredUserVM, id));
+    public ResponseEntity<UserDto> updateUser(NoNullRequiredUserVM noNullRequiredUserVM) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(noNullRequiredUserVM));
     }
 
     @Override

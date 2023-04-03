@@ -2,6 +2,7 @@ package com.fptacademy.training.web.api;
 
 import com.fptacademy.training.service.dto.ProgramDto;
 import com.fptacademy.training.service.dto.SyllabusDto;
+import com.fptacademy.training.web.vm.ProgramExcelImportResponseVM;
 import com.fptacademy.training.web.vm.ProgramListResponseVM;
 import com.fptacademy.training.web.vm.ProgramVM;
 import io.swagger.v3.oas.annotations.Operation;
@@ -134,7 +135,7 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "409", description = "Conflict training program", content = @Content)
     })
     @PostMapping(value = "/programs/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<List<ProgramDto>> importProgramsFromExcel(
+    ResponseEntity<ProgramExcelImportResponseVM> importProgramsFromExcel(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "duplicate", defaultValue = "id") String[] properties,
             @RequestParam(value = "handle", defaultValue = "skip") String handler);
