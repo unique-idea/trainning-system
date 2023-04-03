@@ -26,7 +26,7 @@ public class OutputStandard implements Serializable {
   // @Schema(example = "1")
   private Long id;
 
-  @Column(length = 10)
+  @Column(length = 100)
   private String name;
 
   private String code;
