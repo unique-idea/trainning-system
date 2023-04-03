@@ -33,12 +33,11 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
         Specification<ClassSchedule> spec = Specification.where((root, query, criteriaBuilder) -> {
             query.distinct(true);
             Join<ClassSchedule, ClassDetail> classDetailJoin = root.join("classDetail");
-            Join<ClassDetail, ClassSchedule> scheduleJoin = classDetailJoin.join("schedules");
             Join<ClassDetail, User> userJoin = classDetailJoin.join("users");
 
             Predicate activatedUserPredicate = criteriaBuilder.isTrue(userJoin.get("activated"));
             Predicate statusPredicate = criteriaBuilder.equal(classDetailJoin.get("status"), status);
-            Predicate studyDatePredicate = criteriaBuilder.between(scheduleJoin.get("studyDate"), startDate, endDate);
+            Predicate studyDatePredicate = criteriaBuilder.between(root.get("studyDate"), startDate, endDate);
             Predicate userIdPredicate = userId != null ? criteriaBuilder.equal(userJoin.get("id"), userId) : criteriaBuilder.conjunction();
 
             Predicate classNamePredicate = criteriaBuilder.conjunction();
@@ -78,12 +77,11 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
         Specification<ClassSchedule> spec = Specification.where((root, query, criteriaBuilder) -> {
             query.distinct(true);
             Join<ClassSchedule, ClassDetail> classDetailJoin = root.join("classDetail");
-            Join<ClassDetail, ClassSchedule> scheduleJoin = classDetailJoin.join("schedules");
             Join<ClassDetail, User> userJoin = classDetailJoin.join("users");
 
             Predicate activatedUserPredicate = criteriaBuilder.isTrue(userJoin.get("activated"));
             Predicate statusPredicate = criteriaBuilder.equal(classDetailJoin.get("status"), status);
-            Predicate studyDatePredicate = criteriaBuilder.equal(scheduleJoin.get("studyDate"), date);
+            Predicate studyDatePredicate = criteriaBuilder.equal(root.get("studyDate"), date);
             Predicate userIdPredicate = userId != null ? criteriaBuilder.equal(userJoin.get("id"), userId) : criteriaBuilder.conjunction();
 
             Predicate classNamePredicate = criteriaBuilder.conjunction();
