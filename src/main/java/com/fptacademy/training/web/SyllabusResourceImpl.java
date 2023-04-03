@@ -14,6 +14,7 @@ import com.fptacademy.training.service.SyllabusService;
 import com.fptacademy.training.service.dto.SyllabusDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusDetailDto;
 import com.fptacademy.training.service.dto.SyllabusDto.SyllabusListDto;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -82,7 +83,6 @@ public class SyllabusResourceImpl {
     );
   }
 
-
   @Operation(
     summary = "Show syllabus by id",
     description = "Syllabus Input: id(long)",
@@ -144,83 +144,97 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
+    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = {
+        @Content(
+          mediaType = "application/json",
+          schema = @Schema(
+            allOf = SyllabusDetailDto.class,
+            description = "post Syllabus",
+            externalDocs = @ExternalDocumentation(url = "https://github.com/"),
+            title = "Syllabus",
+            defaultValue = "{" +
+            "    \"name\": \"string\"," +
+            "    \"attendeeNumber\": 0," +
+            "    \"status\": \"ACTIVATED\"," +
+            "    \"technicalRequirement\": \"string\"," +
+            "    \"courseObjective\": \"string\"," +
+            "    \"trainingPrinciple\": {" +
+            "        \"training\": \"string\"," +
+            "        \"reTest\": \"string\"," +
+            "        \"marking\": \"string\"," +
+            "        \"waiverCriteria\": \"string\"," +
+            "        \"others\": \"string\"" +
+            "    }," +
+            "    \"level\": {" +
+            "        \"id\": 1" +
+            "    }," +
+            "    \"assessment\": {" +
+            "        \"quiz\": 0," +
+            "        \"assignment\": 0," +
+            "        \"finalField\": 0," +
+            "        \"finalPractice\": 0," +
+            "        \"finalTheory\": 0," +
+            "        \"gpa\": 0" +
+            "    }," +
+            "    \"sessions\": [" +
+            "        {" +
+            "            \"index\": 0," +
+            "            \"name\": \"string\"," +
+            "            \"units\": [" +
+            "                {" +
+            "                    \"title\": \"string\"," +
+            "                    \"name\": \"string\"," +
+            "                    \"index\": 0," +
+            "                    \"lessons\": [" +
+            "                        {" +
+            "                            \"name\": \"string\"," +
+            "                            \"duration\": 0," +
+            "                            \"index\": 0," +
+            "                            \"outputStandard\": {" +
+            "                                \"id\": 1" +
+            "                            }," +
+            "                            \"formatType\": {" +
+            "                                \"id\": 1" +
+            "                            }," +
+            "                            \"delivery\": {" +
+            "                                \"id\": 1" +
+            "                            }," +
+            "                            \"materials\": [" +
+            "                                {" +
+            "                                    \"name\": \"string\"," +
+            "                                    \"fileUrl\": \"string\"" +
+            "                                }" +
+            "                            ]" +
+            "                        }" +
+            "                    ]" +
+            "                }" +
+            "            ]" +
+            "        }" +
+            "    ]" +
+            "}"
+          )
+        ),
+        @Content(
+          mediaType = "application/schema+json",
+          schema = @Schema(implementation = SyllabusDetailDto.class),
+          examples = {
+            @ExampleObject(name = "default", description = "default json", summary = "default json"),
+            @ExampleObject(name = "name 1", description = "not summary , have name", value = "value 1"),
+            @ExampleObject(name = "name 2", description = "have summary , not name", summary = "summary 2", value = "value 2"),
+          }
+        ),
+        @Content(mediaType = "application/vnd.api+json", schema = @Schema(implementation = SyllabusDetailDto.class)),
+        @Content(mediaType = "application/vnd.geo+json", schema = @Schema(implementation = SyllabusDetailDto.class)),
+      }
+    ),
     summary = "Add new syllabus",
     description = "Syllabus Input: name(string), attendeeNumber, status, duration" +
     "technicalRequirement, courseObjective, trainingPrinciple, level, session" +
     "unit, lesson, formatType, delivery, materials, assessment",
     tags = "Syllabus",
     security = @SecurityRequirement(name = "token_auth"),
-    responses = {
-      @ApiResponse(
-        description = "Success | OK",
-        responseCode = "200",
-        content = @Content(
-          mediaType = "application/json",
-          schema = @Schema(implementation = Syllabus.class),
-          examples = @ExampleObject(
-            name = "Example",
-            value = "{\n" +
-            "  \"name\": \"TEST\",\n" +
-            "  \"code\": \"\",\n" +
-            "  \"attendeeNumber\": 10,\n" +
-            "  \"status\": \"DRAFT\",\n" +
-            "  \"duration\": 0,\n" +
-            "  \"version\": 0,\n" +
-            "  \"technicalRequirement\": \"testing testing...\",\n" +
-            "  \"courseObjective\": \"write something in here\",\n" +
-            "  \"trainingPrinciple\": \"marvelous!\",\n" +
-            "  \"level\": {\n" +
-            "    \"name\": \"normal\"\n" +
-            "  },\n" +
-            "  \"sessions\": [\n" +
-            "    {\n" +
-            "      \"index\": 1,\n" +
-            "      \"name\": \"Test\",\n" +
-            "      \"units\": [\n" +
-            "        {\n" +
-            "          \"title\": \".Test\",\n" +
-            "          \"name\": \".Test\",\n" +
-            "          \"index\": 1,\n" +
-            "          \"totalDurationLesson\": 0,\n" +
-            "          \"lessons\": [\n" +
-            "            {\n" +
-            "              \"name\": \"test\",\n" +
-            "              \"duration\": 30,\n" +
-            "              \"outputStandard\": {\n" +
-            "                \"name\": \"OJT\"\n" +
-            "              },\n" +
-            "              \"formatType\": {\n" +
-            "                \"name\": \"Online\"\n" +
-            "              },\n" +
-            "              \"delivery\": {\n" +
-            "                \"name\": \"Exam\"\n" +
-            "              },\n" +
-            "              \"materials\": [\n" +
-            "                {\n" +
-            "                  \"name\": \"Material name\",\n" +
-            "                  \"fileUrl\": \"https://noName.com\"\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "        }\n" +
-            "      ]\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"assessment\": {\n" +
-            "    \"quiz\": 10,\n" +
-            "    \"assignment\": 20,\n" +
-            "    \"finalField\": 70,\n" +
-            "    \"finalTheory\": 40,\n" +
-            "    \"finalPractice\": 60,\n" +
-            "    \"gpa\": 70\n" +
-            "  }\n" +
-            "}"
-          )
-        )
-      ),
-      @ApiResponse(description = "Not found", responseCode = "404", content = @Content),
-    }
+    responses = { @ApiResponse(description = "Not found", responseCode = "404", content = @Content) }
   )
   @PostMapping("/syllabuses")
   public ResponseEntity<SyllabusDetailDto> createSyllabus(@RequestBody SyllabusDetailDto syllabus) {
@@ -228,6 +242,97 @@ public class SyllabusResourceImpl {
   }
 
   @Operation(
+    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = {
+        @Content(
+          mediaType = "application/json",
+          schema = @Schema(
+            allOf = SyllabusDetailDto.class,
+            description = "put Syllabus",
+            externalDocs = @ExternalDocumentation(url = "https://github.com/"),
+            title = "Syllabus",
+            defaultValue = "{" +
+            "    \"id\": 212," +
+            "    \"name\": \"string\"," +
+            "    \"attendeeNumber\": 0," +
+            "    \"status\": \"ACTIVATED\"," +
+            "    \"technicalRequirement\": \"string\"," +
+            "    \"courseObjective\": \"string\"," +
+            "    \"trainingPrinciple\": {" +
+            "        \"id\": 145," +
+            "        \"training\": \"string\"," +
+            "        \"reTest\": \"string\"," +
+            "        \"marking\": \"string\"," +
+            "        \"waiverCriteria\": \"string\"," +
+            "        \"others\": \"string\"" +
+            "    }," +
+            "    \"level\": {" +
+            "        \"id\": 1" +
+            "    }," +
+            "    \"assessment\": {" +
+            "        \"id\": 158," +
+            "        \"quiz\": 0," +
+            "        \"assignment\": 0," +
+            "        \"finalField\": 0," +
+            "        \"finalPractice\": 0," +
+            "        \"finalTheory\": 0," +
+            "        \"gpa\": 0" +
+            "    }," +
+            "    \"sessions\": [" +
+            "        {" +
+            "            \"id\": 321," +
+            "            \"index\": 0," +
+            "            \"name\": \"string\"," +
+            "            \"units\": [" +
+            "                {" +
+            "                    \"id\": 383," +
+            "                    \"title\": \"string\"," +
+            "                    \"name\": \"string\"," +
+            "                    \"index\": 0," +
+            "                    \"lessons\": [" +
+            "                        {" +
+            "                            \"id\": 247," +
+            "                            \"name\": \"string\"," +
+            "                            \"duration\": 0," +
+            "                            \"index\": 0," +
+            "                            \"outputStandard\": {" +
+            "                                \"id\": 1" +
+            "                            }," +
+            "                            \"formatType\": {" +
+            "                                \"id\": 1" +
+            "                            }," +
+            "                            \"delivery\": {" +
+            "                                \"id\": 1" +
+            "                            }," +
+            "                            \"materials\": [" +
+            "                                {" +
+            "                                    \"id\": 208," +
+            "                                    \"name\": \"string\"," +
+            "                                    \"fileUrl\": \"string\"" +
+            "                                }" +
+            "                            ]" +
+            "                        }" +
+            "                    ]" +
+            "                }" +
+            "            ]" +
+            "        }" +
+            "    ]" +
+            "}"
+          )
+        ),
+        @Content(
+          mediaType = "application/schema+json",
+          schema = @Schema(implementation = SyllabusDetailDto.class),
+          examples = {
+            @ExampleObject(name = "default", description = "default json", summary = "default json"),
+            @ExampleObject(name = "name 1", description = "not summary , have name", value = "value 1"),
+            @ExampleObject(name = "name 2", description = "have summary , not name", summary = "summary 2", value = "value 2"),
+          }
+        ),
+        @Content(mediaType = "application/vnd.api+json", schema = @Schema(implementation = SyllabusDetailDto.class)),
+        @Content(mediaType = "application/vnd.geo+json", schema = @Schema(implementation = SyllabusDetailDto.class)),
+      }
+    ),
     summary = "Update syllabus",
     description = "Syllabus Input: name(string), attendeeNumber, status, duration" +
     "technicalRequirement, courseObjective, trainingPrinciple, level, session" +

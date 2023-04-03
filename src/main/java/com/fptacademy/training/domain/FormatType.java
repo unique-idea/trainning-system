@@ -23,10 +23,10 @@ public class FormatType implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Schema(example = "1")
+  // @Schema(example = "1")
   private Long id;
 
-  @Column(length = 20)
+  @Column(length = 100)
   private String name;
 
   private String code;
