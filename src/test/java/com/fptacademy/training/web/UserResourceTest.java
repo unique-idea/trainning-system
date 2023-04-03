@@ -81,7 +81,7 @@ public class UserResourceTest {
                 .build();
         List<User> userList = new ArrayList<>(Arrays.asList(user, user1));
         List<UserDto> dto = userMapper.toDtos(userList);
-        when(userService.importUsersToDB(file)).thenReturn(dto);
+        when(userService.importUsersToDB(file, "user")).thenReturn(dto);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .multipart("/api/user/import")

@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 public class UserResourceImpl implements UserResource {
 
-//    @Autowired
     private final UserService userService;
 
     private final ResourceLoader resourceLoader;
@@ -78,10 +77,10 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> importUsersFromExcel(MultipartFile file) {
+    public ResponseEntity<List<UserDto>> importUsersFromExcel(MultipartFile file, String description) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.importUsersToDB(file));
+                .body(userService.importUsersToDB(file, description));
     }
 
     @Override

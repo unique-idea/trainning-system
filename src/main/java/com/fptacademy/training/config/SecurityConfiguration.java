@@ -86,7 +86,7 @@ public class SecurityConfiguration {
                 .hasAnyAuthority(Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
                 .mvcMatchers( HttpMethod.POST,"/api/users/")
                 .hasAnyAuthority(Permissions.USER_CREATE, Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
-                .mvcMatchers("/api/users/**")
+                .mvcMatchers(new String[]{"/api/users/**", "/api/user/**"})
                 .hasAnyAuthority(Permissions.USER_VIEW, Permissions.USER_CREATE, Permissions.USER_MODIFY, Permissions.USER_FULL_ACCESS)
                 .anyRequest()
                 .authenticated()

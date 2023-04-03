@@ -1,5 +1,6 @@
 package com.fptacademy.training.service;
 
+import com.fptacademy.training.domain.FileStorage;
 import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.domain.User;
 import com.fptacademy.training.domain.enumeration.RoleName;
@@ -10,12 +11,15 @@ import com.fptacademy.training.exception.ResourceNotFoundException;
 import com.fptacademy.training.repository.UserRepository;
 import com.fptacademy.training.service.dto.ReturnPageDto;
 import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.service.mapper.FileStorageMapper;
 import com.fptacademy.training.service.mapper.UserMapper;
 import com.fptacademy.training.service.util.ExcelExportUtils;
 import com.fptacademy.training.service.util.ExcelUploadService;
+import com.fptacademy.training.service.util.S3UploadFileUtil;
 import com.fptacademy.training.web.vm.NoNullRequiredUserVM;
 import com.fptacademy.training.web.vm.UserVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,8 +40,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -53,9 +60,13 @@ public class UserService {
     private final LevelService levelService;
     private final UserMapper userMapper;
     private final ExcelUploadService excelUploadService;
+    private final FileStorageService fileStorageService;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize maxFileSize;
+
+    @Autowired
+    private S3UploadFileUtil s3UploadFileUtil;
 
     private String[] userProperties = {"id", "email", "fullName", "code", "level", "role", "activated", "birthday",
             "status"};
@@ -223,12 +234,22 @@ public class UserService {
         return userMapper.toPageUserDto(page);
     }
 
-    public List<UserDto> importUsersToDB(MultipartFile file) {
+    public List<UserDto> importUsersToDB(MultipartFile file, String description) {
+
         List<User> users = null;
         try {
             if (ExcelUploadService.isValidExcelFile(file)) {
+//                Import to DB
                 users = excelUploadService.getUserDataFromExcel(file.getInputStream());
                 this.userRepository.saveAll(users);
+//               Upload file to S3
+                String url = (String) s3UploadFileUtil.handleFileUpload(file,description);
+//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+//                String formatDate = ZonedDateTime.now().format(formatter);
+//                System.out.println(formatDate);
+
+//                Add link file to FileStorage
+                fileStorageService.addFile(new FileStorage(url, description));
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("The file is not a valid excel file");

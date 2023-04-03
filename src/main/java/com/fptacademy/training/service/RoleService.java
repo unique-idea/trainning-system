@@ -53,10 +53,10 @@ public class RoleService {
                     List<String> listPermission = role.get(i).permissions().stream().toList();
                     updatePermission(RoleName.TRAINEE.toString(), listPermission);
                 } else {
-                    throw new ResourceNotFoundException("Do no have this role: " + role.get(i).name());
+                    throw new ResourceNotFoundException("Do not have this role: " + role.get(i).name());
                 }
-//            } else {
-//                throw new ResourceBadRequestException("Permission must have value of Syllabus, Program, Class, Material, User");
+            } else {
+                throw new ResourceBadRequestException("Permission must have value of Syllabus, Program, Class, Material, User");
             }
         }
         return roleMapper.toDtos(roleRepository.findAll());
