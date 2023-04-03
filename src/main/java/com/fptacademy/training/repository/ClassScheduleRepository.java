@@ -41,7 +41,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             Predicate userIdPredicate = userId != null ? criteriaBuilder.equal(userJoin.get("id"), userId) : criteriaBuilder.conjunction();
 
             Predicate classNamePredicate = criteriaBuilder.conjunction();
-            if (className != null && !className.isEmpty()) {
+            if (className != null) {
                 List<Predicate> classNamePredicates = new ArrayList<>();
                 for (String name : className) {
                     classNamePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("name"), "%" + name + "%"));
@@ -50,7 +50,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             }
 
             Predicate classCodePredicate = criteriaBuilder.conjunction();
-            if (classCode != null && !className.isEmpty()) {
+            if (classCode != null) {
                 List<Predicate> classCodePredicates = new ArrayList<>();
                 for (String code : classCode) {
                     classCodePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("code"), "%" + code + "%"));
@@ -59,7 +59,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             }
 
             Predicate cityPredicate = criteriaBuilder.conjunction();
-            if (city != null && !className.isEmpty()) {
+            if (city != null) {
                 List<Predicate> cityPredicates = new ArrayList<>();
                 for (String c : city) {
                     cityPredicates.add(criteriaBuilder.like(classDetailJoin.get("location").get("city"), "%" + c + "%"));
@@ -85,7 +85,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             Predicate userIdPredicate = userId != null ? criteriaBuilder.equal(userJoin.get("id"), userId) : criteriaBuilder.conjunction();
 
             Predicate classNamePredicate = criteriaBuilder.conjunction();
-            if (className != null && !className.isEmpty()) {
+            if (className != null) {
                 List<Predicate> classNamePredicates = new ArrayList<>();
                 for (String name : className) {
                     classNamePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("name"), "%" + name + "%"));
@@ -94,7 +94,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             }
 
             Predicate classCodePredicate = criteriaBuilder.conjunction();
-            if (classCode != null && !className.isEmpty()) {
+            if (classCode != null) {
                 List<Predicate> classCodePredicates = new ArrayList<>();
                 for (String code : classCode) {
                     classCodePredicates.add(criteriaBuilder.like(classDetailJoin.get("classField").get("code"), "%" + code + "%"));
@@ -103,7 +103,7 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             }
 
             Predicate cityPredicate = criteriaBuilder.conjunction();
-            if (city != null && !className.isEmpty()) {
+            if (city != null) {
                 List<Predicate> cityPredicates = new ArrayList<>();
                 for (String c : city) {
                     cityPredicates.add(criteriaBuilder.like(classDetailJoin.get("location").get("city"), "%" + c + "%"));
