@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import com.fptacademy.training.domain.FileStorage;
 import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import com.fptacademy.training.repository.ClassRepository;
+import com.fptacademy.training.service.util.S3UploadFileUtil;
 import com.fptacademy.training.web.vm.ProgramExcelImportResponseVM;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -41,6 +43,8 @@ import lombok.RequiredArgsConstructor;
 public class ProgramService {
     private final SyllabusMapper syllabusMapper;
     private final ProgramMapper programMapper;
+    private final S3UploadFileUtil s3UploadFileUtil;
+    private final FileStorageService fileStorageService;
     private final ProgramRepository programRepository;
     private final SyllabusRepository syllabusRepository;
     private final ClassRepository classRepository;
@@ -319,7 +323,11 @@ public class ProgramService {
         } catch (IOException e) {
             throw new RuntimeException("Cannot read excel file", e);
         }
-
+        // upload to S3
+        String url = (String) s3UploadFileUtil.handleFileUpload(file, "Program");
+        if (url != null) {
+            fileStorageService.addFile(new FileStorage(url, "Program"));
+        }
         return new ProgramExcelImportResponseVM(duplicateProgramNames, programMapper.toDtos(programs.stream().toList()));
     }
 

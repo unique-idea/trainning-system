@@ -1,7 +1,6 @@
 package com.fptacademy.training.config;
 
 import com.fptacademy.training.aop.logging.LoggingAspect;
-import com.fptacademy.training.aop.upload.UploadFileAspect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -15,11 +14,5 @@ public class AspectConfiguration {
     @Profile({"dev", "prod"})
     public LoggingAspect loggingAspect(Environment env) {
         return new LoggingAspect(env);
-    }
-
-    @Bean
-    @Profile({"dev", "prod"})
-    public UploadFileAspect uploadFileAspect(Environment env) {
-        return new UploadFileAspect(env);
     }
 }
