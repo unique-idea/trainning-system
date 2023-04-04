@@ -246,17 +246,19 @@ public class UserService {
         List<User> users = null;
         try {
             if (ExcelUploadService.isValidExcelFile(file)) {
-//                Import to DB
+//              Import to DB
                 users = excelUploadService.getUserDataFromExcel(file.getInputStream());
-                this.userRepository.saveAll(users);
-//               Upload file to S3
-                String url = (String) s3UploadFileUtil.handleFileUpload(file,description);
-//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-//                String formatDate = ZonedDateTime.now().format(formatter);
-//                System.out.println(formatDate);
+                if (users != null) {
+                    this.userRepository.saveAll(users);
 
-//                Add link file to FileStorage
-                fileStorageService.addFile(new FileStorage(url, description));
+//              Upload file to S3
+                    String url = (String) s3UploadFileUtil.handleFileUpload(file, description);
+
+//              Add link file to FileStorage
+                    if (url != null) {
+                        fileStorageService.addFile(new FileStorage(url, description));
+                    }
+                }
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("The file is not a valid excel file");
