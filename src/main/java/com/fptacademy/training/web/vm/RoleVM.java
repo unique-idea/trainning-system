@@ -5,7 +5,7 @@ import java.util.List;
 public record RoleVM(
         @Schema(example = "Class Admin")
         String name,
-        @Schema(defaultValue = "[\"Syllabus_View\", \"Program_Create\", \"Class_Modify\", \"Material_FullAccess\", \"User_AccessDenied\"]")
-        List<String> permissions
+        @Schema(defaultValue = "[{\"object\":\"Syllabus\",\"permission\":\"View\"},{\"object\":\"Program\",\"permission\":\"Create\"},{\"object\":\"Class\",\"permission\":\"Modify\"},{\"object\":\"Material\",\"permission\":\"FullAccess\"},{\"object\":\"User\",\"permission\":\"AccessDenied\"}]")
+        List<PermissionVM> permissions
 ) {
 }

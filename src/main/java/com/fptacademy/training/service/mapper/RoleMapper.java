@@ -11,15 +11,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoleMapper {
     private final ModelMapper modelMapper;
+    private final PermissionMapper permissionMapper;
 
-    public RoleDto toDto(Role role){
-        if(role==null){
+    public RoleDto toDto(Role role) {
+        if (role == null) {
             return null;
         }
-        RoleDto dto=modelMapper.map(role,RoleDto.class);
+        RoleDto dto = modelMapper.map(role, RoleDto.class);
+        dto.setPermissions(permissionMapper.toDtos(role.getPermissions()));
         return dto;
     }
-    public List<RoleDto> toDtos(List<Role>roles){
+
+    public List<RoleDto> toDtos(List<Role> roles) {
         return roles.stream().map(this::toDto).toList();
     }
 }
