@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fptacademy.training.domain.Role;
 import com.fptacademy.training.service.RoleService;
 import com.fptacademy.training.service.dto.RoleDto;
 import com.fptacademy.training.web.api.RoleResource;

@@ -2,11 +2,14 @@ package com.fptacademy.training.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
+import com.fptacademy.training.service.dto.UserDto;
+import com.fptacademy.training.web.vm.UserVM;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.*;
 
 import java.time.LocalDate;
@@ -61,7 +64,9 @@ public class UserServiceTest {
     @Mock
     private ExcelUploadService excelUploadService;
 
-    @InjectMocks
+    @Mock
+    private FileStorageService fileStorageService;
+
     private UserService userService;
 
     AutoCloseable autoClosable;
@@ -69,12 +74,69 @@ public class UserServiceTest {
     @BeforeEach
     void setUp() {
         autoClosable = openMocks(this);
-        userService = new UserService(userRepository, roleService, levelService, userMapper, excelUploadService);
+        userService = new UserService(userRepository, roleService, levelService, userMapper, excelUploadService, fileStorageService);
     }
 
     @AfterEach
     void tearDown() throws Exception {
         autoClosable.close();
+    }
+
+    @Test
+    public void createNewUserTest() {
+        // given
+        UserVM userVM = new UserVM("Tran Huu Tri", "tri@test.com", "2001-04-13",
+                "male", "true", "Basic", "Trainee", "http://test.com/avatar.jpg",
+                "SE151390", "ACTIVE");
+        Level level = new Level();
+        level.setName(userVM.level());
+        Role role = new Role();
+        role.setName(userVM.role());
+
+        User user = new User();
+        user.setFullName(userVM.fullName());
+        user.setEmail(userVM.email());
+        user.setBirthday(LocalDate.parse(userVM.birthday()));
+        user.setGender(Boolean.valueOf(userVM.gender()));
+        user.setActivated(Boolean.valueOf(userVM.activated()));
+        user.setLevel(level);
+        user.setRole(role);
+        user.setAvatarUrl(userVM.avatarUrl());
+        user.setCode(userVM.code());
+        user.setStatus(UserStatus.ACTIVE);
+
+        Mockito.when(userMapper.toEntity(any(UserVM.class), any(LevelService.class), any(RoleService.class))).thenReturn(user);
+        Mockito.when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        Mockito.when(userRepository.existsByCode(anyString())).thenReturn(false);
+        Mockito.when(userRepository.save(any(User.class))).thenReturn(user);
+        Mockito.when(userMapper.toDto(any(User.class))).thenReturn(new UserDto());
+
+        // when
+        UserDto result = userService.createUser(userVM);
+
+        // then
+        Assertions.assertNotNull(result);
+        Mockito.verify(userMapper, Mockito.times(1)).toEntity(any(UserVM.class), any(LevelService.class), any(RoleService.class));
+        Mockito.verify(userRepository, Mockito.times(1)).existsByEmail(anyString());
+        Mockito.verify(userRepository, Mockito.times(1)).existsByCode(anyString());
+        Mockito.verify(userRepository, Mockito.times(1)).save(any(User.class));
+        Mockito.verify(userMapper, Mockito.times(1)).toDto(any(User.class));
+    }
+    @Test
+    public void getUserByEmailTest() {
+        // given
+        String email = "tri@test.com";
+        User user = new User();
+        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        Mockito.when(userMapper.toDto(user)).thenReturn(new UserDto());
+
+        // when
+        Optional<UserDto> result = userService.findUserByEmail(email);
+
+        // then
+        Assertions.assertNotNull(result);
+        Mockito.verify(userRepository, Mockito.times(1)).findByEmail(email);
+        Mockito.verify(userMapper, Mockito.times(1)).toDto(user);
     }
 
     @Test
