@@ -373,12 +373,6 @@ public class ClassService {
         return classDetailMapper.toDto(currentClassDetail);
     }
 
-    @PostFilter("(hasAnyAuthority('" + Permissions.CLASS_VIEW + "') " +
-            "and filterObject.status != 'DRAFT' and filterObject.status != 'INACTIVE') or " +
-            "(hasAnyAuthority('" +
-            Permissions.CLASS_CREATE + "', '" +
-            Permissions.CLASS_MODIFY + "', '" +
-            Permissions.CLASS_FULL_ACCESS  + "'))")
     public Page<ClassDto> filterClassV2(List<String> keywords,
                                         LocalDate from,
                                         LocalDate to,
