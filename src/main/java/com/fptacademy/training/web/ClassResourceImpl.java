@@ -8,6 +8,7 @@ import com.fptacademy.training.exception.ResourceBadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -92,6 +93,28 @@ public class ClassResourceImpl implements ClassResource {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ClassListResponseVM(totalPages, totalElements, size, page, result));
+    }
+
+    @Override
+    public ResponseEntity<Page<ClassDto>> filterClassV2(List<String> keywords,
+                                                        LocalDate from, LocalDate to,
+                                                        List<String> cities,
+                                                        List<String> classTimes,
+                                                        List<String> statuses,
+                                                        List<String> attendeeTypes,
+                                                        String fsu, String trainerCode,
+                                                        Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(classService.filterClassV2(
+                        keywords,
+                        from, to,
+                        cities,
+                        classTimes,
+                        statuses,
+                        attendeeTypes,
+                        fsu, trainerCode,
+                        pageable
+                ));
     }
 
 

@@ -12,6 +12,8 @@ import com.fptacademy.training.service.dto.*;
 import com.fptacademy.training.service.mapper.*;
 import com.fptacademy.training.web.vm.ClassVM;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -369,5 +371,29 @@ public class ClassService {
             }
         }
         return classDetailMapper.toDto(currentClassDetail);
+    }
+
+    public Page<ClassDto> filterClassV2(List<String> keywords,
+                                        LocalDate from,
+                                        LocalDate to,
+                                        List<String> cities,
+                                        List<String> classTimes,
+                                        List<String> statuses,
+                                        List<String> attendeeTypes,
+                                        String fsu,
+                                        String trainerCode,
+                                        Pageable pageable) {
+        Page<Class> classes = classRepository.findAll(
+                ClassRepository.getSpecificationForSearchAndFilter(
+                        keywords,
+                        cities,
+                        statuses,
+                        attendeeTypes,
+                        fsu
+                ),
+                pageable
+                );
+
+        return classes.map(classMapper::toDto);
     }
 }

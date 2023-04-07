@@ -14,6 +14,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -91,6 +94,34 @@ public interface ClassResource {
             @RequestParam(value = "sort", required = false, defaultValue = "id,asc") String sort,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    );
+
+    @Operation(
+            summary = "Get list of classes (can be filtered) by class ID (version 2)",
+            description = "Get list of classes (can be filtered) by class ID",
+            tags = "class",
+            security = @SecurityRequirement(name = "token_auth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
+            @ApiResponse(responseCode = "200", description = "Find list of class successfully"),
+    })
+    @GetMapping("/all-v2")
+    public ResponseEntity<Page<ClassDto>> filterClassV2(
+            @Parameter(description = "Input any keywords for searching the list of classes")
+            @RequestParam(value = "keywords", required = false) List<String> keywords,
+            @RequestParam(name = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(name = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(name = "location", required = false) List<String> cities,
+            @RequestParam(name = "classTime", required = false) List<String> classTimes,
+            @RequestParam(name = "status", required = false) List<String> statuses,
+            @RequestParam(name = "attendee", required = false) List<String> attendeeTypes,
+            @RequestParam(name = "fsu", required = false) String fsu,
+            @RequestParam(name = "trainer", required = false) String trainerCode,
+            @ParameterObject Pageable pageable
     );
 
     @Operation(
