@@ -216,7 +216,7 @@ public class ClassService {
         newClassDetail.setUsers(
                 classVM.userIds().stream().map(userId ->
                         userRepository.findById(userId)
-                                .orElseThrow(() -> new ResourceNotFoundException("User ID ot found")))
+                                .orElseThrow(() -> new ResourceNotFoundException("User ID not found")))
                         .toList()
         );
         ClassDetail finalNewClassDetail = classDetailRepository.save(newClassDetail);
