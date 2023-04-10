@@ -262,7 +262,10 @@ public class SyllabusService {
           .map(Syllabus::getSessions, SyllabusDetailDto::setTimeAllocation);
       });
 
-    return syllabusRepository.findById(id).map(syl -> map.map(syl, SyllabusDetailDto.class));
+    return syllabusRepository
+      .findById(id)
+      .map(syl -> map.map(syl, SyllabusDetailDto.class))
+      .filter(s -> s.getStatus() != null && !s.getStatus().equals(SyllabusStatus.REJECTED.toString()));
   }
 
   public void delete(Syllabus syllabus) {
@@ -391,7 +394,7 @@ public class SyllabusService {
                 .code(code)
                 .name(getCellValue(rowSyllabus.getCell(2), CellType.STRING, null, String.class))
                 .attendeeNumber(getCellValue(rowSyllabus.getCell(3), CellType.NUMERIC, null, Integer.class))
-                .status(SyllabusStatus.DRAFT)
+                .status(SyllabusStatus.ACTIVATED)
                 .version(1.0F)
                 .courseObjective(getCellValue(rowSyllabus.getCell(4), CellType.STRING, null, String.class))
                 .technicalRequirement(getCellValue(rowSyllabus.getCell(5), CellType.STRING, null, String.class))
