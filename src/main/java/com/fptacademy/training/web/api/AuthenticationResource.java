@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+import javax.validation.Valid;
+
 @RequestMapping("/api/auth")
 public interface AuthenticationResource {
     @Operation(summary = "Login entry",
@@ -25,11 +27,12 @@ public interface AuthenticationResource {
     )
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Authenticated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body"),
             @ApiResponse(responseCode = "401", description = "Incorrect email or password", content = @Content)
     }
     )
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<AccountVM> login(@RequestBody LoginVM loginVM);
+    ResponseEntity<AccountVM> login(@Valid @RequestBody LoginVM loginVM);
 
     @Operation(summary = "Get access token",
             description = "Get new access token from refresh token",
