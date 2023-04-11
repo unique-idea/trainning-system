@@ -30,6 +30,7 @@ public interface ProgramResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created training program successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "409", description = "Conflict training program name", content = @Content)
