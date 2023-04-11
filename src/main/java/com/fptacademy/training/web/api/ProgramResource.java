@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RequestMapping("/api")
@@ -29,12 +30,13 @@ public interface ProgramResource {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created training program successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized, missing or invalid JWT", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
             @ApiResponse(responseCode = "409", description = "Conflict training program name", content = @Content)
     })
     @PostMapping(value = "/programs", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ProgramDto> createProgram(@RequestBody ProgramVM programVM);
+    ResponseEntity<ProgramDto> createProgram(@Valid @RequestBody ProgramVM programVM);
 
     //Activate the Program by id
     @Operation(
@@ -172,7 +174,7 @@ public interface ProgramResource {
             @ApiResponse(responseCode = "403", description = "Access denied, do not have permission to access this resource", content = @Content),
     })
     @PutMapping(value = "/programs/{id}" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ProgramDto> updateProgram(@RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
+    ResponseEntity<ProgramDto> updateProgram(@Valid @RequestBody ProgramVM programVM, @PathVariable(value = "id") final Long id);
 
     @Operation(
             summary = "Delete training program by id",
