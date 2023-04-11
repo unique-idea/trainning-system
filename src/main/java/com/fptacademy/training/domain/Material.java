@@ -45,9 +45,11 @@ public class Material implements Serializable {
   @LastModifiedBy
   @JoinColumn(name = "created_by")
   @ManyToOne
+  @JsonIgnore
   private User createdBy;
 
   @LastModifiedDate
+  @JsonIgnore
   private Instant createdAt;
 
   @ManyToOne

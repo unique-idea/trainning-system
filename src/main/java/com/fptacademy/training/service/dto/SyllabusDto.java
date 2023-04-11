@@ -10,6 +10,10 @@ import com.fptacademy.training.domain.enumeration.SyllabusStatus;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,7 +53,10 @@ public class SyllabusDto {
   public static class SyllabusDetailDto {
 
     private Long id;
+
+    @NotBlank(message = "name must not be empty or null")
     private String name;
+
     private String createdBy;
     private Instant createdAt;
     private Instant lastModifiedAt;
@@ -57,7 +64,11 @@ public class SyllabusDto {
     private String code;
     private Float version;
     private Integer attendeeNumber;
+
+    @NotBlank(message = "status must not be empty or null")
+    @Pattern(regexp = "DRAFT|ACTIVATED", message = "status must be DRAFT or ACTIVATED")
     private String status;
+
     private Integer duration;
     private Double durationInHours;
     private String technicalRequirement;
@@ -67,6 +78,6 @@ public class SyllabusDto {
     private Assessment assessment;
     private List<Delivery> timeAllocation;
     private List<OutputStandard> outputStandard;
-    private List<Session> sessions;
+    private List<Session> sessions = new ArrayList<>();
   }
 }

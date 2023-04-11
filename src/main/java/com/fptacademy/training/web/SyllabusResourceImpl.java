@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -40,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,6 +92,7 @@ public class SyllabusResourceImpl {
     security = @SecurityRequirement(name = "token_auth"),
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   @GetMapping("/syllabuses/{id}")
   public ResponseEntity<SyllabusDetailDto> getSyllabus(@PathVariable Long id) {
     return syllabusService
@@ -106,8 +109,12 @@ public class SyllabusResourceImpl {
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
   @DeleteMapping("/syllabuses/{id}")
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   public ResponseEntity<?> deleteSyllabus(@PathVariable Long id) {
-    Syllabus syl = syllabusRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Syllabus syl = syllabusRepository
+      .findById(id)
+      .filter(s -> s.getStatus() != null && !s.getStatus().equals(SyllabusStatus.REJECTED))
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     syl.setStatus(SyllabusStatus.REJECTED);
     syllabusService.delete(syl);
     return ResponseEntity.ok("OK");
@@ -121,8 +128,15 @@ public class SyllabusResourceImpl {
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
   @PutMapping("/syllabuses/de-active/{id}")
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   public ResponseEntity<?> deActiveSyllabus(@PathVariable Long id) {
-    Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Syllabus syllabus = syllabusRepository
+      .findById(id)
+      .filter(s -> s.getStatus() != null && !s.getStatus().equals(SyllabusStatus.REJECTED))
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    if (syllabus.getStatus().equals(SyllabusStatus.DEACTIVATED)) {
+      throw new ResourceBadRequestException("syllabus is already DEACTIVATED");
+    }
     syllabus.setStatus(SyllabusStatus.DEACTIVATED);
     syllabusService.delete(syllabus);
     return ResponseEntity.ok("OK");
@@ -136,10 +150,17 @@ public class SyllabusResourceImpl {
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
   @PutMapping("/syllabuses/active/{id}")
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   public ResponseEntity<?> activeSyllabus(@PathVariable Long id) {
-    Syllabus syl = syllabusRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    syl.setStatus(SyllabusStatus.ACTIVATED);
-    syllabusService.delete(syl);
+    Syllabus syllabus = syllabusRepository
+      .findById(id)
+      .filter(s -> s.getStatus() != null && !s.getStatus().equals(SyllabusStatus.REJECTED))
+      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    if (syllabus.getStatus().equals(SyllabusStatus.ACTIVATED)) {
+      throw new ResourceBadRequestException("syllabus is already ACTIVATED");
+    }
+    syllabus.setStatus(SyllabusStatus.ACTIVATED);
+    syllabusService.delete(syllabus);
     return ResponseEntity.ok("OK");
   }
 
@@ -236,8 +257,12 @@ public class SyllabusResourceImpl {
     security = @SecurityRequirement(name = "token_auth"),
     responses = { @ApiResponse(description = "Not found", responseCode = "404", content = @Content) }
   )
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   @PostMapping("/syllabuses")
-  public ResponseEntity<SyllabusDetailDto> createSyllabus(@RequestBody SyllabusDetailDto syllabus) {
+  public ResponseEntity<SyllabusDetailDto> createSyllabus(@RequestBody @Valid SyllabusDetailDto syllabus, Errors errors) {
+    if (errors.hasErrors()) {
+      throw new ResourceBadRequestException(errors.getFieldError().getDefaultMessage());
+    }
     return ResponseEntity.ok(syllabusService.save(syllabus));
   }
 
@@ -252,14 +277,14 @@ public class SyllabusResourceImpl {
             externalDocs = @ExternalDocumentation(url = "https://github.com/"),
             title = "Syllabus",
             defaultValue = "{" +
-            "    \"id\": 212," +
+            "    \"id\": 0," +
             "    \"name\": \"string\"," +
             "    \"attendeeNumber\": 0," +
             "    \"status\": \"ACTIVATED\"," +
             "    \"technicalRequirement\": \"string\"," +
             "    \"courseObjective\": \"string\"," +
             "    \"trainingPrinciple\": {" +
-            "        \"id\": 145," +
+            "        \"id\": 0," +
             "        \"training\": \"string\"," +
             "        \"reTest\": \"string\"," +
             "        \"marking\": \"string\"," +
@@ -270,7 +295,7 @@ public class SyllabusResourceImpl {
             "        \"id\": 1" +
             "    }," +
             "    \"assessment\": {" +
-            "        \"id\": 158," +
+            "        \"id\": 0," +
             "        \"quiz\": 0," +
             "        \"assignment\": 0," +
             "        \"finalField\": 0," +
@@ -280,18 +305,18 @@ public class SyllabusResourceImpl {
             "    }," +
             "    \"sessions\": [" +
             "        {" +
-            "            \"id\": 321," +
+            "            \"id\": 0," +
             "            \"index\": 0," +
             "            \"name\": \"string\"," +
             "            \"units\": [" +
             "                {" +
-            "                    \"id\": 383," +
+            "                    \"id\": 0," +
             "                    \"title\": \"string\"," +
             "                    \"name\": \"string\"," +
             "                    \"index\": 0," +
             "                    \"lessons\": [" +
             "                        {" +
-            "                            \"id\": 247," +
+            "                            \"id\": 0," +
             "                            \"name\": \"string\"," +
             "                            \"duration\": 0," +
             "                            \"index\": 0," +
@@ -306,7 +331,7 @@ public class SyllabusResourceImpl {
             "                            }," +
             "                            \"materials\": [" +
             "                                {" +
-            "                                    \"id\": 208," +
+            "                                    \"id\": 0," +
             "                                    \"name\": \"string\"," +
             "                                    \"fileUrl\": \"string\"" +
             "                                }" +
@@ -342,9 +367,14 @@ public class SyllabusResourceImpl {
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
   @PutMapping("/syllabuses")
-  public ResponseEntity<SyllabusDetailDto> updateSyllabus(@RequestBody SyllabusDetailDto syllabus) {
-    if (!syllabusRepository.existsById(syllabus.getId())) {
-      throw new ResourceBadRequestException("Entity not found id ");
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
+  public ResponseEntity<SyllabusDetailDto> updateSyllabus(@RequestBody @Valid SyllabusDetailDto syllabus, Errors errors) {
+    syllabusRepository
+      .findById(syllabus.getId())
+      .filter(s -> s.getStatus() != null && !s.getStatus().equals(SyllabusStatus.REJECTED))
+      .orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
+    if (errors.hasErrors()) {
+      throw new ResourceBadRequestException(errors.getFieldError().getDefaultMessage());
     }
     return syllabusService
       .update(syllabus)
@@ -361,9 +391,13 @@ public class SyllabusResourceImpl {
   )
   @PostMapping("/syllabuses/duplicate/{id}")
   @Transactional
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   public ResponseEntity<Syllabus> duplicateSyllabus(@PathVariable Long id) {
     ModelMapper map = new ModelMapper();
-    Syllabus syllabus = syllabusRepository.findById(id).orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
+    Syllabus syllabus = syllabusRepository
+      .findById(id)
+      .filter(s -> s.getStatus() != null && !s.getStatus().equals(SyllabusStatus.REJECTED))
+      .orElseThrow(() -> new ResourceBadRequestException("syllabus id not found!"));
     map
       .createTypeMap(Syllabus.class, Syllabus.class)
       .addMappings(mapper -> {
@@ -405,11 +439,11 @@ public class SyllabusResourceImpl {
 
   @Operation(
     summary = "Get template syllabus",
-    description = "Syllabus Input: null",
     tags = "Syllabus",
     security = @SecurityRequirement(name = "token_auth"),
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   @GetMapping(value = "/syllabuses/template", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> getTemplateSyllabus() {
     Resource resource = new ClassPathResource("templates/Syllabus-template.xlsx");
@@ -426,10 +460,11 @@ public class SyllabusResourceImpl {
     security = @SecurityRequirement(name = "token_auth"),
     responses = { @ApiResponse(description = "Success | OK", responseCode = "200"), @ApiResponse(description = "Not found", responseCode = "404") }
   )
+  @PreAuthorize("!hasAuthority('Syllabus_AccessDenied')")
   @PostMapping(value = "/syllabuses/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> importSyllabus(
     @RequestPart(value = "file", required = true) MultipartFile file,
-    @Schema(description = "code or name", type = "array") @RequestParam(required = false) String[] scanning,
+    @Schema(description = "", type = "array") @RequestParam(required = false) String[] scanning,
     @Schema(allowableValues = { "allow", "replace", "skip" }) @RequestParam(required = true) String handle
   ) {
     return ResponseEntity.ok(syllabusService.importExcel(file, scanning, handle));
